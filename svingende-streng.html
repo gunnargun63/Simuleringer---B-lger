@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="da">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Svingende Streng</title>
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Exo+2:wght@300;400;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0a0c14;--panel:#0f1320;--border:#1e2a3a;
+  --accent:#00e5ff;--text:#c8d8e8;--muted:#4a6278;
+  --glow:0 0 10px rgba(0,229,255,0.45);
+  --h1c:#00e5ff;--h2c:#7df9ff;--h3c:#a8ff3e;
+  --h4c:#ffd93d;--h5c:#ff6b35;--h6c:#d45eff;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+html,body{height:100%;overflow:hidden;}
+body{background:var(--bg);color:var(--text);font-family:'Exo 2',sans-serif;font-weight:300;display:flex;flex-direction:column;}
+
+header{flex:0 0 auto;padding:10px 18px 9px;border-bottom:1px solid var(--border);display:flex;align-items:baseline;gap:14px;background:var(--panel);}
+header h1{font-family:'Share Tech Mono',monospace;font-size:clamp(.85rem,2.2vw,1.15rem);color:var(--accent);text-shadow:var(--glow);letter-spacing:.07em;}
+header span{font-size:.7rem;color:var(--muted);}
+
+.main{flex:1 1 0;display:grid;grid-template-columns:1fr 340px;min-height:0;gap:1px;background:var(--border);}
+
+/* Left col */
+.left-col{display:flex;flex-direction:column;background:var(--bg);gap:1px;min-height:0;}
+
+.canvas-wrap{flex:1 1 0;min-height:0;max-height:42vh;position:relative;background:#06080f;display:flex;align-items:stretch;}
+canvas{display:block;width:100%;height:100%;}
+.string-label{position:absolute;bottom:7px;left:50%;transform:translateX(-50%);font-family:'Share Tech Mono',monospace;font-size:.75rem;color:var(--muted);letter-spacing:.1em;pointer-events:none;}
+
+.harmonics-bar{flex:0 0 auto;background:var(--panel);padding:10px 14px 8px;border-top:1px solid var(--border);}
+.panel-title{font-family:'Share Tech Mono',monospace;font-size:.7rem;letter-spacing:.18em;color:#8ab4cf;text-transform:uppercase;margin-bottom:8px;}
+
+.harmonics-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:6px;}
+.harmonic-col{display:flex;flex-direction:column;align-items:center;gap:4px;}
+.harmonic-label{font-family:'Share Tech Mono',monospace;font-size:.82rem;}
+.harmonic-freq{font-family:'Share Tech Mono',monospace;font-size:.66rem;color:var(--muted);}
+.amplitude-val{font-family:'Share Tech Mono',monospace;font-size:.7rem;color:var(--muted);}
+.v-slider-wrap{height:68px;display:flex;align-items:center;justify-content:center;}
+input[type=range].vertical{writing-mode:vertical-lr;direction:rtl;-webkit-appearance:slider-vertical;appearance:slider-vertical;width:28px;height:68px;cursor:pointer;background:transparent;outline:none;}
+input[type=range].vertical::-webkit-slider-runnable-track{width:4px;border-radius:2px;background:var(--border);}
+input[type=range].vertical::-moz-range-track{width:4px;border-radius:2px;background:var(--border);}
+input[type=range].vertical::-webkit-slider-thumb{-webkit-appearance:none;width:22px;height:22px;border-radius:50%;border:2px solid var(--bg);cursor:pointer;}
+input[type=range].vertical::-moz-range-thumb{width:22px;height:22px;border-radius:50%;border:2px solid var(--bg);cursor:pointer;}
+.h1 input::-webkit-slider-thumb,.h1 input::-moz-range-thumb{background:var(--h1c);box-shadow:0 0 7px var(--h1c);}
+.h1 .harmonic-label{color:var(--h1c);}
+.h2 input::-webkit-slider-thumb,.h2 input::-moz-range-thumb{background:var(--h2c);box-shadow:0 0 7px var(--h2c);}
+.h2 .harmonic-label{color:var(--h2c);}
+.h3 input::-webkit-slider-thumb,.h3 input::-moz-range-thumb{background:var(--h3c);box-shadow:0 0 7px var(--h3c);}
+.h3 .harmonic-label{color:var(--h3c);}
+.h4 input::-webkit-slider-thumb,.h4 input::-moz-range-thumb{background:var(--h4c);box-shadow:0 0 7px var(--h4c);}
+.h4 .harmonic-label{color:var(--h4c);}
+.h5 input::-webkit-slider-thumb,.h5 input::-moz-range-thumb{background:var(--h5c);box-shadow:0 0 7px var(--h5c);}
+.h5 .harmonic-label{color:var(--h5c);}
+.h6 input::-webkit-slider-thumb,.h6 input::-moz-range-thumb{background:var(--h6c);box-shadow:0 0 7px var(--h6c);}
+.h6 .harmonic-label{color:var(--h6c);}
+
+.presets-bar{flex:0 0 auto;display:flex;align-items:center;flex-wrap:wrap;gap:6px;padding:7px 14px 9px;background:var(--panel);border-top:1px solid var(--border);}
+.preset-btn{background:transparent;border:1px solid var(--border);color:var(--text);font-family:'Share Tech Mono',monospace;font-size:.72rem;padding:6px 12px;border-radius:3px;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:all .15s;}
+.preset-btn:hover,.preset-btn:active{border-color:var(--accent);color:var(--accent);background:rgba(0,229,255,.07);}
+.action-btns{margin-left:auto;display:flex;gap:8px;flex-shrink:0;}
+.action-btn{background:transparent;border:1px solid var(--border);color:var(--accent);font-family:'Share Tech Mono',monospace;font-size:.72rem;padding:7px 16px;border-radius:6px;cursor:pointer;display:flex;align-items:center;gap:7px;letter-spacing:.07em;-webkit-tap-highlight-color:transparent;transition:all .15s;}
+.action-btn:hover,.action-btn:active{background:rgba(0,229,255,.08);border-color:var(--accent);}
+.action-icon{font-size:.9rem;line-height:1;}
+
+/* Right col */
+.right-col{background:var(--panel);display:flex;flex-direction:column;overflow-y:auto;padding:13px 15px;gap:12px;}
+.h-slider-row{display:flex;align-items:center;gap:8px;margin-bottom:9px;}
+.h-slider-row label{font-size:.82rem;color:var(--text);min-width:90px;flex-shrink:0;}
+input[type=range].horiz{flex:1;height:4px;-webkit-appearance:none;appearance:none;background:var(--border);border-radius:2px;outline:none;cursor:pointer;}
+input[type=range].horiz::-webkit-slider-thumb{-webkit-appearance:none;width:22px;height:22px;border-radius:50%;background:var(--accent);border:2px solid var(--bg);box-shadow:var(--glow);cursor:pointer;}
+input[type=range].horiz::-moz-range-thumb{width:22px;height:22px;border-radius:50%;background:var(--accent);border:2px solid var(--bg);cursor:pointer;}
+.slider-val{font-family:'Share Tech Mono',monospace;font-size:.82rem;color:var(--accent);min-width:68px;text-align:right;}
+
+.toggle-row{display:flex;align-items:center;gap:9px;margin-bottom:8px;font-size:.82rem;}
+.toggle{position:relative;width:36px;height:20px;flex-shrink:0;}
+.toggle input{opacity:0;width:0;height:0;}
+.toggle-slider{position:absolute;inset:0;background:var(--border);border-radius:20px;cursor:pointer;transition:.2s;}
+.toggle-slider:before{content:'';position:absolute;width:14px;height:14px;left:3px;top:3px;background:var(--muted);border-radius:50%;transition:.2s;}
+.toggle input:checked+.toggle-slider{background:rgba(0,229,255,.2);}
+.toggle input:checked+.toggle-slider:before{transform:translateX(16px);background:var(--accent);box-shadow:var(--glow);}
+
+.readouts{display:grid;grid-template-columns:1fr 1fr;gap:6px;}
+.readout{background:#080b12;border:1px solid var(--border);border-radius:4px;padding:8px 10px;}
+.readout-label{font-size:.64rem;color:#8ab4cf;letter-spacing:.06em;margin-bottom:2px;}
+.readout-value{font-family:'Share Tech Mono',monospace;font-size:1.15rem;color:#a8ff3e;text-shadow:0 0 8px rgba(168,255,62,.5);}
+.readout-unit{font-size:.64rem;color:#8ab4cf;}
+.divider{height:1px;background:var(--border);}
+#freqList{font-family:'Share Tech Mono',monospace;font-size:.75rem;line-height:2;color:#8ab4cf;}
+
+@media(max-width:700px){
+  html,body{overflow:auto;}
+  .main{grid-template-columns:1fr;}
+  .canvas-wrap{height:40vw;flex:none;}
+  .right-col{max-height:none;}
+}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>&#10216; SVINGENDE STRENG &#10217;</h1>
+  <span>St&#229;ende b&#248;lger &middot; Partialtonesimulering</span>
+</header>
+
+<div class="main">
+  <div class="left-col">
+
+    <div class="canvas-wrap">
+      <canvas id="c"></canvas>
+      <div class="string-label">&#8592; L &#8594;</div>
+    </div>
+
+    <div class="harmonics-bar">
+      <div class="panel-title">Partialtoner &#8212; Amplitude</div>
+      <div class="harmonics-grid" id="hGrid"></div>
+    </div>
+
+    <div class="presets-bar" id="presetsBar">
+      <div class="action-btns">
+        <button class="action-btn" id="pauseBtn"><span class="action-icon">&#9646;&#9646;</span> PAUSE</button>
+        <button class="action-btn" id="copyBtn"><span class="action-icon">&#10697;</span> KOPIER KODE</button>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="right-col">
+    <div>
+      <div class="panel-title">B&#248;lgeparametre</div>
+      <div class="h-slider-row">
+        <label>B&#248;lgehastighed</label>
+        <input type="range" class="horiz" id="speedSlider" min="10" max="600" value="120" step="1">
+        <span class="slider-val" id="speedVal">120 m/s</span>
+      </div>
+      <div class="h-slider-row">
+        <label>Strengl&#230;ngde L</label>
+        <input type="range" class="horiz" id="lengthSlider" min="0.1" max="5" value="1" step="0.05">
+        <span class="slider-val" id="lengthVal">1.00 m</span>
+      </div>
+      <div class="h-slider-row" style="margin-bottom:0;">
+        <label>Animationsfart</label>
+        <input type="range" class="horiz" id="visSlider" min="0.02" max="2" value="0.12" step="0.01">
+        <span class="slider-val" id="visVal">0.12 Hz</span>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <div>
+      <div class="toggle-row">
+        <label class="toggle"><input type="checkbox" id="dampToggle"><span class="toggle-slider"></span></label>
+        <span>D&#230;mpning</span>
+      </div>
+      <div class="h-slider-row" id="dampRow" style="opacity:.3;pointer-events:none;margin-bottom:6px;">
+        <label>D&#230;mpning &#947;</label>
+        <input type="range" class="horiz" id="dampSlider" min="0.05" max="2" value="0.4" step="0.05">
+        <span class="slider-val" id="dampVal">0.40</span>
+      </div>
+      <div class="toggle-row" style="margin-bottom:0;">
+        <label class="toggle"><input type="checkbox" id="showPartialsToggle" checked><span class="toggle-slider"></span></label>
+        <span>Vis partialtoner separat</span>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <div>
+      <div class="panel-title" style="margin-bottom:8px;">Afl&#230;sninger</div>
+      <div class="readouts">
+        <div class="readout">
+          <div class="readout-label">Grundfrekvens f&#8321;</div>
+          <div class="readout-value" id="f1Display">60.0</div>
+          <div class="readout-unit">Hz</div>
+        </div>
+        <div class="readout">
+          <div class="readout-label">B&#248;lgel&#230;ngde &#955;&#8321;</div>
+          <div class="readout-value" id="lambdaDisplay">2.00</div>
+          <div class="readout-unit">m</div>
+        </div>
+        <div class="readout">
+          <div class="readout-label">Aktive partialtoner</div>
+          <div class="readout-value" id="activeDisplay">1</div>
+          <div class="readout-unit">stk</div>
+        </div>
+        <div class="readout">
+          <div class="readout-label">Periode T&#8321;</div>
+          <div class="readout-value" id="periodDisplay">16.7</div>
+          <div class="readout-unit">ms</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <div>
+      <div class="panel-title" style="margin-bottom:5px;">Aktive frekvenser</div>
+      <div id="freqList"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+var N=6;
+var COLORS=['#00e5ff','#7df9ff','#a8ff3e','#ffd93d','#ff6b35','#d45eff'];
+var NPTS=500;
+var amps=[1,0,0,0,0,0];
+var speed=120,L=1.0,visFreq=0.12;
+var damping=false,gamma=0.4,showParts=true,paused=false;
+var visT=0,lastStamp=null;
+var freqLabels=[],ampValEls=[];
+
+var gridEl=document.getElementById('hGrid');
+for(var i=0;i<N;i++){
+  (function(idx){
+    var col=document.createElement('div');col.className='harmonic-col h'+(idx+1);
+    var lbl=document.createElement('div');lbl.className='harmonic-label';lbl.textContent='n='+(idx+1);
+    var fLbl=document.createElement('div');fLbl.className='harmonic-freq';fLbl.textContent='--';freqLabels.push(fLbl);
+    var wrap=document.createElement('div');wrap.className='v-slider-wrap';
+    var inp=document.createElement('input');inp.type='range';inp.className='vertical';
+    inp.min=0;inp.max=1;inp.step=0.01;inp.value=amps[idx];
+    var aVal=document.createElement('div');aVal.className='amplitude-val';
+    aVal.textContent=amps[idx].toFixed(2);ampValEls.push(aVal);
+    inp.addEventListener('input',function(){amps[idx]=parseFloat(this.value);aVal.textContent=amps[idx].toFixed(2);updateReadouts();});
+    wrap.appendChild(inp);col.appendChild(lbl);col.appendChild(fLbl);col.appendChild(wrap);col.appendChild(aVal);gridEl.appendChild(col);
+  })(i);
+}
+
+var PRESETS=[
+  {label:'Grundtone',  a:[1,0,0,0,0,0]},
+  {label:'2. partial', a:[0,1,0,0,0,0]},
+  {label:'3. partial', a:[0,0,1,0,0,0]},
+  {label:'4. partial', a:[0,0,0,1,0,0]},
+  {label:'5. partial', a:[0,0,0,0,1,0]},
+  {label:'6. partial', a:[0,0,0,0,0,1]},
+  {label:'Tilfaeldig', a:null},
+  {label:'Nulstil',      a:[0,0,0,0,0,0]},
+];
+var presetsBar=document.getElementById('presetsBar');
+var pauseBtn=document.getElementById('pauseBtn');
+PRESETS.forEach(function(p){
+  var btn=document.createElement('button');btn.className='preset-btn';btn.textContent=p.label;
+  btn.addEventListener('click',function(){
+    var raw=p.a?p.a.slice():[Math.random(),Math.random(),Math.random(),Math.random(),Math.random(),Math.random()];
+    var mx=0;for(var i=0;i<N;i++)if(raw[i]>mx)mx=raw[i];if(mx<1e-6)mx=1;
+    var inputs=gridEl.querySelectorAll('input[type=range]');
+    for(var i=0;i<N;i++){amps[i]=raw[i]/mx;inputs[i].value=amps[i];ampValEls[i].textContent=amps[i].toFixed(2);}
+    updateReadouts();
+  });
+  presetsBar.insertBefore(btn,presetsBar.querySelector('.action-btns'));
+});
+
+function bindH(id,valId,cb){var el=document.getElementById(id),vl=document.getElementById(valId);el.addEventListener('input',function(){cb(parseFloat(el.value),vl);});}
+bindH('speedSlider','speedVal',function(v,vl){speed=v;vl.textContent=v+' m/s';updateReadouts();});
+bindH('lengthSlider','lengthVal',function(v,vl){L=v;vl.textContent=v.toFixed(2)+' m';updateReadouts();});
+bindH('visSlider','visVal',function(v,vl){visFreq=v;vl.textContent=v.toFixed(2)+' Hz';});
+bindH('dampSlider','dampVal',function(v,vl){gamma=v;vl.textContent=v.toFixed(2);});
+document.getElementById('dampToggle').addEventListener('change',function(){
+  damping=this.checked;var r=document.getElementById('dampRow');
+  r.style.opacity=damping?'1':'0.3';r.style.pointerEvents=damping?'auto':'none';if(damping)visT=0;
+});
+document.getElementById('showPartialsToggle').addEventListener('change',function(){showParts=this.checked;});
+pauseBtn.addEventListener('click',function(){
+  paused=!paused;
+  this.innerHTML=paused?'<span class="action-icon">&#9654;</span> AFSPIL':'<span class="action-icon">&#9646;&#9646;</span> PAUSE';
+  if(!paused)lastStamp=null;
+});
+document.getElementById('copyBtn').addEventListener('click',function(){
+  var html=document.documentElement.outerHTML;
+  navigator.clipboard.writeText(html).then(function(){
+    var btn=document.getElementById('copyBtn');
+    btn.innerHTML='<span class="action-icon">&#10003;</span> KOPIERET!';
+    setTimeout(function(){btn.innerHTML='<span class="action-icon">&#10697;</span> KOPIER KODE';},2000);
+  });
+});
+
+function updateReadouts(){
+  var f1=speed/(2*L);
+  document.getElementById('f1Display').textContent=f1.toFixed(1);
+  document.getElementById('lambdaDisplay').textContent=(2*L).toFixed(2);
+  var cnt=0;for(var i=0;i<N;i++)if(amps[i]>0.005)cnt++;
+  document.getElementById('activeDisplay').textContent=cnt;
+  document.getElementById('periodDisplay').textContent=(1000/f1).toFixed(1);
+  var html='';
+  for(var i=0;i<N;i++){var fn=f1*(i+1);freqLabels[i].textContent=fn.toFixed(1)+' Hz';if(amps[i]>0.005)html+='<span style="color:'+COLORS[i]+'">n='+(i+1)+'</span>  '+fn.toFixed(1)+' Hz  A='+amps[i].toFixed(2)+'<br>';}
+  document.getElementById('freqList').innerHTML=html||'<span style="color:#2a3a4a">Ingen aktive partialtoner</span>';
+}
+
+var canvas=document.getElementById('c'),ctx=canvas.getContext('2d');
+var cW=0,cH=0;
+function resize(){
+  var dpr=window.devicePixelRatio||1,wrap=canvas.parentElement;
+  var W=wrap.clientWidth,H=wrap.clientHeight;
+  if(W<1||H<1)return;
+  cW=W;cH=H;
+  canvas.width=W*dpr;canvas.height=H*dpr;
+  canvas.style.width=W+'px';canvas.style.height=H+'px';
+  ctx.setTransform(dpr,0,0,dpr,0,0);
+}
+resize();
+window.addEventListener('resize',resize);
+
+function getY(frac,t){
+  var w0=2*Math.PI*visFreq,dmp=damping?Math.exp(-gamma*t):1,y=0;
+  for(var n=1;n<=N;n++){if(amps[n-1]<0.001)continue;y+=amps[n-1]*Math.sin(n*Math.PI*frac)*Math.cos(n*w0*t);}
+  return y*dmp;
+}
+
+function draw(stamp){
+  if(!lastStamp)lastStamp=stamp;
+  var dt=Math.min((stamp-lastStamp)/1000,0.05);lastStamp=stamp;
+  if(!paused)visT+=dt;
+  if(cW<1||cH<1){requestAnimationFrame(draw);return;}
+  var W=cW,H=cH,cy=H/2,pad=W*0.05,strW=W-2*pad,x0=pad;
+  // Normalisér så bølgen aldrig ryger ud af canvas:
+  // Worst case amplitude = sum af alle aktive amps (når de er i fase)
+  var ampSum=0;for(var i=0;i<N;i++)if(amps[i]>0.001)ampSum+=amps[i];
+  if(ampSum<0.001)ampSum=1;
+  var maxA=(H*0.44)/ampSum;
+  ctx.clearRect(0,0,W,H);
+  ctx.strokeStyle='rgba(30,42,58,0.55)';ctx.lineWidth=0.5;
+  for(var gi=1;gi<8;gi++){ctx.beginPath();ctx.moveTo(0,H*gi/8);ctx.lineTo(W,H*gi/8);ctx.stroke();}
+  for(var gj=1;gj<12;gj++){ctx.beginPath();ctx.moveTo(W*gj/12,0);ctx.lineTo(W*gj/12,H);ctx.stroke();}
+  ctx.strokeStyle='rgba(74,98,120,0.4)';ctx.lineWidth=1;ctx.setLineDash([4,7]);
+  ctx.beginPath();ctx.moveTo(x0,cy);ctx.lineTo(x0+strW,cy);ctx.stroke();ctx.setLineDash([]);
+  var w0=2*Math.PI*visFreq,dmp=damping?Math.exp(-gamma*visT):1;
+  if(showParts){
+    for(var n=1;n<=N;n++){
+      if(amps[n-1]<0.005)continue;
+      ctx.beginPath();ctx.strokeStyle=COLORS[n-1]+'55';ctx.lineWidth=1;
+      for(var j=0;j<=NPTS;j++){var f=j/NPTS,xp=x0+f*strW,yp=cy-amps[n-1]*maxA*Math.sin(n*Math.PI*f)*Math.cos(n*w0*visT)*dmp;if(j===0)ctx.moveTo(xp,yp);else ctx.lineTo(xp,yp);}
+      ctx.stroke();
+    }
+  }
+  var hasAny=false;for(var i=0;i<N;i++)if(amps[i]>0.005){hasAny=true;break;}
+  if(hasAny){
+    var pts=new Float32Array(NPTS+1);for(var j=0;j<=NPTS;j++)pts[j]=getY(j/NPTS,visT);
+    var passes=[[10,0.06],[4,0.18],[1.5,1.0]];
+    for(var p=0;p<passes.length;p++){
+      ctx.beginPath();ctx.strokeStyle='rgba(0,229,255,'+passes[p][1]+')';ctx.lineWidth=passes[p][0];
+      for(var j=0;j<=NPTS;j++){var xp=x0+(j/NPTS)*strW,yp=cy-pts[j]*maxA;if(j===0)ctx.moveTo(xp,yp);else ctx.lineTo(xp,yp);}
+      ctx.stroke();
+    }
+  } else {
+    ctx.beginPath();ctx.strokeStyle='rgba(0,229,255,0.4)';ctx.lineWidth=1.5;ctx.moveTo(x0,cy);ctx.lineTo(x0+strW,cy);ctx.stroke();
+  }
+  for(var n=1;n<=N;n++){
+    if(amps[n-1]<0.005)continue;
+    for(var k=0;k<=n;k++){
+      var frac=k/n,xp=x0+frac*strW,isEnd=(k===0||k===n);
+      ctx.beginPath();ctx.arc(xp,cy,isEnd?6:3.5,0,Math.PI*2);
+      ctx.fillStyle=isEnd?'#1e2a3a':COLORS[n-1]+'90';ctx.fill();
+      ctx.strokeStyle=isEnd?'#00e5ff':COLORS[n-1];ctx.lineWidth=isEnd?2:1;ctx.stroke();
+    }
+  }
+  requestAnimationFrame(draw);
+}
+updateReadouts();
+requestAnimationFrame(draw);
+</script>
+</body>
+</html>

@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="da">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Elektromagnetisk Bølge</title>
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#06101a;--bg-panel:#0c1c2c;--bg-input:#08141e;
+  --border:#1c3650;--border-hi:#2a4e6e;
+  --cyan:#00d4ff;--cg:rgba(0,212,255,.55);--cg2:rgba(0,212,255,.15);--cdim:rgba(0,212,255,.12);
+  --magenta:#ff4da6;
+  --text:#dceefa;--text-sec:#88bcd8;--label:#6a9ab8;--axis:#1c3448;
+}
+.light{
+  --bg:#e8f2f8;--bg-panel:#fff;--bg-input:#f0f6fa;
+  --border:#aecce0;--border-hi:#7aaec8;
+  --cyan:#006699;--cg:rgba(0,102,153,.3);--cg2:rgba(0,102,153,.1);--cdim:rgba(0,102,153,.09);
+  --magenta:#bb0066;
+  --text:#0e1e2a;--text-sec:#2a5570;--label:#3a6880;--axis:#aaccdc;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:var(--bg);color:var(--text);font-family:'Rajdhani',sans-serif;font-size:15px;min-height:100vh;padding:22px;transition:background .3s,color .3s;}
+
+/* Header */
+header{display:flex;justify-content:space-between;align-items:center;padding-bottom:14px;margin-bottom:16px;border-bottom:1px solid var(--border-hi);}
+.tblock{display:flex;flex-direction:column;gap:6px;}
+h1{font-family:'Share Tech Mono',monospace;font-size:19px;font-weight:400;color:var(--cyan);letter-spacing:.15em;text-shadow:0 0 16px var(--cg),0 0 36px var(--cg2);}
+h1 .br{opacity:.5;}
+.sub{font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--text-sec);letter-spacing:.1em;}
+.theme-btn{background:var(--cdim);border:1px solid var(--cyan);color:var(--cyan);padding:9px 18px;cursor:pointer;font-family:'Share Tech Mono',monospace;font-size:12px;letter-spacing:.12em;transition:background .2s;white-space:nowrap;text-shadow:0 0 8px var(--cg);}
+.theme-btn:hover{background:rgba(0,212,255,.22);}
+
+/* Layout */
+.main{display:flex;gap:14px;align-items:flex-start;}
+.lcol{flex:1;min-width:0;}
+.rcol{width:280px;flex-shrink:0;display:flex;flex-direction:column;gap:10px;}
+
+/* Canvas + spectrum */
+.cwrap{background:var(--bg-panel);border:1px solid var(--border-hi);padding:12px;margin-bottom:8px;}
+.swrap{background:var(--bg-panel);border:1px solid var(--border-hi);padding:8px 12px;margin-bottom:10px;}
+canvas{display:block;width:100%;}
+
+/* Controls */
+.controls{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px;align-items:center;}
+.btn{background:none;border:1px solid var(--border-hi);color:var(--text-sec);padding:9px 18px;cursor:pointer;font-family:'Share Tech Mono',monospace;font-size:12px;letter-spacing:.12em;transition:all .15s;}
+.btn:hover{border-color:var(--cyan);color:var(--cyan);background:var(--cdim);}
+.btn-play{border-color:var(--cyan);color:var(--cyan);text-shadow:0 0 8px var(--cg);}
+.legend{display:flex;gap:16px;align-items:center;flex-wrap:wrap;}
+.leg{display:flex;align-items:center;gap:7px;font-family:'Share Tech Mono',monospace;font-size:11px;}
+.legline{width:22px;height:2px;display:block;}
+.c{color:var(--cyan);}.m{color:var(--magenta);}
+
+/* Right panel */
+.pcard{background:var(--bg-panel);border:1px solid var(--border-hi);padding:15px 17px;}
+.plbl{font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--label);letter-spacing:.14em;text-transform:uppercase;margin-bottom:9px;}
+.pval{font-family:'Share Tech Mono',monospace;font-size:19px;color:var(--cyan);letter-spacing:.05em;}
+.pval-sm{font-family:'Share Tech Mono',monospace;font-size:13px;color:var(--cyan);letter-spacing:.04em;}
+.wave-name{font-family:'Share Tech Mono',monospace;font-size:15px;color:var(--text);letter-spacing:.06em;margin-bottom:7px;}
+.wave-desc{font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--text-sec);letter-spacing:.04em;line-height:1.8;}
+.irow{display:flex;gap:6px;align-items:center;margin-bottom:10px;}
+.linp{background:var(--bg-input);border:1px solid var(--border-hi);color:var(--cyan);padding:7px 8px;font-family:'Share Tech Mono',monospace;font-size:16px;width:0;flex:1;letter-spacing:.03em;outline:none;transition:border-color .2s;-moz-appearance:textfield;}
+.linp::-webkit-inner-spin-button,.linp::-webkit-outer-spin-button{-webkit-appearance:none;}
+.linp:focus{border-color:var(--cyan);}
+.usel{background:var(--bg-input);border:1px solid var(--border-hi);color:var(--text);padding:7px 5px;font-family:'Share Tech Mono',monospace;font-size:12px;outline:none;cursor:pointer;width:52px;}
+input[type=range].ls{-webkit-appearance:none;appearance:none;width:100%;height:4px;border-radius:2px;outline:none;cursor:pointer;}
+input[type=range].ls::-webkit-slider-thumb{-webkit-appearance:none;width:15px;height:15px;border-radius:50%;background:var(--cyan);cursor:pointer;box-shadow:0 0 7px var(--cg);}
+input[type=range].ls::-moz-range-thumb{width:15px;height:15px;border-radius:50%;border:none;background:var(--cyan);cursor:pointer;box-shadow:0 0 7px var(--cg);}
+.slbls{display:flex;justify-content:space-between;font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--label);letter-spacing:.03em;margin-top:5px;}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="tblock">
+    <h1><span class="br">{</span> ELEKTROMAGNETISK BØLGE <span class="br">›</span> UDBREDELSE <span class="br">}</span></h1>
+    <div class="sub">Tværgående bølge &nbsp;·&nbsp; E ⊥ B ⊥ k &nbsp;·&nbsp; felterne svinger i fase</div>
+  </div>
+  <button class="theme-btn" id="themeBtn" onclick="toggleTheme()">☀ LYS</button>
+</header>
+
+<div class="main">
+  <div class="lcol">
+    <div class="cwrap"><canvas id="wc" height="265"></canvas></div>
+    <div class="swrap"><canvas id="sc" height="60"></canvas></div>
+    <div class="controls">
+      <button class="btn btn-play" id="playBtn" onclick="togglePlay()">▶ AFSPIL</button>
+      <button class="btn" onclick="resetWave()">↺ NULSTIL</button>
+      <button class="btn" id="copyBtn" onclick="copyCode()">⧉ KOPIER KODE</button>
+    </div>
+    <div class="legend">
+      <div class="leg"><span class="legline" style="background:var(--cyan)"></span><span class="c">E-felt (elektrisk)</span></div>
+      <div class="leg"><span class="legline" style="background:var(--magenta)"></span><span class="m">B-felt (magnetisk)</span></div>
+    </div>
+  </div>
+
+  <div class="rcol">
+    <div class="pcard">
+      <div class="plbl">Bølgelængde (λ)</div>
+      <div class="irow">
+        <input class="linp" type="number" id="lval" value="500" min="0.0001" step="any" oninput="onNum()">
+        <select class="usel" id="usel" onchange="onNum()">
+          <option value="1e-9">nm</option>
+          <option value="1e-6">μm</option>
+          <option value="1e-3">mm</option>
+          <option value="1">m</option>
+        </select>
+      </div>
+      <input type="range" class="ls" id="ls" min="-11" max="1" step="0.01" value="-6.301" oninput="onSlider()">
+      <div class="slbls"><span>0,01 nm</span><span>1 nm</span><span>1 μm</span><span>1 mm</span><span>10 m</span></div>
+    </div>
+    <div class="pcard">
+      <div class="plbl">Frekvens &nbsp;( f = c / λ )</div>
+      <div class="pval" id="fdisp">—</div>
+    </div>
+    <div class="pcard">
+      <div class="plbl">Bølgetype</div>
+      <div class="wave-name" id="wname">—</div>
+      <div class="wave-desc" id="wdesc">Angiv en bølgelængde.</div>
+    </div>
+    <div class="pcard">
+      <div class="plbl">Lyshastighed</div>
+      <div class="pval-sm">c = 3,00 × 10⁸ m/s</div>
+    </div>
+  </div>
+</div>
+
+<script>
+const wc=document.getElementById('wc'), ctx=wc.getContext('2d');
+const sc=document.getElementById('sc'), sctx=sc.getContext('2d');
+const C=3e8, LMIN=-11, LMAX=1, SPD=2.5, EMX=20;
+
+let cLog=Math.log10(500e-9), phase=0, wf=0, running=false, animId=null, isLight=false;
+
+const css=v=>getComputedStyle(document.body).getPropertyValue(v).trim();
+
+function initC(){
+  wc.width=wc.parentElement.clientWidth-24; wc.height=265;
+  sc.width=sc.parentElement.clientWidth-24; sc.height=60;
+}
+
+/* Visual wavelength: logarithmically maps log(lambda) to canvas pixels */
+function visLam(){
+  const t=(cLog-LMIN)/(LMAX-LMIN); // 0=gamma, 1=radio
+  return Math.max(8, wc.width*(0.04+0.63*t));
+}
+
+/* EM info */
+function waveInfo(m){
+  if(m>=1)      return{n:'Radiobølger',      d:'λ ≥ 1 m\nFM/AM-radio, TV og mobilkommunikation.'};
+  if(m>=1e-3)   return{n:'Mikrobølger',       d:'1 mm – 1 m\nMikrobølgeovn, radar og Wi-Fi.'};
+  if(m>=700e-9) return{n:'Infrarød stråling', d:'700 nm – 1 mm\nFornemmes som varme.\nFjernstyring og termokameraer.'};
+  if(m>=380e-9) return{n:'Synligt lys',       d:'380 – 700 nm\nDen eneste del af EM-spektret\nvi kan se med øjet.'};
+  if(m>=10e-9)  return{n:'Ultraviolet (UV)',  d:'10 – 380 nm\nFra solen. Kan skade hud og DNA.'};
+  if(m>=1e-11)  return{n:'Røntgenstråling',   d:'0,01 – 10 nm\nGennemtrænger blødt væv.\nBrugt i medicinsk diagnostik.'};
+  return             {n:'Gammastråling',     d:'λ < 0,01 nm\nFra radioaktivt henfald og\nkosmiske eksplosioner.'};
+}
+function fmtF(hz){
+  if(hz>=1e18)return(hz/1e18).toPrecision(3)+' EHz';
+  if(hz>=1e15)return(hz/1e15).toPrecision(3)+' PHz';
+  if(hz>=1e12)return(hz/1e12).toPrecision(3)+' THz';
+  if(hz>=1e9) return(hz/1e9 ).toPrecision(3)+' GHz';
+  if(hz>=1e6) return(hz/1e6 ).toPrecision(3)+' MHz';
+  if(hz>=1e3) return(hz/1e3 ).toPrecision(3)+' kHz';
+  return hz.toPrecision(3)+' Hz';
+}
+function m2disp(m){
+  if(m>=1)    return{v:m,      s:'1'};
+  if(m>=1e-3) return{v:m*1e3, s:'1e-3'};
+  if(m>=1e-6) return{v:m*1e6, s:'1e-6'};
+  return           {v:m*1e9, s:'1e-9'};
+}
+function updatePanel(){
+  const m=Math.pow(10,cLog);
+  document.getElementById('fdisp').textContent=fmtF(C/m);
+  const i=waveInfo(m);
+  document.getElementById('wname').textContent=i.n;
+  document.getElementById('wdesc').textContent=i.d.replace(/\n/g,' ');
+}
+function updSliderFill(){
+  const s=document.getElementById('ls');
+  const p=((cLog-LMIN)/(LMAX-LMIN))*100;
+  s.style.background=`linear-gradient(to right,${css('--cyan')} ${p}%,${css('--border-hi')} ${p}%)`;
+}
+function onSlider(){
+  cLog=parseFloat(document.getElementById('ls').value);
+  const d=m2disp(Math.pow(10,cLog));
+  document.getElementById('lval').value=parseFloat(d.v.toPrecision(4));
+  document.getElementById('usel').value=d.s;
+  updSliderFill(); updatePanel(); drawSpec();
+}
+function onNum(){
+  const v=parseFloat(document.getElementById('lval').value)||0;
+  const u=parseFloat(document.getElementById('usel').value);
+  const m=v*u; if(m<=0)return;
+  cLog=Math.max(LMIN,Math.min(LMAX,Math.log10(m)));
+  document.getElementById('ls').value=cLog;
+  updSliderFill(); updatePanel(); drawSpec();
+}
+
+/* Arrow */
+function arw(x1,y1,x2,y2,col,lw){
+  const dx=x2-x1,dy=y2-y1,len=Math.hypot(dx,dy);
+  if(len<4)return;
+  const a=Math.atan2(dy,dx),hl=Math.min(10,len*0.28);
+  ctx.save();ctx.strokeStyle=col;ctx.fillStyle=col;ctx.lineWidth=lw;ctx.lineCap='round';
+  ctx.globalAlpha=0.88;ctx.beginPath();ctx.moveTo(x1,y1);ctx.lineTo(x2,y2);ctx.stroke();
+  ctx.globalAlpha=1;ctx.beginPath();ctx.moveTo(x2,y2);
+  ctx.lineTo(x2-hl*Math.cos(a-.38),y2-hl*Math.sin(a-.38));
+  ctx.lineTo(x2-hl*Math.cos(a+.38),y2-hl*Math.sin(a+.38));
+  ctx.closePath();ctx.fill();ctx.restore();
+}
+
+/* Emitter */
+function drawEmitter(cy,ph,CC,active){
+  const pulse=(1+Math.sin(ph*2.5))/2;
+  const op=active?(.55+.45*pulse):.28;
+  ctx.save();
+
+  /* Ground line */
+  ctx.strokeStyle=CC;ctx.lineWidth=1.5;ctx.globalAlpha=op*.7;
+  ctx.beginPath();ctx.moveTo(EMX-7,cy+17);ctx.lineTo(EMX+7,cy+17);ctx.stroke();
+
+  /* Antenna */
+  ctx.lineWidth=2;ctx.globalAlpha=op;
+  ctx.beginPath();ctx.moveTo(EMX,cy-16);ctx.lineTo(EMX,cy+17);ctx.stroke();
+
+  /* Pulsing core */
+  const r=active?(4+pulse*3):4;
+  ctx.fillStyle=CC;ctx.globalAlpha=active?(.65+.35*pulse):.2;
+  ctx.beginPath();ctx.arc(EMX,cy,r,0,Math.PI*2);ctx.fill();
+
+  /* Radiating arcs */
+  if(active&&wf>5){
+    for(let ri=1;ri<=4;ri++){
+      const rad=ri*7;
+      const ao=(1-ri/4.8)*(0.45+0.4*pulse);
+      ctx.globalAlpha=Math.max(0,ao);
+      ctx.strokeStyle=CC;ctx.lineWidth=1;
+      ctx.beginPath();ctx.arc(EMX,cy,rad,-Math.PI/3,Math.PI/3);ctx.stroke();
+    }
+  }
+  ctx.restore();
+}
+
+/* Main wave draw */
+function draw(){
+  const W=wc.width,H=wc.height;
+  ctx.clearRect(0,0,W,H);
+  const cy=H/2, amp=H*0.27;
+  const lam=visLam(), k=(2*Math.PI)/lam;
+  const bA=28*Math.PI/180, bS=0.55;
+  const CC=css('--cyan'),M=css('--magenta'),AX=css('--axis'),LB=css('--label');
+  const x0=EMX+16, xEnd=W-10;
+
+  /* Axis */
+  ctx.save();ctx.strokeStyle=AX;ctx.lineWidth=1;ctx.setLineDash([5,8]);
+  ctx.beginPath();ctx.moveTo(x0,cy);ctx.lineTo(xEnd,cy);ctx.stroke();ctx.restore();
+
+  drawEmitter(cy,phase,CC,running||wf>0);
+
+  const xF=Math.min(x0+wf,xEnd);
+
+  if(wf>2){
+    /* Clip to wavefront */
+    ctx.save();ctx.beginPath();ctx.rect(x0,0,xF-x0,H);ctx.clip();
+
+    /* Arrows: spaced ~40% of lambda */
+    const spacing=lam*0.38;
+    const N=Math.min(38,Math.max(5,Math.round((xEnd-x0)/spacing)));
+
+    /* B field */
+    for(let i=0;i<=N;i++){
+      const x=x0+(i/N)*(xEnd-x0);if(x>xF)continue;
+      const v=amp*Math.sin(k*(x-x0)-phase);
+      if(Math.abs(v)>6)arw(x,cy,x+v*bS*Math.cos(bA),cy+v*bS*Math.sin(bA),M,1.5);
+    }
+    ctx.save();ctx.strokeStyle=M;ctx.lineWidth=2.4;ctx.beginPath();let fb=true;
+    for(let x=x0;x<=xF;x+=2){
+      const v=amp*Math.sin(k*(x-x0)-phase);
+      const sx=x+v*bS*Math.cos(bA),sy=cy+v*bS*Math.sin(bA);
+      fb?(ctx.moveTo(sx,sy),fb=false):ctx.lineTo(sx,sy);
+    }
+    ctx.stroke();ctx.restore();
+
+    /* E field */
+    for(let i=0;i<=N;i++){
+      const x=x0+(i/N)*(xEnd-x0);if(x>xF)continue;
+      const v=amp*Math.sin(k*(x-x0)-phase);
+      if(Math.abs(v)>6)arw(x,cy,x,cy-v,CC,1.5);
+    }
+    ctx.save();ctx.strokeStyle=CC;ctx.lineWidth=2.4;ctx.beginPath();
+    for(let x=x0;x<=xF;x+=2){
+      const y=amp*Math.sin(k*(x-x0)-phase);
+      x===x0?ctx.moveTo(x,cy-y):ctx.lineTo(x,cy-y);
+    }
+    ctx.stroke();ctx.restore();
+
+    ctx.restore(); /* end clip */
+
+    /* Wavefront indicator */
+    if(xF<xEnd-4){
+      ctx.save();ctx.strokeStyle=CC;ctx.lineWidth=1.2;
+      ctx.setLineDash([3,5]);ctx.globalAlpha=0.4;
+      ctx.beginPath();ctx.moveTo(xF,cy-amp*.9);ctx.lineTo(xF,cy+amp*.65);ctx.stroke();ctx.restore();
+    }
+  }
+
+  /* E / B labels */
+  if(wf>35){
+    ctx.save();ctx.font='bold 13px "Share Tech Mono",monospace';
+    ctx.fillStyle=CC;ctx.fillText('E',x0+4,cy-amp-10);
+    ctx.fillStyle=M;ctx.fillText('B',x0+6+amp*bS*Math.cos(bA),cy+amp*bS*Math.sin(bA)+4);
+    ctx.restore();
+  }
+
+  /* k arrow */
+  const ax=xEnd-40;
+  arw(ax,cy,ax+28,cy,LB,1.5);
+  ctx.save();ctx.fillStyle=LB;ctx.font='11px "Share Tech Mono",monospace';
+  ctx.fillText('k',ax-14,cy+4);ctx.restore();
+}
+
+/* EM Spectrum strip */
+function drawSpec(){
+  const W=sc.width,H=sc.height;
+  sctx.clearRect(0,0,W,H);
+  const SH=30; /* strip height */
+  const lx=l=>(l-LMIN)/(LMAX-LMIN)*W;
+
+  const regions=[
+    {l0:-11, l1:-10,  col:'#4a0077', lbl:'Gamma'},
+    {l0:-10, l1:-8,   col:'#00338b', lbl:'Røntgen'},
+    {l0:-8,  l1:-6.42,col:'#6600bb', lbl:'UV'},
+    {l0:-6.42,l1:-6.15,vis:true,     lbl:'Synligt lys'},
+    {l0:-6.15,l1:-3,  col:'#991100', lbl:'Infrarød'},
+    {l0:-3,  l1:0,    col:'#995500', lbl:'Mikrobølger'},
+    {l0:0,   l1:1,    col:'#335577', lbl:'Radio'},
+  ];
+
+  for(const r of regions){
+    const rx0=lx(r.l0),rx1=lx(r.l1),rw=rx1-rx0;
+    if(r.vis){
+      const g=sctx.createLinearGradient(rx0,0,rx1,0);
+      g.addColorStop(0,'#8800ff');g.addColorStop(.18,'#2200ff');
+      g.addColorStop(.35,'#00aaee');g.addColorStop(.52,'#00bb00');
+      g.addColorStop(.68,'#cccc00');g.addColorStop(.84,'#ff8800');
+      g.addColorStop(1,'#cc0000');
+      sctx.fillStyle=g;
+    } else { sctx.fillStyle=r.col; }
+    sctx.fillRect(rx0,0,rw,SH);
+    /* Separator */
+    sctx.fillStyle='rgba(0,0,0,0.35)';sctx.fillRect(rx1-.5,0,1,SH);
+  }
+
+  /* Current position marker */
+  const mx=lx(cLog);
+  sctx.save();
+  sctx.strokeStyle=css('--cyan');sctx.lineWidth=2.5;
+  if(!isLight){sctx.shadowBlur=10;sctx.shadowColor=css('--cyan');}
+  sctx.beginPath();sctx.moveTo(mx,0);sctx.lineTo(mx,SH+5);sctx.stroke();
+  sctx.fillStyle=css('--cyan');
+  sctx.beginPath();sctx.moveTo(mx-5,SH+1);sctx.lineTo(mx+5,SH+1);sctx.lineTo(mx,SH+8);sctx.closePath();sctx.fill();
+  sctx.restore();
+
+  /* Region labels */
+  sctx.textAlign='center';sctx.font='10px "Share Tech Mono",monospace';
+  for(const r of regions){
+    const rw=lx(r.l1)-lx(r.l0),cx=(lx(r.l0)+lx(r.l1))/2;
+    if(rw<22)continue; /* skip if too narrow */
+    sctx.fillStyle=r.vis?'#000':'rgba(255,255,255,.82)';
+    /* Abbreviate if narrow */
+    const txt=rw<50?r.lbl.split(' ')[0]:r.lbl;
+    sctx.fillText(txt,cx,SH+19);
+  }
+  sctx.textAlign='left';
+}
+
+/* Animation loop */
+function step(){
+  const lam=visLam();
+  const xEnd=wc.width-10, x0=EMX+16;
+  wf=Math.min(wf+SPD,xEnd-x0);
+  phase+=SPD*(2*Math.PI)/lam;
+  draw();
+  animId=requestAnimationFrame(step);
+}
+
+function togglePlay(){
+  const btn=document.getElementById('playBtn');
+  if(running){running=false;cancelAnimationFrame(animId);btn.textContent='▶ AFSPIL';}
+  else{running=true;btn.textContent='⏸ PAUSE';step();}
+}
+function resetWave(){
+  if(running){running=false;cancelAnimationFrame(animId);document.getElementById('playBtn').textContent='▶ AFSPIL';}
+  phase=0;wf=0;draw();drawSpec();
+}
+function toggleTheme(){
+  isLight=!isLight;document.body.classList.toggle('light',isLight);
+  document.getElementById('themeBtn').textContent=isLight?'☾ MØRK':'☀ LYS';
+  updSliderFill();draw();drawSpec();
+}
+function copyCode(){
+  const btn=document.getElementById('copyBtn');
+  navigator.clipboard.writeText('<!DOCTYPE html>\n'+document.documentElement.outerHTML)
+    .then(()=>{btn.textContent='✓ KOPIERET!';setTimeout(()=>btn.textContent='⧉ KOPIER KODE',2500);})
+    .catch(()=>{btn.textContent='✗ FEJL';setTimeout(()=>btn.textContent='⧉ KOPIER KODE',2000);});
+}
+
+window.addEventListener('resize',()=>{initC();draw();drawSpec();});
+initC();updatePanel();updSliderFill();draw();drawSpec();
+</script>
+</body>
+</html>

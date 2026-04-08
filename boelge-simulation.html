@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="da">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bølgesuperposition</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:      #060c13;
+    --panel:   #0a1420;
+    --border:  #17303e;
+    --wave1:   #00e5ff;
+    --wave2:   #ff6b35;
+    --result:  #b9fbc0;
+    --node:    #ffd600;
+    --anti:    #ea80fc;
+    --text:    #5a8899;
+    --bright:  #cce8f0;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--bright);
+    font-family: 'JetBrains Mono', monospace;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 16px 14px 24px;
+  }
+
+  header { text-align: center; margin-bottom: 12px; }
+  h1 {
+    font-size: 0.82rem; font-weight: 600;
+    letter-spacing: 0.42em; text-transform: uppercase;
+    color: var(--wave1); text-shadow: 0 0 20px rgba(0,229,255,0.5);
+    margin-bottom: 2px;
+  }
+  .subtitle { font-size: 0.56rem; color: var(--text); letter-spacing: 0.22em; }
+
+  .canvas-wrap { position: relative; width: 100%; max-width: 820px; }
+
+  canvas {
+    display: block; width: 100%;
+    border: 1px solid var(--border); border-radius: 5px;
+    background: #02090f;
+    box-shadow: 0 0 50px rgba(0,229,255,0.06), inset 0 0 100px rgba(0,0,0,0.5);
+  }
+
+  #phaseBadge {
+    position: absolute; top: 9px; right: 12px;
+    font-size: 0.55rem; letter-spacing: 0.14em;
+    padding: 2px 9px; border-radius: 2px;
+    border: 1px solid currentColor; opacity: 0.8;
+    transition: color 0.4s;
+    pointer-events: none;
+  }
+
+  .legend {
+    display: flex; flex-wrap: wrap; justify-content: center;
+    gap: 10px 20px; margin: 9px 0 13px;
+    font-size: 0.56rem; letter-spacing: 0.07em; color: var(--text);
+  }
+  .leg { display: flex; align-items: center; gap: 6px; }
+  .leg-line { width: 24px; height: 2px; border-radius: 1px; }
+  .leg-diamond {
+    width: 8px; height: 8px; flex-shrink: 0;
+    background: var(--node); transform: rotate(45deg);
+    box-shadow: 0 0 6px var(--node);
+  }
+  .leg-circle {
+    width: 9px; height: 9px; flex-shrink: 0;
+    border-radius: 50%; background: var(--anti);
+    box-shadow: 0 0 7px var(--anti);
+  }
+
+  .controls {
+    background: var(--panel);
+    border: 1px solid var(--border); border-radius: 8px;
+    padding: 13px 15px;
+    display: grid; grid-template-columns: 1fr 1fr; gap: 11px;
+    width: 100%; max-width: 820px;
+  }
+  .wave-box {
+    border: 1px solid var(--border); border-radius: 4px;
+    padding: 9px 11px;
+  }
+  .wave-box h3 {
+    font-size: 0.6rem; font-weight: 600;
+    letter-spacing: 0.22em; text-transform: uppercase;
+    padding-bottom: 6px; margin-bottom: 7px;
+    border-bottom: 1px solid var(--border);
+  }
+  .w1 h3 { color: var(--wave1); text-shadow: 0 0 8px rgba(0,229,255,0.4); }
+  .w2 h3 { color: var(--wave2); text-shadow: 0 0 8px rgba(255,107,53,0.4); }
+
+  .ctrl-row { display: flex; align-items: center; gap: 8px; margin: 5px 0; }
+  .ctrl-row label { font-size: 0.56rem; color: var(--text); width: 70px; flex-shrink: 0; }
+  input[type=range] { flex: 1; height: 3px; cursor: pointer; border-radius: 2px; }
+  .w1 input[type=range] { accent-color: var(--wave1); }
+  .w2 input[type=range] { accent-color: var(--wave2); }
+  .val { font-size: 0.58rem; color: var(--bright); width: 30px; text-align: right; flex-shrink: 0; }
+
+  .bottom-bar {
+    grid-column: 1 / -1;
+    border: 1px solid var(--border); border-radius: 4px;
+    padding: 9px 13px;
+    display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+  }
+  .btn-group { display: flex; gap: 8px; }
+  button {
+    background: rgba(0,229,255,0.08); border: 1px solid var(--wave1);
+    color: var(--wave1); font-family: inherit;
+    font-size: 0.58rem; letter-spacing: 0.14em; text-transform: uppercase;
+    padding: 5px 14px; border-radius: 3px; cursor: pointer; transition: all 0.18s;
+    text-shadow: 0 0 8px rgba(0,229,255,0.45);
+    box-shadow: 0 0 8px rgba(0,229,255,0.12), inset 0 0 8px rgba(0,229,255,0.04);
+  }
+  button:hover {
+    background: rgba(0,229,255,0.16);
+    box-shadow: 0 0 18px rgba(0,229,255,0.3), inset 0 0 10px rgba(0,229,255,0.08);
+  }
+  button:active { background: rgba(0,229,255,0.24); }
+
+  .sep { flex: 1; min-width: 4px; }
+
+  .sp-row { display: flex; align-items: center; gap: 8px; }
+  .sp-row label { font-size: 0.56rem; color: var(--text); white-space: nowrap; }
+  .sp-row input[type=range] { width: 90px; flex: none; accent-color: #607d8b; }
+
+  .check-row {
+    display: flex; align-items: center; gap: 7px;
+    font-size: 0.56rem; color: var(--text); cursor: pointer;
+    white-space: nowrap;
+  }
+  .check-row input[type=checkbox] {
+    accent-color: var(--wave1); width: 13px; height: 13px; cursor: pointer;
+    flex: none;
+  }
+  .check-row:hover { color: var(--bright); }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Bølgesuperposition</h1>
+  <p class="subtitle">Interferens &amp; stående bølger</p>
+</header>
+
+<div class="canvas-wrap">
+  <canvas id="cv"></canvas>
+  <span id="phaseBadge" style="color:var(--text)">BØLGERNE NÆRMER SIG ▶◀</span>
+</div>
+
+<div class="legend">
+  <div class="leg">
+    <div class="leg-line" style="background:var(--wave1);box-shadow:0 0 4px var(--wave1)"></div>
+    <span>Bølge&nbsp;1&nbsp;(→)</span>
+  </div>
+  <div class="leg">
+    <div class="leg-line" style="background:var(--wave2);box-shadow:0 0 4px var(--wave2)"></div>
+    <span>Bølge&nbsp;2&nbsp;(←)</span>
+  </div>
+  <div class="leg">
+    <div class="leg-line" style="background:var(--result);height:3px;box-shadow:0 0 5px var(--result)"></div>
+    <span>Superposition</span>
+  </div>
+  <div class="leg"><div class="leg-diamond"></div><span>Knudepunkt</span></div>
+  <div class="leg"><div class="leg-circle"></div><span>Bug</span></div>
+</div>
+
+<div class="controls">
+  <div class="wave-box w1">
+    <h3>▶ Bølge 1</h3>
+    <div class="ctrl-row">
+      <label>Amplitude</label>
+      <input type="range" id="a1" min="1" max="10" value="5" step="1">
+      <span class="val" id="a1v">5</span>
+    </div>
+    <div class="ctrl-row">
+      <label>Frekvens</label>
+      <input type="range" id="f1" min="1" max="6" value="3" step="1">
+      <span class="val" id="f1v">3</span>
+    </div>
+  </div>
+
+  <div class="wave-box w2">
+    <h3>◀ Bølge 2</h3>
+    <div class="ctrl-row">
+      <label>Amplitude</label>
+      <input type="range" id="a2" min="1" max="10" value="5" step="1">
+      <span class="val" id="a2v">5</span>
+    </div>
+    <div class="ctrl-row">
+      <label>Frekvens</label>
+      <input type="range" id="f2" min="1" max="6" value="3" step="1">
+      <span class="val" id="f2v">3</span>
+    </div>
+  </div>
+
+  <div class="bottom-bar">
+    <div class="btn-group">
+      <button id="playBtn">▶ Afspil</button>
+      <button id="resetBtn">↺ Nulstil</button>
+      <button id="copyBtn">⧉ Kopier kode</button>
+    </div>
+
+    <div class="sep"></div>
+
+    <label class="check-row">
+      <input type="checkbox" id="showInd">
+      Vis individuelle bølger
+    </label>
+
+    <div class="sep"></div>
+
+    <div class="sp-row">
+      <label>Animationsfart</label>
+      <input type="range" id="sp" min="0.1" max="3" value="0.5" step="0.1">
+      <span class="val" id="spv">0.5</span>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ═══════════════════════════════════════════════════
+   CANVAS SETUP
+═══════════════════════════════════════════════════ */
+const cv  = document.getElementById('cv');
+const ctx = cv.getContext('2d');
+const W = 820, H = 270;
+cv.width = W; cv.height = H;
+const CY = H / 2;
+
+/* ═══════════════════════════════════════════════════
+   KEY PHYSICAL INVARIANT
+   ───────────────────────────────────────────────────
+   OSC === TRAVEL ensures the wave front always
+   coincides with a zero crossing:
+
+     front1(t) = INIT_F1 + t·W
+     y1(front1) = A·sin(2πF·INIT_F1/W + 2πF·t − 2πF·t)
+                = A·sin(2πF·INIT_F1/W)
+
+   INIT_F1 = W/(2F)  →  y1(front1) = A·sin(π) = 0 ✓
+   Same proof holds for wave 2 (mirror wave).
+═══════════════════════════════════════════════════ */
+const RATE = 0.22;   // OSC = TRAVEL = this value
+
+/* ═══════════════════════════════════════════════════
+   STATE
+═══════════════════════════════════════════════════ */
+let A1=5, A2=5, F1=3, F2=3, SPEED=0.5;
+const DEF = { A1:5, A2:5, F1:3, F2:3, SPEED:0.5 };
+
+let t=0, front1, front2;
+let playing=false, lastTs=null;
+let showIndividual = false;
+
+function initFronts() {
+  // Start at exactly one half-wavelength from each edge.
+  // This is always a zero crossing → front starts at y=0.
+  front1 = W / (2 * F1);          // = λ1/2
+  front2 = W - W / (2 * F2);      // = W − λ2/2
+}
+initFronts();
+
+/* ═══════════════════════════════════════════════════
+   WAVE FUNCTIONS
+   y2 is the spatial mirror of y1: y2(x,t) = y1(W−x,t)
+   guarantees mirror-image fronts and in-phase meeting.
+═══════════════════════════════════════════════════ */
+const ampPx = a => (a / 10) * H * 0.37;
+const y1 = x => ampPx(A1) * Math.sin(2*Math.PI*F1 *    x    /W  -  2*Math.PI*F1*t);
+const y2 = x => ampPx(A2) * Math.sin(2*Math.PI*F2 * (W-x)   /W  -  2*Math.PI*F2*t);
+const yr = x => y1(x) + y2(x);
+
+/* ═══════════════════════════════════════════════════
+   DRAWING UTILITIES
+═══════════════════════════════════════════════════ */
+function drawGrid() {
+  ctx.save();
+  ctx.strokeStyle = 'rgba(0,229,255,0.028)';
+  ctx.lineWidth = 1;
+  for (let x=0; x<=W; x+=W/16) { ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,H); ctx.stroke(); }
+  for (let y=0; y<=H; y+=H/8)  { ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(W,y); ctx.stroke(); }
+  ctx.strokeStyle = 'rgba(0,229,255,0.09)';
+  ctx.setLineDash([4,6]);
+  ctx.beginPath(); ctx.moveTo(0,CY); ctx.lineTo(W,CY); ctx.stroke();
+  ctx.setLineDash([]);
+  ctx.restore();
+}
+
+/** Draw wave fn clipped to [x0,x1] with optional glow */
+function drawWave(fn, x0, x1, color, lw, alpha, glowBlur) {
+  if (x1 - x0 < 1) return;
+  const ix0 = Math.max(0, Math.floor(x0));
+  const ix1 = Math.min(W, Math.ceil(x1));
+  ctx.save();
+  ctx.beginPath(); ctx.rect(ix0, 0, ix1-ix0, H); ctx.clip();
+
+  const path = () => {
+    ctx.beginPath();
+    for (let x = ix0; x <= ix1; x++) {
+      const py = CY - fn(x);
+      x === ix0 ? ctx.moveTo(x, py) : ctx.lineTo(x, py);
+    }
+  };
+
+  if (glowBlur) {
+    ctx.filter = `blur(${glowBlur}px)`;
+    ctx.globalAlpha = alpha * 0.4;
+    ctx.strokeStyle = color;
+    ctx.lineWidth = lw * 2.5;
+    ctx.lineJoin = 'round';
+    path(); ctx.stroke();
+    ctx.filter = 'none';
+  }
+  ctx.globalAlpha = alpha;
+  ctx.strokeStyle = color;
+  ctx.lineWidth = lw;
+  ctx.lineJoin = 'round';
+  path(); ctx.stroke();
+  ctx.restore();
+}
+
+/** Dashed "front" indicator line */
+function drawFront(x, color) {
+  if (x < 2 || x > W-2) return;
+  ctx.save();
+  ctx.strokeStyle = color; ctx.globalAlpha = 0.22; ctx.lineWidth = 1;
+  ctx.setLineDash([3,6]);
+  ctx.beginPath(); ctx.moveTo(x,6); ctx.lineTo(x,H-6); ctx.stroke();
+  ctx.setLineDash([]);
+  ctx.restore();
+}
+
+/** Standing-wave envelope */
+function drawEnvelope(x0, x1) {
+  if (F1 !== F2) return;
+  const ix0 = Math.max(0, Math.floor(x0)), ix1 = Math.min(W, Math.ceil(x1));
+  const a = ampPx(A1) + ampPx(A2);
+  ctx.save();
+  ctx.beginPath(); ctx.rect(ix0, 0, ix1-ix0, H); ctx.clip();
+  ctx.strokeStyle = 'rgba(185,251,192,0.11)';
+  ctx.lineWidth = 1; ctx.setLineDash([2,7]);
+  [1,-1].forEach(s => {
+    ctx.beginPath();
+    for (let x = ix0; x <= ix1; x++) {
+      const py = CY - s * a * Math.abs(Math.cos(Math.PI*F1*(2*x/W - 1)));
+      x === ix0 ? ctx.moveTo(x,py) : ctx.lineTo(x,py);
+    }
+    ctx.stroke();
+  });
+  ctx.setLineDash([]);
+  ctx.restore();
+}
+
+/** Node / antinode markers within [x0,x1] */
+function drawMarkings(x0, x1) {
+  if (F1 !== F2) return;
+  const λ = W / F1;
+  const envA = ampPx(A1) + ampPx(A2);
+  const R = Math.ceil(2*W/λ) + 2;
+  // Antinodes: x = W/2 + n·λ/2  (centre W/2 is always an antinode)
+  for (let n=-R; n<=R; n++) {
+    const x = W/2 + n*λ/2;
+    if (x >= x0-2 && x <= x1+2 && x >= 0 && x <= W) drawAntinode(x, envA);
+  }
+  // Nodes: x = W/2 + λ/4 + n·λ/2  (halfway between antinodes)
+  for (let n=-R; n<=R; n++) {
+    const x = W/2 + λ/4 + n*λ/2;
+    if (x >= x0-2 && x <= x1+2 && x >= 0 && x <= W) drawDiamond(x);
+  }
+}
+
+function drawDiamond(x) {
+  const s = 5;
+  ctx.save();
+  ctx.fillStyle = '#ffd600'; ctx.shadowColor = '#ffd600'; ctx.shadowBlur = 14;
+  ctx.beginPath();
+  ctx.moveTo(x, CY-s); ctx.lineTo(x+s, CY); ctx.lineTo(x, CY+s); ctx.lineTo(x-s, CY);
+  ctx.closePath(); ctx.fill();
+  ctx.restore();
+}
+
+function drawAntinode(x, envA) {
+  [CY - envA, CY + envA].forEach(py => {
+    ctx.save();
+    ctx.fillStyle = '#ea80fc'; ctx.shadowColor = '#ea80fc'; ctx.shadowBlur = 18;
+    ctx.beginPath(); ctx.arc(x, py, 4.5, 0, Math.PI*2); ctx.fill();
+    ctx.restore();
+  });
+}
+
+/* ═══════════════════════════════════════════════════
+   PHASE BADGE
+═══════════════════════════════════════════════════ */
+const badge = document.getElementById('phaseBadge');
+function updateBadge() {
+  const over = front1 > front2;
+  const full = front1 >= W-2 && front2 <= 2;
+  if (!over) {
+    badge.textContent = 'BØLGERNE NÆRMER SIG ▶◀';
+    badge.style.color = 'var(--text)';
+  } else if (!full) {
+    badge.textContent = F1===F2 ? 'INTERFERENS — STÅENDE BØLGE OPSTÅR' : 'BEAT-MØNSTER  (f₁ ≠ f₂)';
+    badge.style.color = F1===F2 ? 'var(--result)' : 'var(--wave2)';
+  } else {
+    badge.textContent = F1===F2 ? 'STÅENDE BØLGE' : 'BEAT-MØNSTER  (f₁ ≠ f₂)';
+    badge.style.color = F1===F2 ? 'var(--wave1)' : 'var(--wave2)';
+  }
+}
+
+/* ═══════════════════════════════════════════════════
+   MAIN DRAW
+═══════════════════════════════════════════════════ */
+function draw() {
+  ctx.clearRect(0, 0, W, H);
+  drawGrid();
+
+  const over = front1 > front2;
+
+  if (!over) {
+    /* ── Approaching phase: two separate wave packets ── */
+    drawWave(y1,      0, front1, '#00e5ff', 1.6, 0.90, 4);
+    drawWave(y2, front2,      W, '#ff6b35', 1.6, 0.90, 4);
+    drawFront(front1, '#00e5ff');
+    drawFront(front2, '#ff6b35');
+
+  } else {
+    /* ── Overlap phase ── */
+
+    // Individual waves outside the overlap region (always shown)
+    drawWave(y1,      0, front2, '#00e5ff', 1.5, 0.85, 3.5);
+    drawWave(y2, front1,      W, '#ff6b35', 1.5, 0.85, 3.5);
+
+    // Individual waves INSIDE overlap — only when checkbox is ticked
+    if (showIndividual) {
+      drawWave(y1, front2, front1, '#00e5ff', 1.1, 0.35, 0);
+      drawWave(y2, front2, front1, '#ff6b35', 1.1, 0.35, 0);
+    }
+
+    // Envelope + markers + resultant (always shown in overlap)
+    drawEnvelope(front2, front1);
+    drawMarkings(front2, front1);
+    drawWave(yr, front2, front1, '#b9fbc0', 2.5, 1.0, 5.5);
+  }
+}
+
+/* ═══════════════════════════════════════════════════
+   ANIMATION LOOP
+═══════════════════════════════════════════════════ */
+function loop(ts) {
+  if (lastTs === null) lastTs = ts;
+  const dt = Math.min((ts - lastTs) / 1000, 0.05);
+  lastTs = ts;
+
+  if (playing) {
+    // RATE = OSC = TRAVEL → front tracks zero crossing of wave
+    t      += dt * SPEED * RATE;
+    front1  = Math.min(front1 + dt * SPEED * RATE * W, W);
+    front2  = Math.max(front2 - dt * SPEED * RATE * W, 0);
+  }
+
+  draw();
+  updateBadge();
+  requestAnimationFrame(loop);
+}
+
+/* ═══════════════════════════════════════════════════
+   CONTROLS
+═══════════════════════════════════════════════════ */
+function wire(id, dispId, setter) {
+  const el = document.getElementById(id);
+  const vl = document.getElementById(dispId);
+  el.addEventListener('input', () => { setter(+el.value); vl.textContent = el.value; updateBadge(); });
+}
+wire('a1','a1v', v => A1=v);
+wire('a2','a2v', v => A2=v);
+wire('f1','f1v', v => F1=v);
+wire('f2','f2v', v => F2=v);
+wire('sp','spv', v => SPEED=v);
+
+document.getElementById('showInd').addEventListener('change', e => {
+  showIndividual = e.target.checked;
+});
+
+document.getElementById('playBtn').addEventListener('click', () => {
+  playing = !playing;
+  const btn = document.getElementById('playBtn');
+  btn.textContent = playing ? '⏸ Pause' : '▶ Afspil';
+  lastTs = null;
+});
+
+document.getElementById('resetBtn').addEventListener('click', () => {
+  A1=DEF.A1; A2=DEF.A2; F1=DEF.F1; F2=DEF.F2; SPEED=DEF.SPEED;
+  t = 0; lastTs = null;
+  initFronts();
+
+  [['a1',A1],['a2',A2],['f1',F1],['f2',F2]].forEach(([id,v]) => {
+    document.getElementById(id).value = v;
+    document.getElementById(id+'v').textContent = v;
+  });
+  document.getElementById('sp').value       = SPEED;
+  document.getElementById('spv').textContent = SPEED;
+  document.getElementById('showInd').checked = false;
+  showIndividual = false;
+
+  // Stay paused — user presses Afspil when ready
+  playing = false;
+  const btn = document.getElementById('playBtn');
+  btn.textContent = '▶ Afspil';
+  updateBadge();
+});
+
+document.getElementById('copyBtn').addEventListener('click', () => {
+  const src = document.documentElement.outerHTML;
+  navigator.clipboard.writeText(src).then(() => {
+    const btn = document.getElementById('copyBtn');
+    const orig = btn.textContent;
+    btn.textContent = '✓ Kopieret!';
+    setTimeout(() => { btn.textContent = orig; }, 1800);
+  });
+});
+
+updateBadge();
+requestAnimationFrame(loop);
+</script>
+</body>
+</html>

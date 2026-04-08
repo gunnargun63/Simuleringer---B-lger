@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="da">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Lydbølge Simulering</title>
+<style>
+body{margin:0;padding:24px;box-sizing:border-box;background:#e8e8f0;min-height:100vh;display:flex;justify-content:center;align-items:flex-start}
+#wrapper{width:100%;max-width:860px}
+</style>
+</head>
+<body>
+<div id="wrapper">
+<div id="sim" style="padding:0.25rem 0">
+<style>
+#shell{border-radius:10px;overflow:hidden;border:1px solid var(--bd);transition:background .25s}
+.sec{padding:9px 13px;border-bottom:1px solid var(--bd)}
+.sec:last-child{border-bottom:none}
+.hdr-row{display:flex;justify-content:space-between;align-items:center}
+.htitle{font-family:'Courier New',monospace;font-size:11px;letter-spacing:.18em;color:var(--ac);text-transform:uppercase}
+.slbl{font-size:9px;letter-spacing:.13em;color:var(--dim);text-transform:uppercase;margin:0 0 5px;font-family:'Courier New',monospace}
+.main-row{display:flex;gap:0;border-bottom:1px solid var(--bd)}
+.col-canvas{flex:1 1 0;min-width:0}
+.col-controls{width:230px;flex-shrink:0;border-left:1px solid var(--bd);padding:9px 13px;display:flex;flex-direction:column;gap:7px}
+.mg4{display:grid;grid-template-columns:1fr 1fr;gap:5px}
+.mc2{background:var(--sf);border:1px solid var(--bd);border-radius:4px;padding:5px 7px}
+.mc2.derived{border-style:dashed}
+.ml2{font-size:8px;letter-spacing:.08em;color:var(--dim);margin:0 0 1px;text-transform:uppercase;font-family:'Courier New',monospace}
+.mv2{font-size:13px;font-weight:500;margin:0;color:var(--ac);font-family:'Courier New',monospace}
+.cr2{display:flex;flex-direction:column;gap:2px;margin:2px 0}
+.cr2 label{font-size:10px;color:var(--tx);font-family:'Courier New',monospace;display:flex;justify-content:space-between}
+.cr2 label span{color:var(--ac)}
+#oc{display:block;width:100%}
+#cv{display:block;width:100%}
+.btnrow{display:flex;gap:8px;padding:9px 13px}
+.cbtn{flex:1;font-family:'Courier New',monospace;font-size:10px;letter-spacing:.12em;text-transform:uppercase;
+  padding:8px 4px;border-radius:6px;cursor:pointer;transition:opacity .15s;
+  background:var(--btn-bg);color:var(--btn-fg);border:1.5px solid var(--btn-fg)}
+.cbtn:hover{opacity:.75}
+.cbtn:active{opacity:.5}
+</style>
+<div id="shell">
+  <div class="sec hdr-row">
+    <span class="htitle">▌ Lydbølge Simulering</span>
+    <button class="cbtn" id="btn-th" style="flex:none;padding:5px 12px">◑ Mørk tilstand</button>
+  </div>
+  <div class="main-row">
+    <div class="col-canvas"><canvas id="cv" height="232"></canvas></div>
+    <div class="col-controls">
+      <div>
+        <p class="slbl">Målinger</p>
+        <div class="mg4">
+          <div class="mc2"><p class="ml2">Hastighed</p><p class="mv2" id="dspd">340 m/s</p></div>
+          <div class="mc2"><p class="ml2">Frekvens</p><p class="mv2" id="dfrq">440 Hz</p></div>
+          <div class="mc2 derived"><p class="ml2">Bølgelængde ↗</p><p class="mv2" id="dlam">0.77 m</p></div>
+          <div class="mc2 derived"><p class="ml2">Periode ↗</p><p class="mv2" id="dper">2.27 ms</p></div>
+        </div>
+      </div>
+      <div>
+        <p class="slbl">Parametre</p>
+        <div class="cr2"><label>Hastighed (m/s) <span id="svo">340</span></label><input type="range" id="slv" min="330" max="350" value="340" step="1"></div>
+        <div class="cr2"><label>Frekvens (Hz) <span id="sfo">440</span></label><input type="range" id="slf" min="170" max="1700" value="440" step="10"></div>
+        <div class="cr2"><label>Animationsfart <span id="sao">1×</span></label><input type="range" id="sla" min="1" max="10" value="1" step="1"></div>
+      </div>
+    </div>
+  </div>
+  <div class="sec">
+    <p class="slbl">Oscilloskop — sporet molekyle</p>
+    <canvas id="oc" height="88" style="border-radius:4px"></canvas>
+  </div>
+  <div class="btnrow">
+    <button class="cbtn" id="bplay">► Afspil</button>
+    <button class="cbtn" id="breset">↺ Nulstil</button>
+    <button class="cbtn" id="bcopy">⊞ Kopier kode</button>
+  </div>
+</div>
+<script>
+(function(){
+const cv=document.getElementById('cv'),cx=cv.getContext('2d');
+const oc=document.getElementById('oc'),ox=oc.getContext('2d');
+let spd=340,freq=440,asp=1,simT=0,running=true,lastTS=null;
+let W=600,OW=600;
+const H=232,OH=88;
+let darkMode=false;
+const SAMPLE_RATE=120,OSC_LEN=480;
+const oscBuf=new Float32Array(OSC_LEN);
+let oscHead=0,lastSampleT=0;
+const TRAIL=70;
+const trailX=new Float32Array(TRAIL).fill(NaN);
+let trailHead=0;
+const VIS_SPEED=110;
+const MEMX=68,MOLX0=96,MOLSP=18,MOLR=5,A_MEM=12,A_MOL=9;
+const SPKX=4,SPKW=64;
+const ROWS=[H*.22,H*.50,H*.78];
+const TR_ROW=1,TR_IDX=9;
+const TH={
+  dk:{bg:'#06060d',sf:'#0c0c1c',bd:'rgba(0,210,255,.2)',tx:'#c8c8e8',dim:'#8080b8',ac:'#00d2ff',
+      btnBg:'#070712',btnFg:'#00d2ff',
+      mI:'#0d1428',mM:'#2c6fff',mC:'#0a2080',mR:'#88c0ff',
+      bond:'rgba(44,111,255,.13)',sB:'#12122a',sI:'#07070d',cone:'#081830',mem:'#00d2ff',
+      wf:'rgba(0,210,255,.07)',trk:'#00ff9f',tG:'rgba(0,255,159,.55)',
+      oscB:'#02020a',oscG:'rgba(40,80,200,.25)',oscT:'#00ff9f',oTG:'rgba(0,255,159,.7)',
+      oscZ:'rgba(60,100,220,.4)',lbl:'#1a1a3a',lblB:'#5858a0'},
+  lt:{bg:'#f0eeff',sf:'#e4deff',bd:'rgba(60,30,180,.18)',tx:'#1a1050',dim:'#5a529a',ac:'#0038bb',
+      btnBg:'#e4deff',btnFg:'#0038bb',
+      mI:'#cac4e8',mM:'#1a60dd',mC:'#0028a0',mR:'#88b8ff',
+      bond:'rgba(26,96,221,.15)',sB:'#807ab0',sI:'#d4ceee',cone:'#aab0f2',mem:'#0038bb',
+      wf:'rgba(60,80,220,.07)',trk:'#006e2c',tG:'rgba(0,140,60,.35)',
+      oscB:'#e8e3ff',oscG:'rgba(55,15,175,.09)',oscT:'#006e2c',oTG:'rgba(0,120,50,.45)',
+      oscZ:'rgba(70,30,190,.25)',lbl:'#bab4d8',lblB:'#5050a0'}
+};
+const c=()=>TH[darkMode?'dk':'lt'];
+function applyTheme(){
+  const t=c(),s=document.getElementById('shell');
+  s.style.background=t.bg;
+  [['--bd',t.bd],['--sf',t.sf],['--dim',t.dim],['--ac',t.ac],['--tx',t.tx],['--btn-bg',t.btnBg],['--btn-fg',t.btnFg]]
+    .forEach(([k,v])=>s.style.setProperty(k,v));
+  document.querySelector('.htitle').style.color=t.ac;
+  document.getElementById('btn-th').textContent=darkMode?'◐ Lys tilstand':'◑ Mørk tilstand';
+  document.querySelectorAll('.cr2 label').forEach(el=>el.style.color=t.tx);
+  document.querySelectorAll('.slbl').forEach(el=>el.style.color=t.dim);
+  document.getElementById('bplay').textContent=running?'⏸ Pause':'► Afspil';
+}
+function resz(){
+  let nw=cv.offsetWidth||600;if(nw>0&&nw!==W){W=nw;cv.width=W;}
+  let no=oc.offsetWidth||600;if(no>0&&no!==OW){OW=no;oc.width=OW;}
+}
+function rrect(ctx,x,y,w,h,r){
+  ctx.beginPath();ctx.moveTo(x+r,y);ctx.lineTo(x+w-r,y);ctx.arcTo(x+w,y,x+w,y+r,r);
+  ctx.lineTo(x+w,y+h-r);ctx.arcTo(x+w,y+h,x+w-r,y+h,r);
+  ctx.lineTo(x+r,y+h);ctx.arcTo(x,y+h,x,y+h-r,r);
+  ctx.lineTo(x,y+r);ctx.arcTo(x,y,x+r,y,r);ctx.closePath();
+}
+function drawSpeaker(md){
+  const t=c(),cy=H/2,cH=Math.round(H*.88),cY=cy-cH/2,mX=MEMX+md,cL=SPKX+15,nH=18,wH=cH-32;
+  rrect(cx,SPKX,cY,SPKW,cH,5);cx.fillStyle=t.sB;cx.fill();
+  rrect(cx,SPKX+5,cY+5,SPKW-11,cH-10,3);cx.fillStyle=t.sI;cx.fill();
+  cx.fillStyle=t.cone;cx.beginPath();
+  cx.moveTo(cL,cy-nH/2);cx.lineTo(mX,cy-wH/2);cx.lineTo(mX,cy+wH/2);cx.lineTo(cL,cy+nH/2);
+  cx.closePath();cx.fill();
+  cx.strokeStyle=t.sB;cx.lineWidth=1.2;
+  cx.beginPath();cx.moveTo(SPKX+5,cY+5);cx.quadraticCurveTo(mX-8,cY+5,mX,cy-wH/2);cx.stroke();
+  cx.beginPath();cx.moveTo(SPKX+5,cY+cH-5);cx.quadraticCurveTo(mX-8,cY+cH-5,mX,cy+wH/2);cx.stroke();
+  if(darkMode){cx.shadowColor='rgba(0,210,255,.6)';cx.shadowBlur=9;}
+  cx.strokeStyle=t.mem;cx.lineWidth=3;
+  cx.beginPath();cx.moveTo(mX,cy-wH/2-2);cx.lineTo(mX,cy+wH/2+2);cx.stroke();
+  cx.shadowBlur=0;
+  cx.fillStyle=t.sB;cx.beginPath();cx.arc(cL+3,cy,6,0,Math.PI*2);cx.fill();
+  cx.fillStyle=t.mem;cx.globalAlpha=.4;cx.beginPath();cx.arc(cL+3,cy,2.5,0,Math.PI*2);cx.fill();cx.globalAlpha=1;
+  cx.font='8px monospace';cx.textAlign='center';cx.fillStyle=t.lblB;
+  cx.fillText('Bølgegiver',SPKX+SPKW/2,cY-4);
+}
+function mCol(disp,active){
+  const t=c();if(!active)return t.mI;
+  const n=disp/A_MOL;if(n>0.28)return t.mC;if(n<-0.28)return t.mR;return t.mM;
+}
+function fillOscBuffer(omega,k,trDist,trTau){
+  const targetCount=Math.floor(simT*SAMPLE_RATE);
+  const doneCount=Math.floor(lastSampleT*SAMPLE_RATE);
+  const toAdd=Math.min(targetCount-doneCount,50);
+  for(let s=0;s<toAdd;s++){
+    const st=(doneCount+s+1)/SAMPLE_RATE;
+    oscBuf[oscHead]=st>=trTau?Math.sin(omega*st-k*trDist):0;
+    oscHead=(oscHead+1)%OSC_LEN;
+  }
+  if(toAdd>0)lastSampleT=(doneCount+toAdd)/SAMPLE_RATE;
+}
+function drawOsc(trDisp,trActive){
+  const t=c();
+  ox.fillStyle=t.oscB;ox.fillRect(0,0,OW,OH);
+  if(darkMode){ox.fillStyle='rgba(0,0,8,.07)';for(let y=0;y<OH;y+=2)ox.fillRect(0,y,OW,1);}
+  ox.strokeStyle=t.oscG;ox.lineWidth=.5;
+  for(const v of [-1,-.5,.5,1]){const y=OH/2-v*(OH/2-11);ox.beginPath();ox.moveTo(28,y);ox.lineTo(OW,y);ox.stroke();}
+  ox.strokeStyle=t.oscZ;ox.lineWidth=1;ox.beginPath();ox.moveTo(28,OH/2);ox.lineTo(OW,OH/2);ox.stroke();
+  ox.strokeStyle=t.oscT;ox.lineWidth=1.8;
+  if(darkMode){ox.shadowColor=t.oTG;ox.shadowBlur=5;}
+  ox.beginPath();let first=true;
+  for(let i=0;i<OSC_LEN;i++){
+    const idx=(oscHead-OSC_LEN+i+OSC_LEN*2)%OSC_LEN;
+    const x=28+(i/(OSC_LEN-1))*(OW-30),y=OH/2-oscBuf[idx]*(OH/2-11);
+    first?(ox.moveTo(x,y),first=false):ox.lineTo(x,y);
+  }
+  ox.stroke();ox.shadowBlur=0;
+  const curY=OH/2-(trActive?trDisp/A_MOL:0)*(OH/2-11);
+  if(darkMode){ox.shadowColor=t.oTG;ox.shadowBlur=8;}
+  ox.fillStyle=t.oscT;ox.beginPath();ox.arc(OW-2,curY,3,0,Math.PI*2);ox.fill();ox.shadowBlur=0;
+  ox.font='8px monospace';ox.fillStyle=t.lblB;
+  ox.textAlign='left';ox.fillText('+1',2,12);ox.fillText(' 0',2,OH/2+4);ox.fillText('−1',2,OH-4);
+  ox.fillStyle=t.oscT;ox.fillText('↕',30,OH-4);
+  ox.fillStyle=t.lblB;ox.textAlign='right';ox.fillText('tid →',OW-2,OH-4);
+}
+function frame(){
+  resz();
+  const t=c();
+  const lam=spd/freq;
+  const lp=Math.max(38,Math.min(320,50+(lam-.1)/1.9*250));
+  const k=2*Math.PI/lp,omega=2*Math.PI*VIS_SPEED/lp;
+  const wfx=MEMX+VIS_SPEED*simT;
+  const trX0=MOLX0+TR_IDX*MOLSP,trDist=trX0-MEMX,trTau=trDist/VIS_SPEED;
+  const trActive=simT>=trTau;
+  let trDisp=0;if(trActive)trDisp=A_MOL*Math.sin(omega*simT-k*trDist);
+  const trXcur=trX0+trDisp,trY=ROWS[TR_ROW];
+  fillOscBuffer(omega,k,trDist,trTau);
+  if(trActive){trailX[trailHead]=trXcur;trailHead=(trailHead+1)%TRAIL;}
+  cx.fillStyle=t.bg;cx.fillRect(0,0,W,H);
+  if(darkMode){cx.fillStyle='rgba(0,0,10,.07)';for(let y=0;y<H;y+=2)cx.fillRect(0,y,W,1);}
+  cx.strokeStyle=t.lbl;cx.lineWidth=.5;cx.setLineDash([1,8]);
+  for(let gx=MOLX0;gx<W;gx+=36){cx.beginPath();cx.moveTo(gx,0);cx.lineTo(gx,H);cx.stroke();}
+  for(let gy=0;gy<H;gy+=36){cx.beginPath();cx.moveTo(MOLX0,gy);cx.lineTo(W,gy);cx.stroke();}
+  cx.setLineDash([]);
+  if(wfx>MOLX0&&wfx<W+80){
+    const g=cx.createLinearGradient(wfx-80,0,wfx+5,0);
+    g.addColorStop(0,'transparent');g.addColorStop(1,t.wf);
+    cx.fillStyle=g;cx.fillRect(wfx-80,0,85,H);
+  }
+  drawSpeaker(A_MEM*Math.sin(omega*simT));
+  cx.strokeStyle=t.trk;cx.lineWidth=.8;cx.globalAlpha=.2;cx.setLineDash([3,5]);
+  cx.beginPath();cx.moveTo(trX0,trY-24);cx.lineTo(trX0,trY+24);cx.stroke();
+  cx.setLineDash([]);cx.globalAlpha=1;
+  const nM=Math.floor((W-MOLX0-8)/MOLSP);
+  for(let ri=0;ri<ROWS.length;ri++){
+    const ry=ROWS[ri],row=[];
+    for(let i=0;i<nM;i++){
+      const x0=MOLX0+i*MOLSP,dist=x0-MEMX,tau=dist/VIS_SPEED,active=simT>=tau;
+      let disp=0;if(active)disp=A_MOL*Math.sin(omega*simT-k*dist);
+      row.push({x:x0+disp,disp,active,isTrk:(ri===TR_ROW&&i===TR_IDX)});
+    }
+    cx.lineWidth=.8;
+    for(let i=0;i<row.length-1;i++){
+      const a=row[i],b=row[i+1];if(!a.active&&!b.active)continue;
+      const linked=ri===TR_ROW&&(i===TR_IDX||i===TR_IDX-1);
+      cx.strokeStyle=linked?t.trk+'44':t.bond;
+      cx.beginPath();cx.moveTo(a.x,ry);cx.lineTo(b.x,ry);cx.stroke();
+    }
+    for(const p of row){
+      if(p.isTrk)continue;
+      cx.beginPath();cx.arc(p.x,ry,MOLR,0,Math.PI*2);cx.fillStyle=mCol(p.disp,p.active);cx.fill();
+    }
+  }
+  const rgb=darkMode?'0,255,159':'0,110,44';
+  for(let i=0;i<TRAIL;i++){
+    const idx=(trailHead-1-i+TRAIL)%TRAIL,tx=trailX[idx];if(isNaN(tx))break;
+    cx.beginPath();cx.arc(tx,trY,1.2+2.2*(1-i/TRAIL),0,Math.PI*2);
+    cx.fillStyle=`rgba(${rgb},${(1-i/TRAIL)*.5})`;cx.fill();
+  }
+  if(trActive){
+    if(darkMode){cx.shadowColor=t.tG;cx.shadowBlur=16;}
+    cx.beginPath();cx.arc(trXcur,trY,9,0,Math.PI*2);cx.fillStyle=t.trk;cx.fill();
+    cx.strokeStyle=darkMode?'rgba(200,255,230,.6)':'rgba(0,80,30,.4)';cx.lineWidth=1.2;cx.stroke();
+    cx.shadowBlur=0;
+    cx.font='bold 8px monospace';cx.textAlign='center';cx.fillStyle=t.trk;
+    cx.fillText('SPORET',trXcur,trY-14);
+  }
+  const vP=lp/VIS_SPEED;
+  if(simT>vP*.7){
+    cx.font='8px monospace';cx.textAlign='center';cx.fillStyle=t.lblB;
+    const cc=wfx-lp*.5,rc=wfx-lp;
+    if(cc>MOLX0+10&&cc<W-18)cx.fillText('komprimeret',cc,ROWS[0]-11);
+    if(rc>MOLX0+10&&rc<W-18)cx.fillText('fortyndet',rc,ROWS[0]-11);
+  }
+  cx.font='8px monospace';cx.textAlign='left';const lY=H-6;
+  [[t.mC,'komprimeret'],[t.mM,'ligevægt'],[t.mR,'fortyndet'],[t.mI,'ej aktiveret'],[t.trk,'sporet']]
+    .forEach(([col,lbl],i)=>{
+      const lx=MOLX0+i*95;if(lx+80>W)return;
+      cx.fillStyle=col;cx.beginPath();cx.arc(lx+3,lY-2,3.5,0,Math.PI*2);cx.fill();
+      cx.fillStyle=t.lblB;cx.fillText(lbl,lx+10,lY);
+    });
+  drawOsc(trDisp,trActive);
+}
+function loop(ts){
+  if(lastTS===null)lastTS=ts;
+  const dt=Math.min((ts-lastTS)/1000,.05);lastTS=ts;
+  if(running)simT+=dt*asp;
+  frame();requestAnimationFrame(loop);
+}
+function upd(){
+  const lam=spd/freq,p=1000/freq;
+  document.getElementById('dspd').textContent=spd+' m/s';
+  document.getElementById('dfrq').textContent=freq+' Hz';
+  document.getElementById('dlam').textContent=lam.toFixed(2)+' m';
+  document.getElementById('dper').textContent=p>=1?p.toFixed(2)+' ms':(p*1000).toFixed(1)+' μs';
+}
+document.getElementById('slv').oninput=function(){spd=+this.value;document.getElementById('svo').textContent=spd;upd();};
+document.getElementById('slf').oninput=function(){freq=+this.value;document.getElementById('sfo').textContent=freq;upd();};
+document.getElementById('sla').oninput=function(){asp=+this.value;document.getElementById('sao').textContent=asp+'×';};
+document.getElementById('bplay').onclick=function(){running=!running;this.textContent=running?'⏸ Pause':'► Afspil';if(running)lastTS=null;};
+document.getElementById('breset').onclick=function(){
+  simT=0;lastSampleT=0;lastTS=null;oscBuf.fill(0);oscHead=0;trailX.fill(NaN);trailHead=0;if(!running)frame();
+};
+document.getElementById('btn-th').onclick=function(){darkMode=!darkMode;applyTheme();};
+document.getElementById('bcopy').onclick=async function(){
+  const b=this,h=document.documentElement.outerHTML;
+  try{await navigator.clipboard.writeText(h);}
+  catch{const t=document.createElement('textarea');t.value=h;document.body.appendChild(t);t.select();document.execCommand('copy');t.remove();}
+  b.textContent='⊞ Kopieret!';setTimeout(()=>b.textContent='⊞ Kopier kode',2000);
+};
+applyTheme();upd();requestAnimationFrame(loop);
+})();
+</script>
+</div>
+</div>
+</body>
+</html>
