@@ -23,8 +23,9 @@
     font-size: 1.5rem;
     font-weight: 300;
     letter-spacing: 0.2em;
-    color: #daeeff;
+    color: #36b4d4;
     text-transform: uppercase;
+    text-shadow: 0 0 18px rgba(54,180,212,0.35);
   }
   .formula-top {
     font-family: 'Share Tech Mono', monospace;
@@ -42,6 +43,37 @@
     max-width: 940px;
   }
   canvas { display: block; width: 100%; height: auto; }
+
+  /* ── Main layout: canvas left, controls right ── */
+  .main-area {
+    display: flex;
+    flex-direction: row;
+    gap: 16px;
+    align-items: stretch;
+    width: 100%;
+    max-width: 1240px;
+    justify-content: center;
+  }
+  .main-area .canvas-wrap { flex: 1 1 auto; max-width: 940px; }
+  .side-controls {
+    flex: 0 0 260px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    align-items: stretch;
+    justify-content: center;
+    background: #09101a;
+    border: 1px solid #0e1f30;
+    border-radius: 4px;
+    padding: 18px 18px;
+  }
+  .side-controls .ctrl { width: 100%; }
+  .side-controls .ctrl input[type="range"] { width: 100%; }
+  .side-controls .sep { width: 100%; height: 1px; }
+  @media (max-width: 920px) {
+    .main-area { flex-direction: column; align-items: center; }
+    .side-controls { flex: 0 0 auto; width: 100%; max-width: 940px; }
+  }
 
   /* ── toolbar rows ── */
   .toolbar {
@@ -134,7 +166,6 @@
     font-family: 'Share Tech Mono', monospace;
     font-size: 0.68rem;
     color: #305565;
-    text-transform: uppercase;
     letter-spacing: 0.1em;
   }
   .ctrl-val {
@@ -167,6 +198,14 @@
     border-radius: 50%;
     border: 2px solid #07090f;
   }
+  input[type="range"]:disabled {
+    opacity: 0.35;
+    cursor: not-allowed;
+  }
+  input[type="range"]:disabled::-webkit-slider-thumb { background: #305565; box-shadow: none; }
+  input[type="range"]:disabled::-moz-range-thumb { background: #305565; }
+  .ctrl.disabled .ctrl-lbl,
+  .ctrl.disabled .ctrl-val { opacity: 0.4; }
   .sep { width: 1px; height: 48px; background: #0e1f30; }
   .order-bar {
     font-family: 'Share Tech Mono', monospace;
@@ -181,12 +220,40 @@
 <body>
 
 <header>
-  <h1>Dobbeltspalteeksperiment</h1>
+  <h1>Dobbeltspalteeksperimentet</h1>
   <div class="formula-top">Konstruktiv interferens: d &middot; sin &theta;<sub style="font-size:0.75em">m</sub> = m &middot; &lambda; &nbsp;|&nbsp; Young's eksperiment (1801)</div>
 </header>
 
-<div class="canvas-wrap">
-  <canvas id="c" width="940" height="530"></canvas>
+<div class="main-area">
+  <div class="canvas-wrap">
+    <canvas id="c" width="940" height="530"></canvas>
+  </div>
+
+  <!-- Physics sliders (vertical, right side) -->
+  <div class="controls side-controls">
+    <div class="ctrl" id="ctrlLam">
+      <div class="ctrl-lbl">B&Oslash;LGEL&AElig;NGDE &lambda;</div>
+      <input type="range" id="sLam" min="400" max="700" value="530" step="5">
+      <div class="ctrl-val" id="vLam">&lambda; = 530 nm</div>
+    </div>
+    <div class="sep"></div>
+    <div class="ctrl">
+      <div class="ctrl-lbl">GITTERKONSTANT d</div>
+      <input type="range" id="sD" min="800" max="3000" value="1500" step="25">
+      <div class="ctrl-val" id="vD">d = 1500 nm</div>
+    </div>
+    <div class="sep"></div>
+    <div class="ctrl">
+      <div class="ctrl-lbl">ANTAL SPALTER N</div>
+      <input type="range" id="sN" min="2" max="8" value="2" step="1">
+      <div class="ctrl-val" id="vN">N = 2</div>
+    </div>
+    <div class="sep"></div>
+    <div class="ctrl">
+      <div class="ctrl-lbl">ANTAL ORDNER (m<sub style="font-size:0.8em">max</sub>)</div>
+      <div class="ctrl-val" id="nOrders" style="font-size:1.4rem;">&ndash;</div>
+    </div>
+  </div>
 </div>
 
 <!-- Playback toolbar -->
@@ -208,6 +275,14 @@
     NULSTIL
   </button>
 
+  <button class="btn" id="btnWhite" title="Skift mellem monokromatisk og hvidt lys">
+    <svg width="13" height="13" viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="1.5">
+      <circle cx="6.5" cy="6.5" r="5"/>
+      <path d="M6.5 1.5 V11.5 M1.5 6.5 H11.5" stroke-width="1"/>
+    </svg>
+    <span id="lblWhite">HVIDT LYS</span>
+  </button>
+
   <button class="btn" id="btnCopy">
     <svg width="13" height="14" viewBox="0 0 13 14" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
       <rect x="4" y="4" width="8" height="9" rx="1.5"/>
@@ -220,26 +295,6 @@
     <span class="speed-lbl">HASTIGHED</span>
     <input type="range" class="speed-slider" id="sSpeed" min="1" max="10" value="4" step="1">
     <span class="speed-val" id="vSpeed">×1.0</span>
-  </div>
-</div>
-
-<!-- Physics sliders -->
-<div class="controls">
-  <div class="ctrl">
-    <div class="ctrl-lbl">B&oslash;lgel&aelig;ngde &lambda;</div>
-    <input type="range" id="sLam" min="400" max="700" value="530" step="5">
-    <div class="ctrl-val" id="vLam">&lambda; = 530 nm</div>
-  </div>
-  <div class="sep"></div>
-  <div class="ctrl">
-    <div class="ctrl-lbl">Gitterkonstant d</div>
-    <input type="range" id="sD" min="800" max="3000" value="1500" step="25">
-    <div class="ctrl-val" id="vD">d = 1500 nm</div>
-  </div>
-  <div class="sep"></div>
-  <div class="ctrl">
-    <div class="ctrl-lbl">Antal ordner (m<sub style="font-size:0.8em">max</sub>)</div>
-    <div class="ctrl-val" id="nOrders" style="font-size:1.4rem;">&ndash;</div>
   </div>
 </div>
 
@@ -276,9 +331,29 @@ const CY    = H / 2;
 
 // Physics scaling
 const NM_TO_PX = 0.065;
-let lam_nm = 530, d_nm = 1500;
+let lam_nm = 530, d_nm = 1500, N = 2;
 let lam = lam_nm * NM_TO_PX;
 let d   = d_nm   * NM_TO_PX;
+let whiteMode = false;
+
+// Maximum N that fits on the wall depends on d. Conversely, for a given N we
+// clamp d's slider max so all slits fit between margins. SO=9 is the slit
+// opening half-height (see drawWall), plus a small visual padding.
+const WALL_MARGIN_PX = 18;
+function maxDPxForN(n) {
+  if (n <= 1) return Infinity;
+  return (H - 2 * WALL_MARGIN_PX) / (n - 1);
+}
+function maxDnmForN(n) {
+  return Math.min(3000, Math.floor(maxDPxForN(n) / NM_TO_PX));
+}
+
+// Slit y-positions, symmetric around CY with spacing d (in px)
+function slitYs() {
+  const out = new Array(N);
+  for (let k = 0; k < N; k++) out[k] = CY + (k - (N - 1) / 2) * d;
+  return out;
+}
 
 // Speed: index 1-10 → actual multiplier
 const SPEED_TABLE = [0.15, 0.3, 0.5, 0.75, 1.0, 1.5, 2.0, 3.0, 4.5, 6.0];
@@ -312,27 +387,73 @@ function wavelengthToRGB(nm) {
 function refreshColor() { waveRGB = wavelengthToRGB(lam_nm); }
 refreshColor();
 
+/* ── White light spectrum (precomputed) ──────────────────────────── */
+// 8 wavelengths sampling the visible range. Each entry: { lam_nm, lam, rgb }
+const WHITE_SAMPLES_NM = [410, 450, 490, 525, 560, 595, 635, 680];
+const WHITE_SPECTRUM = WHITE_SAMPLES_NM.map(nm => ({
+  lam_nm: nm,
+  lam: nm * NM_TO_PX,
+  rgb: wavelengthToRGB(nm)
+}));
+// Active spectrum used in physics functions
+function activeSpectrum() {
+  return whiteMode
+    ? WHITE_SPECTRUM
+    : [{ lam_nm, lam, rgb: waveRGB }];
+}
+// Effective display RGB for the plane wave / arrow in current mode
+function displayRGB() {
+  return whiteMode ? [220, 225, 235] : waveRGB;
+}
+
 /* ── Offscreen intensity map ────────────────────────────────────── */
 const off = document.createElement('canvas');
 off.width = W; off.height = H;
 const oCtx = off.getContext('2d');
 
+/* ── Far-field N-slit intensity ─────────────────────────────────── */
+// I(sinθ) = [sin(N π δ) / (N sin(π δ))]²,  δ = d sinθ / λ
+// At principal maxima (δ integer) the limit is 1.
+function farFieldI(sinTheta, lamLocal) {
+  const phi = Math.PI * d * sinTheta / lamLocal;
+  const sphi = Math.sin(phi);
+  if (Math.abs(sphi) < 1e-8) return 1;            // δ ≈ integer → principal max
+  const ratio = Math.sin(N * phi) / (N * sphi);
+  return ratio * ratio;
+}
+
+/* ── Offscreen intensity map (far-field, supports N + spectrum) ──── */
 function buildMap() {
   const img = oCtx.createImageData(W, H);
   const px  = img.data;
-  const y1 = CY - d/2, y2 = CY + d/2;
-  const [cr,cg,cb] = waveRGB;
+  const spec = activeSpectrum();
+  const nL = spec.length;
+
   for (let row = 0; row < H; row++) {
+    const dy = row - CY;
     for (let col = WALL; col < SCR; col++) {
       const dx = col - WALL;
-      const r1 = Math.hypot(dx, row-y1);
-      const r2 = Math.hypot(dx, row-y2);
-      const I  = (1 + Math.cos(2*Math.PI*(r1-r2)/lam)) * 0.5;
-      const i  = (row*W + col)*4;
-      px[i]   = Math.round(I*cr*0.65);
-      px[i+1] = Math.round(I*cg*0.65);
-      px[i+2] = Math.round(I*cb*0.65);
-      px[i+3] = Math.round(28 + I*180);
+      const r = Math.hypot(dx, dy);
+      const sinTheta = (r < 0.5) ? 0 : dy / r;
+
+      let R = 0, G = 0, B = 0, Isum = 0;
+      for (let s = 0; s < nL; s++) {
+        const I = farFieldI(sinTheta, spec[s].lam);
+        const rgb = spec[s].rgb;
+        R += I * rgb[0];
+        G += I * rgb[1];
+        B += I * rgb[2];
+        Isum += I;
+      }
+      const Iavg = Isum / nL;
+      // Brightness scaling: keep similar feel to the old map (×0.65)
+      const scale = whiteMode ? (0.65 / nL) : 0.65;
+
+      const i = (row*W + col)*4;
+      px[i]   = Math.min(255, Math.round(R * scale));
+      px[i+1] = Math.min(255, Math.round(G * scale));
+      px[i+2] = Math.min(255, Math.round(B * scale));
+      px[i+3] = Math.round(28 + Iavg * 180);
     }
   }
   oCtx.clearRect(0, 0, W, H);
@@ -341,16 +462,35 @@ function buildMap() {
 }
 
 /* ── Maxima ─────────────────────────────────────────────────────── */
-// All physically possible orders (|sinθ| < 1)
+// All physically possible principal-maxima orders (|sinθ| < 1).
+// In white mode we tag each order with the angle range from λ_min..λ_max
+// (clamped where m·λ/d would exceed 1).
 function getAllMaxima() {
   const out = [];
+  // Reference λ for counting orders / drawing primary line:
+  //   - mono: the actual λ
+  //   - white: shortest λ (gives the most orders)
+  const lamRef = whiteMode ? WHITE_SPECTRUM[0].lam : lam;
   for (let m = -20; m <= 20; m++) {
-    const sinT = m * lam / d;
+    const sinT = m * lamRef / d;
     if (Math.abs(sinT) >= 1.0) continue;
     const theta = Math.asin(sinT);
     const ys = CY + D * Math.tan(theta);
     const onScreen = (ys >= 4 && ys <= H - 4);
-    out.push({ m, theta, ys, onScreen });
+    const entry = { m, theta, ys, onScreen };
+    if (whiteMode && m !== 0) {
+      const lamMin = WHITE_SPECTRUM[0].lam;          // shortest λ → smallest |θ|
+      const lamMaxAvail = Math.min(WHITE_SPECTRUM[WHITE_SPECTRUM.length-1].lam,
+                                   d / Math.abs(m) * 0.999);
+      const sinMin = m * lamMin / d;                 // signed (matches m's sign)
+      const sinMax = m * lamMaxAvail / d;            // signed (matches m's sign)
+      const thMin = Math.asin(sinMin);                  // closer to axis (violet)
+      const thMax = Math.asin(sinMax);                  // farther from axis (red)
+      entry.range = { thMin, thMax,
+                      yMin: CY + D*Math.tan(thMin),
+                      yMax: CY + D*Math.tan(thMax) };
+    }
+    out.push(entry);
   }
   return out;
 }
@@ -372,7 +512,7 @@ function drawPlaneWave() {
   ctx.fillStyle = '#060a10';
   ctx.fillRect(0, 0, WALL, H);
 
-  const [cr,cg,cb] = waveRGB;
+  const [cr,cg,cb] = displayRGB();
   const clipX = Math.min(waveHead, WALL);  // plane wave never crosses wall
   const phase  = phaseTime % lam;
 
@@ -428,73 +568,90 @@ function drawPlaneWave() {
   ctx.fillText('PLAN B\u00d8LGE  \u2192', WALL/2, H-8);
 }
 
-/* ── Draw: wall ─────────────────────────────────────────────────── */
+/* ── Draw: wall (N slits) ───────────────────────────────────────── */
 function drawWall() {
-  const y1 = CY-d/2, y2 = CY+d/2;
-  const SO=9, wx=WALL-10, ww=20;  // wider wall
+  const SO=9, wx=WALL-10, ww=20;  // SO = slit half-opening
+  const slits = slitYs().sort((a,b)=>a-b);
 
-  // Wall body — brighter, more solid
+  // Build segments of solid wall between (and outside) slit gaps
+  const segments = [];
+  let cursor = 0;
+  for (const sy of slits) {
+    const top = sy - SO, bot = sy + SO;
+    if (top > cursor) segments.push([cursor, top]);
+    cursor = bot;
+  }
+  if (cursor < H) segments.push([cursor, H]);
+
+  // Wall body
   ctx.fillStyle = '#1e3248';
-  ctx.fillRect(wx, 0,       ww, y1-SO);
-  ctx.fillRect(wx, y1+SO,   ww, y2-SO-(y1+SO));
-  ctx.fillRect(wx, y2+SO,   ww, H-(y2+SO));
+  for (const [a,b] of segments) ctx.fillRect(wx, a, ww, b-a);
 
-  // Bright edge highlight on right face of wall
+  // Bright edge highlight on right face
   ctx.fillStyle = '#3a6080';
-  ctx.fillRect(wx+ww-2, 0,       2, y1-SO);
-  ctx.fillRect(wx+ww-2, y1+SO,   2, y2-SO-(y1+SO));
-  ctx.fillRect(wx+ww-2, y2+SO,   2, H-(y2+SO));
+  for (const [a,b] of segments) ctx.fillRect(wx+ww-2, a, 2, b-a);
 
-  // Dark gap behind slits (makes slits look like real holes)
+  // Dark slit interiors
   ctx.fillStyle = '#07090f';
-  ctx.fillRect(wx, y1-SO, ww, SO*2);
-  ctx.fillRect(wx, y2-SO, ww, SO*2);
+  for (const sy of slits) ctx.fillRect(wx, sy-SO, ww, SO*2);
 
   // Outer border
   ctx.strokeStyle='#2a4a62'; ctx.lineWidth=1;
   ctx.strokeRect(wx, 0, ww, H);
 
-  // d-bracket
-  const bx=wx-20;
-  ctx.strokeStyle='rgba(55,125,165,0.6)'; ctx.lineWidth=1;
-  ctx.setLineDash([3,3]);
-  ctx.beginPath(); ctx.moveTo(bx,y1); ctx.lineTo(bx,y2); ctx.stroke();
-  ctx.setLineDash([]);
-  [[bx,y1],[bx,y2]].forEach(([x,y])=>{
-    ctx.beginPath(); ctx.moveTo(x-3,y); ctx.lineTo(x+3,y); ctx.stroke();
-  });
-  ctx.fillStyle='rgba(65,135,175,0.85)';
-  ctx.font='bold 13px "Rajdhani",sans-serif';
-  ctx.textAlign='right';
-  ctx.fillText('d', bx-6, CY+5);
-  ctx.font='11px "Share Tech Mono",monospace';
-  ctx.fillStyle='#286080';
-  ctx.textAlign='right';
-  ctx.fillText('S\u2081', wx-2, y1+4);
-  ctx.fillText('S\u2082', wx-2, y2+4);
+  // d-bracket between first two slits (showing the lattice constant)
+  if (slits.length >= 2) {
+    const sy1 = slits[0], sy2 = slits[1];
+    const bx = wx - 20;
+    ctx.strokeStyle='rgba(55,125,165,0.6)'; ctx.lineWidth=1;
+    ctx.setLineDash([3,3]);
+    ctx.beginPath(); ctx.moveTo(bx, sy1); ctx.lineTo(bx, sy2); ctx.stroke();
+    ctx.setLineDash([]);
+    [[bx,sy1],[bx,sy2]].forEach(([x,y])=>{
+      ctx.beginPath(); ctx.moveTo(x-3,y); ctx.lineTo(x+3,y); ctx.stroke();
+    });
+    ctx.fillStyle='rgba(65,135,175,0.85)';
+    ctx.font='bold 13px "Rajdhani",sans-serif';
+    ctx.textAlign='right';
+    ctx.fillText('d', bx-6, (sy1+sy2)/2 + 5);
+  }
+
+  // Slit labels S₁, S₂, … on the wall's left face (only when N ≤ 5 to avoid clutter)
+  if (slits.length <= 5) {
+    ctx.font='11px "Share Tech Mono",monospace';
+    ctx.fillStyle='#286080';
+    ctx.textAlign='right';
+    const subs = ['\u2081','\u2082','\u2083','\u2084','\u2085'];
+    for (let k=0; k<slits.length; k++) {
+      ctx.fillText('S'+subs[k], wx-2, slits[k]+4);
+    }
+  }
 }
 
-/* ── Draw: ring waves (only after wave reaches wall) ────────────── */
+/* ── Draw: ring waves (only after wave reaches wall, mono mode only) */
 function drawRings() {
-  if (waveHead < WALL) return;   // plane wave hasn't arrived yet
+  if (waveHead < WALL) return;       // plane wave hasn't arrived yet
+  if (whiteMode) return;              // would overlap chaotically in white mode
 
   const ringAge  = waveHead - WALL;   // how far rings have expanded
-  const y1 = CY-d/2, y2 = CY+d/2;
+  const slits = slitYs();
   const maxR = Math.hypot(D, H) + lam*2;
   const phase = phaseTime % lam;
   const [cr,cg,cb] = waveRGB;
+  // Dim the rings a bit as N grows so the canvas doesn't get visually crowded
+  const dim = Math.max(0.35, 1 - 0.08 * (N - 2));
 
   ctx.save();
   // Clip strictly between wall and screen (SCR is the left edge of the screen bar)
   ctx.beginPath(); ctx.rect(WALL, 0, SCR - WALL, H); ctx.clip();
 
-  [y1, y2].forEach(sy => {
+  slits.forEach(sy => {
     for (let k = 0; phase + k*lam < maxR; k++) {
       const r = phase + k*lam;
       if (r < 1) continue;
       if (r > ringAge) continue;          // don't draw rings beyond wavefront
 
-      const fade = Math.max(0, 1 - r/maxR);
+      const fade = Math.max(0, 1 - r/maxR) * dim;
       ctx.beginPath();
       ctx.arc(WALL, sy, r, -Math.PI*0.53, Math.PI*0.53);
       ctx.strokeStyle = `rgba(${cr},${cg},${cb},${(fade*0.88).toFixed(3)})`;
@@ -510,24 +667,38 @@ function drawRings() {
   ctx.restore();
 }
 
-/* ── Draw: screen ───────────────────────────────────────────────── */
+/* ── Draw: screen (far-field N-slit, supports white spectrum) ────── */
 function drawScreen() {
   // Fade in only after wave actually reaches the screen
   const fadeIn = Math.min(1, Math.max(0, waveHead - SCR) / (lam * 6));
 
-  const y1 = CY-d/2, y2 = CY+d/2;
-  const dx = SCR-WALL;
-  const [cr,cg,cb]=waveRGB;
+  const dx = SCR - WALL;
+  const spec = activeSpectrum();
+  const nL = spec.length;
+
+  // Screen substrate
   ctx.fillStyle='#080c15';
   ctx.fillRect(SCR, 0, SCR_W, H);
   ctx.strokeStyle='#182a3e'; ctx.lineWidth=1;
   ctx.strokeRect(SCR, 0, SCR_W, H);
 
-  for (let py=0; py<H; py++) {
-    const r1=Math.hypot(dx, py-y1);
-    const r2=Math.hypot(dx, py-y2);
-    const I=(1+Math.cos(2*Math.PI*(r1-r2)/lam))*0.5*fadeIn;
-    ctx.fillStyle=`rgb(${Math.round(cr*I*0.92)},${Math.round(cg*I*0.92)},${Math.round(cb*I*0.92)})`;
+  for (let py = 0; py < H; py++) {
+    const dy = py - CY;
+    const r  = Math.hypot(dx, dy);
+    const sinTheta = (r < 0.5) ? 0 : dy / r;
+
+    let R = 0, G = 0, B = 0;
+    for (let s = 0; s < nL; s++) {
+      const I = farFieldI(sinTheta, spec[s].lam);
+      R += I * spec[s].rgb[0];
+      G += I * spec[s].rgb[1];
+      B += I * spec[s].rgb[2];
+    }
+    const scale = (whiteMode ? (0.92 / nL) : 0.92) * fadeIn;
+    const rr = Math.min(255, Math.round(R * scale));
+    const gg = Math.min(255, Math.round(G * scale));
+    const bb = Math.min(255, Math.round(B * scale));
+    ctx.fillStyle = `rgb(${rr},${gg},${bb})`;
     ctx.fillRect(SCR+1, py, SCR_W-2, 1);
   }
   ctx.save();
@@ -547,7 +718,7 @@ function drawMaxima(allMaxima) {
   const fadeIn = Math.min(1, pastScreen / (lam * 6));
   if (fadeIn < 0.02) return;
 
-  const [cr,cg,cb]=waveRGB;
+  const [cr,cg,cb] = displayRGB();
   const dr=Math.min(255,cr+90), dg=Math.min(255,cg+90), db=Math.min(255,cb+90);
 
   // Central axis hint
@@ -558,25 +729,47 @@ function drawMaxima(allMaxima) {
   ctx.moveTo(WALL,CY); ctx.lineTo(SCR,CY);
   ctx.stroke(); ctx.setLineDash([]);
 
-  allMaxima.forEach(({m, theta, ys, onScreen}) => {
+  allMaxima.forEach(({m, theta, ys, onScreen, range}) => {
     const isC=m===0, absM=Math.abs(m);
-    const tDeg=Math.abs(theta*180/Math.PI).toFixed(1);
+    const la=(isC?0.14:Math.max(0.05,0.12-absM*0.015))*fadeIn;
 
     // For off-screen orders, clamp ys to canvas edge for drawing the hint line endpoint
     const lineEndY = Math.max(2, Math.min(H-2, ys));
-    const la=(isC?0.14:Math.max(0.05,0.12-absM*0.015))*fadeIn;
 
-    // Direction hint line (clipped to canvas)
-    ctx.beginPath();
-    ctx.setLineDash([5,7]);
-    ctx.strokeStyle=`rgba(${dr},${dg},${db},${la})`;
-    ctx.lineWidth=isC?0.9:0.7;
-    ctx.moveTo(WALL,CY); ctx.lineTo(onScreen ? SCR : WALL + D*(lineEndY-CY)/(ys-CY||0.001), lineEndY);
-    ctx.stroke(); ctx.setLineDash([]);
+    if (whiteMode && range && !isC) {
+      // Two boundary lines for violet (closer to axis) and red (farther)
+      const drawBoundary = (yEnd, lamSample) => {
+        const rgb = wavelengthToRGB(lamSample);
+        const clipY = Math.max(2, Math.min(H-2, yEnd));
+        const xEnd = (yEnd >= 2 && yEnd <= H-2) ? SCR
+                    : WALL + D * (clipY - CY) / (yEnd - CY || 0.001);
+        ctx.beginPath();
+        ctx.setLineDash([5,7]);
+        ctx.strokeStyle=`rgba(${rgb[0]},${rgb[1]},${rgb[2]},${0.55*la})`;
+        ctx.lineWidth=0.7;
+        ctx.moveTo(WALL,CY); ctx.lineTo(xEnd, clipY);
+        ctx.stroke(); ctx.setLineDash([]);
+      };
+      // yMin corresponds to lamMin (≈410 nm violet), yMax to longer λ (≈680 red)
+      drawBoundary(range.yMin, WHITE_SAMPLES_NM[0]);
+      drawBoundary(range.yMax, WHITE_SAMPLES_NM[WHITE_SAMPLES_NM.length-1]);
+    } else {
+      // Single direction hint line (mono mode or central max)
+      ctx.beginPath();
+      ctx.setLineDash([5,7]);
+      ctx.strokeStyle=`rgba(${dr},${dg},${db},${la})`;
+      ctx.lineWidth=isC?0.9:0.7;
+      ctx.moveTo(WALL,CY);
+      ctx.lineTo(onScreen ? SCR : WALL + D*(lineEndY-CY)/(ys-CY||0.001), lineEndY);
+      ctx.stroke(); ctx.setLineDash([]);
+    }
 
     // Small angle arc at wall
     if (!isC) {
-      const arcR=28+absM*6, a1=Math.atan2(ys-CY,D);
+      const arcR=28+absM*6;
+      const a1 = (whiteMode && range)
+        ? Math.atan2(range.yMin - CY, D)
+        : Math.atan2(ys-CY, D);
       ctx.beginPath();
       ctx.strokeStyle=`rgba(${dr},${dg},${db},${0.12*fadeIn})`;
       ctx.lineWidth=1;
@@ -585,21 +778,33 @@ function drawMaxima(allMaxima) {
     }
 
     // ── Angle label along the direction line ─────────────────
-    const lblText = isC ? '\u03b8\u2080 = 0\u00b0' : `\u03b8${absM} = ${tDeg}\u00b0`;
-    // Place label at 44% of available line length toward screen (or canvas edge)
+    let lblText;
+    if (isC) {
+      lblText = '\u03b8\u2080 = 0\u00b0';
+    } else if (whiteMode && range) {
+      const a = Math.abs(range.thMin * 180/Math.PI);
+      const b = Math.abs(range.thMax * 180/Math.PI);
+      lblText = `\u03b8${absM} = ${a.toFixed(1)}\u00b0\u2013${b.toFixed(1)}\u00b0`;
+    } else {
+      const tDeg=Math.abs(theta*180/Math.PI).toFixed(1);
+      lblText = `\u03b8${absM} = ${tDeg}\u00b0`;
+    }
+    // Place label at 44% of available line length toward screen
+    const yForLabel = (whiteMode && range && !isC)
+      ? (range.yMin + range.yMax) / 2
+      : ys;
     const frac = 0.44;
     const lx = WALL + (SCR-WALL)*frac;
-    const ly = CY + (ys-CY)*frac;
-    // Only draw label if it falls within canvas
+    const ly = CY + (yForLabel-CY)*frac;
     if (ly >= 6 && ly <= H-6) {
-      const lineAngle = Math.atan2(ys-CY, D);
+      const lineAngle = Math.atan2(yForLabel-CY, D);
       ctx.save();
       ctx.translate(lx, ly);
       ctx.rotate(lineAngle);
       ctx.font = 'bold 11px "Share Tech Mono",monospace';
       const tw = ctx.measureText(lblText).width;
       const ph = 15, pw = tw + 12, pr = 4;
-      ctx.fillStyle = `rgba(5,10,18,${0.82*fadeIn})`;
+      ctx.fillStyle = `rgba(5,10,18,${0.85*fadeIn})`;
       ctx.beginPath(); ctx.roundRect(-pw/2,-ph/2,pw,ph,pr); ctx.fill();
       ctx.strokeStyle = `rgba(${dr},${dg},${db},${0.45*fadeIn})`;
       ctx.lineWidth = 0.9;
@@ -611,8 +816,58 @@ function drawMaxima(allMaxima) {
       ctx.restore();
     }
 
-    // Dot + m-label only for orders that hit the screen
-    if (onScreen) {
+    // ── Marker on screen ─────────────────────────────────────
+    if (whiteMode && range && !isC) {
+      // Parameterize by wavelength so the segment works correctly for both
+      // m>0 (below center) and m<0 (above center). For each λ in [lamMinNm, lamMaxNm]
+      // we plot a tiny rect at the y position where m·λ/d = sin θ.
+      const xc = SCR + SCR_W/2;
+      const lamMinNm = WHITE_SAMPLES_NM[0];
+      // Red end: clip at the largest visible λ for this order (where m·λ/d ≤ 1)
+      const lamMaxCapped = Math.min(
+        WHITE_SAMPLES_NM[WHITE_SAMPLES_NM.length-1],
+        (d / (Math.abs(m) * NM_TO_PX)) * 0.999
+      );
+      if (lamMaxCapped > lamMinNm) {
+        const STEPS = 48;
+        let prevYClamped = null;
+        let drewAny = false;
+        let yLoSeen = Infinity, yHiSeen = -Infinity;
+        for (let s = 0; s <= STEPS; s++) {
+          const t = s / STEPS;
+          const lamNm = lamMinNm + t * (lamMaxCapped - lamMinNm);
+          const sinT = m * lamNm * NM_TO_PX / d;
+          if (Math.abs(sinT) >= 1) { prevYClamped = null; continue; }
+          const y = CY + D * Math.tan(Math.asin(sinT));
+          if (y < -50 || y > H + 50) { prevYClamped = null; continue; }
+          const yClamped = Math.max(2, Math.min(H-2, y));
+          if (prevYClamped !== null) {
+            const yA = Math.min(prevYClamped, yClamped);
+            const yB = Math.max(prevYClamped, yClamped);
+            if (yB - yA >= 0.4) {
+              const rgb = wavelengthToRGB(lamNm);
+              ctx.fillStyle = `rgba(${rgb[0]},${rgb[1]},${rgb[2]},${fadeIn})`;
+              ctx.fillRect(xc - 2.5, yA, 5, Math.max(1, yB - yA + 0.5));
+              drewAny = true;
+              if (yA < yLoSeen) yLoSeen = yA;
+              if (yB > yHiSeen) yHiSeen = yB;
+            }
+          }
+          prevYClamped = yClamped;
+        }
+        // Subtle outline + m-label centered on drawn segment
+        if (drewAny && yHiSeen - yLoSeen > 1) {
+          ctx.strokeStyle = `rgba(255,255,255,${0.18*fadeIn})`;
+          ctx.lineWidth = 0.7;
+          ctx.strokeRect(xc - 2.5, yLoSeen, 5, yHiSeen - yLoSeen);
+          ctx.font = '11px "Share Tech Mono",monospace';
+          ctx.fillStyle = `rgba(${dr},${dg},${db},${fadeIn})`;
+          ctx.textAlign='left';
+          ctx.fillText(`m=${absM}`, SCR+SCR_W+7, (yLoSeen+yHiSeen)/2 + 4);
+        }
+      }
+    } else if (onScreen) {
+      // Mono mode (or central max): single dot
       const dotR=isC?5.5:4.5;
       ctx.beginPath();
       ctx.arc(SCR+SCR_W/2, ys, dotR, 0, 2*Math.PI);
@@ -713,13 +968,13 @@ document.getElementById('btnPlay').addEventListener('click', () => {
 
 document.getElementById('btnReset').addEventListener('click', () => {
   reset();
-  // auto-play on reset
-  if (!playing) {
-    playing = true;
-    document.getElementById('btnPlay').classList.add('active');
-    document.getElementById('lblPlay').textContent = 'PAUSE';
+  // After reset: pause the simulation so the user manually restarts playback
+  if (playing) {
+    playing = false;
+    document.getElementById('btnPlay').classList.remove('active');
+    document.getElementById('lblPlay').textContent = 'AFSPIL';
     document.getElementById('icoPlay').innerHTML =
-      '<rect x="0" y="0" width="4" height="14" rx="1"/><rect x="9" y="0" width="4" height="14" rx="1"/>';
+      '<polygon points="1,0 13,7 1,14"/>';
   }
 });
 
@@ -749,6 +1004,53 @@ document.getElementById('sD').addEventListener('input', function() {
   document.getElementById('vD').textContent = `d = ${d_nm} nm`;
   dirty = true;
 });
+
+/* ── N (number of slits) slider ───────────────────────────────── */
+const sN = document.getElementById('sN');
+function applyN(newN) {
+  N = newN;
+  document.getElementById('vN').textContent = `N = ${N}`;
+  // Clamp d's max so all slits fit on wall
+  const dMaxNm = maxDnmForN(N);
+  const sD = document.getElementById('sD');
+  sD.max = dMaxNm;
+  if (d_nm > dMaxNm) {
+    // Round down to nearest step (25 nm)
+    d_nm = Math.floor(dMaxNm / 25) * 25;
+    sD.value = d_nm;
+    d = d_nm * NM_TO_PX;
+    document.getElementById('vD').textContent = `d = ${d_nm} nm`;
+  }
+  dirty = true;
+}
+sN.addEventListener('input', function() { applyN(+this.value); });
+
+/* ── White-light toggle ───────────────────────────────────────── */
+function applyWhiteMode(active) {
+  whiteMode = active;
+  const btn = document.getElementById('btnWhite');
+  const lbl = document.getElementById('lblWhite');
+  const sLam = document.getElementById('sLam');
+  const ctrlLam = document.getElementById('ctrlLam');
+  if (active) {
+    btn.classList.add('active');
+    lbl.textContent = 'MONOKROMATISK';
+    sLam.disabled = true;
+    ctrlLam.classList.add('disabled');
+    document.getElementById('vLam').textContent = '\u03bb = hvidt lys';
+  } else {
+    btn.classList.remove('active');
+    lbl.textContent = 'HVIDT LYS';
+    sLam.disabled = false;
+    ctrlLam.classList.remove('disabled');
+    document.getElementById('vLam').textContent = `\u03bb = ${lam_nm} nm`;
+  }
+  dirty = true;
+}
+document.getElementById('btnWhite').addEventListener('click', () => applyWhiteMode(!whiteMode));
+
+// Initial sync of N slider state
+applyN(N);
 
 reset();
 raf = requestAnimationFrame(frame);
