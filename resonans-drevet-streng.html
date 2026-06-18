@@ -1,0 +1,988 @@
+<!DOCTYPE html>
+<html lang="da">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no">
+<title>Resonanser på en svingende streng</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700&family=Share+Tech+Mono&family=Exo+2:wght@300;400;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0a0c14; --panel:#0f1320; --border:#1e2a3a; --canvas-bg:#06080f;
+  --accent:#00e5ff; --text:#c8d8e8; --dim:#8ab4cf; --muted:#4a6278;
+  --glow:0 0 10px rgba(0,229,255,0.45);
+  --readout-c:#a8ff3e; --readout-glow:0 0 8px rgba(168,255,62,.5);
+  --warn-c:#ffd93d;
+  --string-rgb:0,229,255;
+  --trace-rgb:125,249,255;
+  --mark-c:#d45eff;
+}
+[data-theme="light"]{
+  --bg:#e8e0d2; --panel:#f4eee3; --border:#d6cbb8; --canvas-bg:#fdfaf4;
+  --accent:#2767a8; --text:#1a1a1a; --dim:#2a4060; --muted:#6a5b40;
+  --glow:none;
+  --readout-c:#1D9E75; --readout-glow:none;
+  --warn-c:#9c5e00;
+  --string-rgb:26,80,153;
+  --trace-rgb:55,138,221;
+  --mark-c:#7a2da8;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+html,body{height:100%;overflow:hidden;}
+body{background:var(--bg);color:var(--text);font-family:'Exo 2',sans-serif;font-weight:300;display:flex;flex-direction:column;}
+[data-theme="light"] body{font-weight:400;}
+
+header{flex:0 0 auto;padding:10px 18px 9px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px;background:var(--panel);}
+.wave-icon{width:19px;height:19px;color:var(--accent);display:inline-flex;flex-shrink:0;animation:wave-osc 1.8s ease-in-out infinite;transform-origin:center;opacity:.78;filter:drop-shadow(0 0 2px var(--accent));}
+[data-theme="light"] .wave-icon{filter:none;}
+.wave-icon svg{display:block;width:100%;height:100%;}
+@keyframes wave-osc{0%,100%{transform:scaleY(1);}50%{transform:scaleY(-1);}}
+header h1{font-family:'Orbitron','Share Tech Mono',monospace;font-weight:700;font-size:clamp(.78rem,1.9vw,1.0rem);color:var(--accent);text-shadow:var(--glow);letter-spacing:.20em;text-transform:uppercase;}
+[data-theme="light"] header h1{text-shadow:none;}
+header .subtitle{font-size:.72rem;color:var(--dim);font-family:'Share Tech Mono',monospace;letter-spacing:.06em;}
+[data-theme="light"] header .subtitle{font-weight:700;}
+.theme-btn{margin-left:6px;background:transparent;border:1px solid var(--border);color:var(--dim);font-family:'Share Tech Mono',monospace;font-size:.7rem;letter-spacing:.08em;padding:6px 14px;border-radius:3px;cursor:pointer;text-transform:uppercase;transition:all .15s;}
+.theme-btn:hover{border-color:var(--accent);color:var(--accent);}
+[data-theme="light"] .theme-btn{font-weight:700;}
+
+header .action-btn{padding:5px 11px;font-size:.66rem;}
+
+.freq-stepper{display:flex;align-items:center;gap:3px;min-width:118px;justify-content:flex-end;}
+.step-btn{background:transparent;border:1px solid var(--border);color:var(--accent);font-family:'Share Tech Mono',monospace;font-size:.9rem;font-weight:700;width:22px;height:22px;padding:0;border-radius:3px;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1;-webkit-tap-highlight-color:transparent;user-select:none;transition:all .1s;}
+.step-btn:hover,.step-btn:active{background:rgba(0,229,255,.12);border-color:var(--accent);}
+[data-theme="light"] .step-btn:hover,[data-theme="light"] .step-btn:active{background:rgba(39,103,168,.12);}
+.freq-stepper .slider-val{min-width:62px;text-align:center;}
+
+.main{flex:1 1 0;display:grid;grid-template-columns:1fr 370px;min-height:0;gap:1px;background:var(--border);}
+
+.left-col{display:flex;flex-direction:column;background:var(--bg);gap:1px;min-height:0;}
+
+.canvas-wrap{flex:1 1 0;min-height:0;position:relative;background:var(--canvas-bg);display:flex;align-items:stretch;}
+canvas{display:block;width:100%;height:100%;}
+
+.freq-bar{flex:0 0 auto;background:var(--panel);border-top:1px solid var(--border);padding:9px 16px;display:flex;align-items:center;gap:12px;}
+.freq-bar-label{font-family:'Share Tech Mono',monospace;font-size:.74rem;color:var(--dim);letter-spacing:.08em;text-transform:uppercase;flex-shrink:0;}
+[data-theme="light"] .freq-bar-label{font-weight:700;color:#1a3a5c;}
+.freq-bar-display{font-family:'Courier New',monospace;font-size:1.1rem;color:var(--readout-c);font-weight:700;min-width:90px;text-align:center;text-shadow:var(--readout-glow);flex-shrink:0;}
+.freq-bar .step-btn{width:30px;height:30px;font-size:1.1rem;flex-shrink:0;}
+.freq-bar input[type=range].horiz{flex:1;}
+
+.panel-title{font-family:'Share Tech Mono',monospace;font-size:.7rem;letter-spacing:.18em;color:var(--dim);text-transform:uppercase;}
+[data-theme="light"] .panel-title{font-weight:700;color:#1a3a5c;}
+
+.action-bar{flex:0 0 auto;display:flex;align-items:center;flex-wrap:wrap;gap:7px;padding:8px 14px 10px;background:var(--panel);border-top:1px solid var(--border);}
+.action-btn{background:transparent;border:1px solid var(--border);color:var(--accent);font-family:'Share Tech Mono',monospace;font-size:.72rem;padding:7px 13px;border-radius:6px;cursor:pointer;display:flex;align-items:center;gap:6px;letter-spacing:.06em;-webkit-tap-highlight-color:transparent;transition:all .15s;}
+[data-theme="light"] .action-btn{font-weight:700;}
+.action-btn:hover,.action-btn:active{background:rgba(0,229,255,.08);border-color:var(--accent);}
+[data-theme="light"] .action-btn:hover,[data-theme="light"] .action-btn:active{background:rgba(39,103,168,.08);}
+.action-btn.primary{color:var(--readout-c);border-color:var(--readout-c);}
+.action-btn.primary:hover,.action-btn.primary:active{background:rgba(168,255,62,.08);}
+[data-theme="light"] .action-btn.primary:hover,[data-theme="light"] .action-btn.primary:active{background:rgba(29,158,117,.08);}
+.action-icon{font-size:.9rem;line-height:1;}
+
+.right-col{background:var(--panel);display:flex;flex-direction:column;overflow-y:auto;padding:13px 15px;gap:11px;}
+
+.exp-radio{display:grid;grid-template-columns:1fr 1fr;gap:6px;}
+.exp-radio label{cursor:pointer;border:1px solid var(--border);border-radius:4px;padding:7px 8px;font-size:.72rem;font-family:'Share Tech Mono',monospace;text-align:center;letter-spacing:.05em;background:transparent;color:var(--dim);transition:all .15s;}
+[data-theme="light"] .exp-radio label{font-weight:700;}
+.exp-radio label.active{color:var(--accent);border-color:var(--accent);background:rgba(0,229,255,.08);}
+[data-theme="light"] .exp-radio label.active{background:rgba(39,103,168,.08);}
+.exp-radio input{display:none;}
+.exp-desc{font-size:.7rem;color:var(--dim);font-style:italic;margin-top:2px;line-height:1.35;}
+[data-theme="light"] .exp-desc{font-weight:600;}
+
+.h-slider-row{display:flex;align-items:center;gap:8px;margin-bottom:8px;}
+.h-slider-row label{font-size:.8rem;color:var(--text);min-width:104px;flex-shrink:0;}
+[data-theme="light"] .h-slider-row label{font-weight:700;}
+input[type=range].horiz{flex:1;height:4px;-webkit-appearance:none;appearance:none;background:var(--border);border-radius:2px;outline:none;cursor:pointer;}
+input[type=range].horiz::-webkit-slider-thumb{-webkit-appearance:none;width:22px;height:22px;border-radius:50%;background:var(--accent);border:2px solid var(--bg);box-shadow:var(--glow);cursor:pointer;}
+input[type=range].horiz::-moz-range-thumb{width:22px;height:22px;border-radius:50%;background:var(--accent);border:2px solid var(--bg);cursor:pointer;}
+input[type=range].horiz:disabled{opacity:.35;cursor:not-allowed;}
+.slider-val{font-family:'Courier New',monospace;font-size:.85rem;color:var(--accent);min-width:88px;text-align:right;font-weight:700;}
+
+.readouts{display:grid;grid-template-columns:1fr 1fr;gap:6px;}
+.readout{background:var(--canvas-bg);border:1px solid var(--border);border-radius:4px;padding:7px 9px;}
+.readout-label{font-size:.62rem;color:var(--dim);letter-spacing:.06em;margin-bottom:2px;}
+[data-theme="light"] .readout-label{font-weight:700;color:#1a3a5c;}
+.readout-value{font-family:'Courier New',monospace;font-size:1.05rem;color:var(--readout-c);text-shadow:var(--readout-glow);font-weight:700;}
+.readout-unit{font-size:.62rem;color:var(--dim);}
+[data-theme="light"] .readout-unit{font-weight:700;}
+.readout.hint .readout-value{color:var(--warn-c);text-shadow:none;font-size:.92rem;}
+
+.divider{height:1px;background:var(--border);}
+
+.table-wrap{background:var(--canvas-bg);border:1px solid var(--border);border-radius:4px;max-height:170px;overflow-y:auto;}
+.table-wrap table{width:100%;border-collapse:collapse;font-family:'Courier New',monospace;font-size:.82rem;}
+.table-wrap th{position:sticky;top:0;background:var(--panel);color:var(--dim);font-weight:700;text-align:right;padding:5px 7px;border-bottom:1px solid var(--border);font-size:.66rem;letter-spacing:.05em;}
+[data-theme="light"] .table-wrap th{color:#1a3a5c;}
+.table-wrap td{padding:4px 7px;text-align:right;color:var(--text);border-bottom:1px solid rgba(128,128,128,.12);}
+.table-wrap td:first-child,.table-wrap th:first-child{text-align:center;}
+[data-theme="light"] .table-wrap td{font-weight:600;}
+.table-empty{padding:14px 10px;text-align:center;color:var(--muted);font-size:.74rem;font-style:italic;}
+[data-theme="light"] .table-empty{font-weight:600;}
+.table-row-delete{color:var(--mark-c);cursor:pointer;font-weight:700;}
+.table-actions{display:flex;gap:6px;margin-top:5px;}
+.mini-btn{flex:1;background:transparent;border:1px solid var(--border);color:var(--dim);font-family:'Share Tech Mono',monospace;font-size:.66rem;padding:5px 8px;border-radius:3px;cursor:pointer;letter-spacing:.05em;text-transform:uppercase;-webkit-tap-highlight-color:transparent;transition:all .15s;}
+[data-theme="light"] .mini-btn{font-weight:700;}
+.mini-btn:hover,.mini-btn:active{border-color:var(--accent);color:var(--accent);}
+
+.collapse-head{cursor:pointer;display:flex;align-items:center;justify-content:space-between;padding:4px 0;user-select:none;}
+.collapse-head .panel-title{margin:0;}
+.collapse-arrow{font-family:'Share Tech Mono',monospace;color:var(--dim);font-size:.8rem;transition:transform .15s;}
+.collapse-head.open .collapse-arrow{transform:rotate(90deg);}
+.collapse-body{display:none;padding-top:6px;}
+.collapse-head.open + .collapse-body{display:block;}
+
+.toggle-row{display:flex;align-items:center;gap:9px;margin-bottom:6px;font-size:.78rem;}
+[data-theme="light"] .toggle-row{font-weight:700;}
+.toggle{position:relative;width:34px;height:18px;flex-shrink:0;}
+.toggle input{opacity:0;width:0;height:0;}
+.toggle-slider{position:absolute;inset:0;background:var(--border);border-radius:20px;cursor:pointer;transition:.2s;}
+.toggle-slider:before{content:'';position:absolute;width:12px;height:12px;left:3px;top:3px;background:var(--muted);border-radius:50%;transition:.2s;}
+.toggle input:checked+.toggle-slider{background:rgba(0,229,255,.2);}
+[data-theme="light"] .toggle input:checked+.toggle-slider{background:rgba(39,103,168,.2);}
+.toggle input:checked+.toggle-slider:before{transform:translateX(16px);background:var(--accent);box-shadow:var(--glow);}
+
+@media(max-width:760px){
+  html,body{overflow:auto;}
+  .main{grid-template-columns:1fr;}
+  .canvas-wrap{height:45vw;flex:none;}
+  .resonance-wrap{height:140px;}
+  .right-col{max-height:none;}
+  .theme-btn{padding:5px 10px;}
+}
+</style>
+</head>
+<body>
+
+<header>
+  <span class="wave-icon" aria-hidden="true">
+    <svg viewBox="0 0 24 24"><path d="M 1.5 12 Q 6.75 1 12 12 T 22.5 12" fill="none" stroke="currentColor" stroke-width="2.0" stroke-linecap="round" stroke-linejoin="round"/></svg>
+  </span>
+  <h1>Resonanser på en svingende streng</h1>
+  <span class="subtitle">Tvungen svingning &middot; Virtuelt forsøg</span>
+  <button class="action-btn" id="copyBtn" style="margin-left:auto;"><span class="action-icon">&#10697;</span> KOPIER KODE</button>
+  <button class="theme-btn" id="themeBtn">Lys tema</button>
+</header>
+
+<div class="main">
+  <div class="left-col">
+    <div class="canvas-wrap">
+      <canvas id="c"></canvas>
+    </div>
+
+    <div class="freq-bar">
+      <span class="freq-bar-label">Vibratorfrekvens <span style="text-transform:none">f</span></span>
+      <button class="step-btn" id="freqMinus" aria-label="Sænk 0,1 Hz">&minus;</button>
+      <span class="freq-bar-display" id="freqVal">15,0 Hz</span>
+      <button class="step-btn" id="freqPlus" aria-label="Hæv 0,1 Hz">+</button>
+      <input type="range" class="horiz" id="freqSlider" min="1" max="300" value="15" step="0.1">
+    </div>
+
+    <div class="action-bar">
+      <button class="action-btn" id="pauseBtn" style="margin-left:auto;"><span class="action-icon">&#9646;&#9646;</span> PAUSE</button>
+      <button class="action-btn primary" id="recordBtn"><span class="action-icon">&#9679;</span> NOTÉR MÅLING</button>
+      <button class="action-btn" id="csvBtn"><span class="action-icon">&#8615;</span> EKSPORTÉR CSV</button>
+    </div>
+  </div>
+
+  <div class="right-col">
+
+    <div>
+      <div class="panel-title" style="margin-bottom:6px;">Forsøg</div>
+      <div class="exp-radio" id="expRadio">
+        <label data-exp="1" class="active"><input type="radio" name="exp" value="1" checked>Forsøg 1: Partialtoner</label>
+        <label data-exp="2"><input type="radio" name="exp" value="2">Forsøg 2: Grundtone vs. m</label>
+      </div>
+      <div class="exp-desc" id="expDesc">Hold loddet fast. Sweep f og notér resonanstoppene som f<sub>1</sub>, f<sub>2</sub>, f<sub>3</sub> …</div>
+    </div>
+
+    <div class="divider"></div>
+
+    <div>
+      <div class="panel-title" style="margin-bottom:6px;">Opstilling</div>
+
+      <div class="h-slider-row">
+        <label>Lodmasse m</label>
+        <input type="range" class="horiz" id="massSlider" min="50" max="500" value="200" step="5">
+        <span class="slider-val" id="massVal">200 g</span>
+      </div>
+
+      <div class="h-slider-row">
+        <label>Strenglængde L</label>
+        <input type="range" class="horiz" id="lengthSlider" min="0.40" max="1.20" value="0.80" step="0.01">
+        <span class="slider-val" id="lengthVal">0,80 m</span>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <div>
+      <div class="panel-title" style="margin-bottom:5px;">Måletabel</div>
+      <div class="table-wrap" id="tableWrap">
+        <div class="table-empty">Ingen målinger endnu</div>
+      </div>
+      <div class="table-actions">
+        <button class="mini-btn" id="clearBtn">Ryd tabel</button>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <div>
+      <div class="collapse-head" id="labHead">
+        <div class="panel-title">Lærer-indstillinger</div>
+        <span class="collapse-arrow">&#9656;</span>
+      </div>
+      <div class="collapse-body">
+        <div class="h-slider-row">
+          <label>μ (skjult)</label>
+          <input type="range" class="horiz" id="muSlider" min="0.2" max="2.0" value="0.8" step="0.05">
+          <span class="slider-val" id="muVal">0,80 g/m</span>
+        </div>
+        <div class="h-slider-row">
+          <label>Dæmpning γ</label>
+          <input type="range" class="horiz" id="gammaSlider" min="2" max="25" value="8" step="0.5">
+          <span class="slider-val" id="gammaVal">8,0 /s</span>
+        </div>
+        <div class="h-slider-row">
+          <label>σ på m</label>
+          <input type="range" class="horiz" id="sigmaMSlider" min="0" max="10" value="2" step="0.5">
+          <span class="slider-val" id="sigmaMVal">2,0 g</span>
+        </div>
+        <div class="h-slider-row">
+          <label>σ på L</label>
+          <input type="range" class="horiz" id="sigmaLSlider" min="0" max="5" value="2" step="0.5">
+          <span class="slider-val" id="sigmaLVal">2,0 mm</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+// ===== STATE =====
+var L = 0.80;          // m
+var Mg = 200;          // g (set point)
+var mu_gpm = 0.8;      // g/m (hidden from student)
+var f = 15.0;          // Hz (vibrator frequency)
+var GAMMA = 8.0;       // /s, damping coefficient
+var SIGMA_M = 2.0;     // g, mass weighing uncertainty
+var SIGMA_L = 2.0;     // mm, length measurement uncertainty
+var FORCE_K = 8000;    // constant in A_n formula (sets visual scale)
+var N_MODES = 8;
+var experiment = 1;
+var isDark = true;
+var paused = false;
+
+// Animation
+var physT = 0, lastStamp = null;
+var TIME_SCALE = 1/30;
+
+// Recorded measurements
+var exp1Data = [];
+var exp2Data = [];
+
+// Constants
+var g = 9.82; // m/s^2
+
+// ===== HELPERS =====
+function fmtDk(x, dec){ return x.toFixed(dec).replace('.', ','); }
+function D(d, l){ return isDark ? d : l; }
+function randn(){
+  var u = 0, v = 0;
+  while(u === 0) u = Math.random();
+  while(v === 0) v = Math.random();
+  return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v);
+}
+
+// Physics: derived quantities
+function tension(){ return (Mg/1000) * g; }                     // N
+function muSI(){ return mu_gpm / 1000; }                        // kg/m
+function waveSpeed(){ return Math.sqrt(tension()/muSI()); }     // m/s
+function f1(){ return waveSpeed()/(2*L); }                      // Hz
+function omega1(){ return 2*Math.PI*f1(); }
+function omega(){ return 2*Math.PI*f; }
+
+// Amplitude of mode n at vibrator angular frequency omega (Lorentzian, normalized)
+function ampN(n, om){
+  var omN = n*omega1();
+  var d1 = omN*omN - om*om;
+  var d2 = GAMMA*om;
+  var denom = Math.sqrt(d1*d1 + d2*d2);
+  if (denom < 1e-9) denom = 1e-9;
+  return FORCE_K/denom;
+}
+function phaseN(n, om){
+  var omN = n*omega1();
+  return Math.atan2(GAMMA*om, omN*omN - om*om);
+}
+
+// Envelope amplitude at fractional position xFrac (0..1)
+function envelopeAt(xFrac, om){
+  var re = 0, im = 0;
+  for (var n = 1; n <= N_MODES; n++){
+    var a = ampN(n, om);
+    var phi = phaseN(n, om);
+    var s = Math.sin(n*Math.PI*xFrac);
+    re += a*Math.cos(phi)*s;
+    im += a*Math.sin(phi)*s;
+  }
+  return Math.sqrt(re*re + im*im);
+}
+function maxEnvelope(om){
+  var m = 0;
+  for (var i = 1; i < 80; i++){
+    var e = envelopeAt(i/80, om);
+    if (e > m) m = e;
+  }
+  return m;
+}
+
+// Instantaneous y(x,t)
+function yAt(xFrac, t, om){
+  var s = 0;
+  for (var n = 1; n <= N_MODES; n++){
+    var a = ampN(n, om);
+    var phi = phaseN(n, om);
+    s += a*Math.sin(n*Math.PI*xFrac)*Math.cos(om*t - phi);
+  }
+  return s;
+}
+
+// Dominant mode at current f (returns n if one mode is clearly dominant, 0 otherwise)
+function dominantMode(){
+  var om = omega();
+  var best = -1, bestA = 0, total = 0;
+  for (var n = 1; n <= N_MODES; n++){
+    // amplitude evaluated at antinode of mode n  (sin = 1)
+    var a = ampN(n, om);
+    total += a*a;
+    if (a > bestA){ bestA = a; best = n; }
+  }
+  // dominance criterion: best^2 contributes > 70% of energy AND amplitude is above off-resonance floor
+  var dominance = (bestA*bestA)/total;
+  // off-resonance floor: amplitude midway between adjacent peaks
+  if (dominance > 0.70 && bestA > 1.0) return best;
+  return 0;
+}
+
+// Theoretical nearest f_n
+function nearestFn(){
+  var fn1 = f1();
+  var n = Math.max(1, Math.round(f/fn1));
+  return {n: n, fn: n*fn1};
+}
+
+// Measured ("weighed") values — fresh sample
+function measuredM(){ return Mg + randn()*SIGMA_M; }
+function measuredL(){ return L + randn()*SIGMA_L/1000; }  // SIGMA_L in mm
+
+// ===== CANVAS SETUP =====
+var canvas = document.getElementById('c'), ctx = canvas.getContext('2d');
+var cW = 0, cH = 0;
+
+function resize(){
+  var dpr = window.devicePixelRatio || 1, wrap = canvas.parentElement;
+  var W = wrap.clientWidth, H = wrap.clientHeight;
+  if (W < 1 || H < 1) return;
+  cW = W; cH = H;
+  canvas.width = W*dpr; canvas.height = H*dpr;
+  canvas.style.width = W+'px'; canvas.style.height = H+'px';
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+}
+resize();
+window.addEventListener('resize', resize);
+
+// ===== DRAWING: MAIN CANVAS =====
+function drawMain(){
+  if (cW < 1 || cH < 1) return;
+  var W = cW, H = cH;
+
+  // ---- Layout ----
+  var stringCy   = H*0.20;                       // string up high
+  var maxAmpPx   = H*0.14;
+  var pinLength  = Math.min(30, H*0.09);
+  var vibBodyH   = Math.min(64, H*0.20);
+  var tableTopY  = stringCy + pinLength + vibBodyH;
+  var tableSlabH = 10;
+  var tableBotY  = tableTopY + tableSlabH;
+  var floorY     = H - 2;
+  var legW       = 14;
+  var pulleyR    = 11;
+  var pulleyX    = W - 70;
+  var tableLeftX = 20;
+  var tableRightX= pulleyX - pulleyR - 5;
+
+  // Unified scale: same px/m horizontally and vertically.
+  // This visually conserves the total string length — when L decreases by 0.8 m,
+  // the mass drops 0.8 m further down.
+  var L_MAX_VIS  = 1.20;
+  var L_MIN_VIS  = 0.40;
+  var L_TOTAL    = 1.50;
+  var maxDropM   = L_TOTAL - L_MIN_VIS;          // 1.10 m max slack
+  var maxMassH   = (7 + 500/30) * 1.4;           // worst-case mass block height
+  var maxHorizPx = W * 0.58;
+  var maxVertPx  = floorY - (stringCy + pulleyR) - maxMassH - 14;
+  var pxPerMeter = Math.max(50, Math.min(
+                     maxHorizPx / L_MAX_VIS,
+                     maxVertPx  / maxDropM
+                   ));
+  var maxStrPx   = pxPerMeter * L_MAX_VIS;
+  var strPx      = pxPerMeter * L;
+  var dropPx     = pxPerMeter * (L_TOTAL - L);
+
+  // Vibrator
+  var vibBodyW   = 56;
+  var vibX       = pulleyX - strPx;
+  var vibBodyLeft= vibX - vibBodyW/2;
+  var vibBodyTop = tableTopY - vibBodyH;
+
+  // Tonegenerator — FIXED position. Anchored slightly left of where the vibrator
+  // sits at L_max, so at maximum string length the cable is short and the apparatus
+  // is grouped near the center; as L decreases the vibrator slides away to the right.
+  var tonegenW = 115;
+  var tonegenH = Math.min(80, vibBodyH + 6);
+  var tonegenBotY = tableTopY;
+  var tonegenTopY = tonegenBotY - tonegenH;
+  var vibBodyLeft_at_Lmax = (pulleyX - pxPerMeter*L_MAX_VIS) - vibBodyW/2;
+  var tonegenRight = vibBodyLeft_at_Lmax - 50;
+  var tonegenLeft  = tonegenRight - tonegenW;
+  if (tonegenLeft < tableLeftX + 10) tonegenLeft = tableLeftX + 10;
+  tonegenRight = tonegenLeft + tonegenW;
+  var showTonegen = (vibBodyLeft - tonegenRight) >= 10;
+
+  // Pin
+  var om = omega();
+  var pinAmp = 2.5;
+  var pinTipY = stringCy + pinAmp*Math.cos(om*physT);
+
+  // Mass position (drop already computed above using unified pxPerMeter)
+  var massTop = stringCy + pulleyR + dropPx;
+
+  // ---- Background ----
+  ctx.fillStyle = D('#06080f', '#fdfaf4');
+  ctx.fillRect(0, 0, W, H);
+  // Faint grid
+  ctx.strokeStyle = D('rgba(30,42,58,0.55)', 'rgba(120,100,70,0.18)');
+  ctx.lineWidth = 0.5;
+  for (var gi = 1; gi < 8; gi++){
+    ctx.beginPath(); ctx.moveTo(0, H*gi/8); ctx.lineTo(W, H*gi/8); ctx.stroke();
+  }
+  for (var gj = 1; gj < 12; gj++){
+    ctx.beginPath(); ctx.moveTo(W*gj/12, 0); ctx.lineTo(W*gj/12, H); ctx.stroke();
+  }
+
+  // ---- Floor line ----
+  ctx.fillStyle = D('rgba(120,140,160,0.25)', 'rgba(90,56,32,0.35)');
+  ctx.fillRect(0, floorY-1, W, 2);
+
+  // ---- Table (gnidning-trisse style: wood slab + legs to floor) ----
+  var TABLE_TOP_C    = D('#7a5a3a', '#caa06a');
+  var TABLE_STROKE_C = D('#3a2418', '#5a3820');
+  var TABLE_HIGHLIGHT= D('rgba(255,255,255,0.12)', 'rgba(255,255,255,0.30)');
+
+  // shadow under slab
+  ctx.fillStyle = 'rgba(0,0,0,0.10)';
+  ctx.fillRect(tableLeftX+4, tableBotY, tableRightX-tableLeftX, 3);
+  // slab
+  ctx.fillStyle = TABLE_TOP_C;
+  ctx.fillRect(tableLeftX, tableTopY, tableRightX-tableLeftX, tableSlabH);
+  // highlight on top
+  ctx.fillStyle = TABLE_HIGHLIGHT;
+  ctx.fillRect(tableLeftX, tableTopY, tableRightX-tableLeftX, 3);
+  // stroke
+  ctx.strokeStyle = TABLE_STROKE_C;
+  ctx.lineWidth = 1.5;
+  ctx.strokeRect(tableLeftX, tableTopY, tableRightX-tableLeftX, tableSlabH);
+
+  // Two legs going from bottom of slab down to floor
+  var legInset = 28;
+  var legPositions = [tableLeftX + legInset, tableRightX - legInset - legW];
+  for (var lpi = 0; lpi < legPositions.length; lpi++){
+    var lx = legPositions[lpi];
+    ctx.fillStyle = TABLE_TOP_C;
+    ctx.fillRect(lx, tableBotY, legW, floorY - tableBotY);
+    ctx.strokeStyle = TABLE_STROKE_C;
+    ctx.lineWidth = 1.5;
+    ctx.strokeRect(lx, tableBotY, legW, floorY - tableBotY);
+    // shadow on right edge of leg
+    ctx.fillStyle = 'rgba(0,0,0,0.14)';
+    ctx.fillRect(lx + legW - 4, tableBotY, 4, floorY - tableBotY);
+  }
+
+  // ---- Pulley clamp at right edge of table ----
+  ctx.fillStyle = D('#3a4860', '#7a6850');
+  ctx.fillRect(tableRightX-2, stringCy-6, 4, (tableBotY+4) - (stringCy-6));
+  ctx.fillRect(tableRightX, stringCy-3, pulleyR+5, 4);
+  ctx.fillRect(tableRightX-5, tableTopY-2, 10, tableSlabH+6);
+
+  // ---- Compute string shape ----
+  var NPTS = 220;
+  var pts = new Float32Array(NPTS+1);
+  for (var j = 0; j <= NPTS; j++){
+    pts[j] = yAt(j/NPTS, physT, om);
+  }
+  var ampPx_per_unit = maxAmpPx / 7.0;
+  function ypx(yVal){
+    var v = yVal*ampPx_per_unit;
+    if (v >  maxAmpPx) v =  maxAmpPx;
+    if (v < -maxAmpPx) v = -maxAmpPx;
+    return pinTipY - v;
+  }
+
+  // ---- Draw active string (vibrator pin → pulley) ----
+  var sRGB = D('0,229,255', '26,80,153');
+  var passes = isDark ? [[8,0.08],[3.5,0.20],[1.5,1.0]] : [[1.8,1.0]];
+  for (var p = 0; p < passes.length; p++){
+    ctx.beginPath();
+    ctx.strokeStyle = 'rgba('+sRGB+','+passes[p][1]+')';
+    ctx.lineWidth = passes[p][0];
+    for (var j = 0; j <= NPTS; j++){
+      var xp = vibX + (j/NPTS)*strPx;
+      var yp = ypx(pts[j]);
+      if (j === 0) ctx.moveTo(xp, yp); else ctx.lineTo(xp, yp);
+    }
+    ctx.stroke();
+  }
+
+  // ---- String over pulley + down to mass ----
+  ctx.strokeStyle = 'rgba('+sRGB+',0.9)';
+  ctx.lineWidth = 1.5;
+  ctx.beginPath();
+  ctx.arc(pulleyX, stringCy, pulleyR, -Math.PI/2, 0, false);
+  ctx.stroke();
+  var stringRightX = pulleyX + pulleyR;
+  ctx.beginPath();
+  ctx.moveTo(stringRightX, stringCy);
+  ctx.lineTo(stringRightX, massTop);
+  ctx.stroke();
+
+  // ---- Tonegenerator (fixed left, on table) ----
+  if (showTonegen){
+    // shadow under
+    ctx.fillStyle = D('rgba(0,0,0,0.30)','rgba(60,40,20,0.18)');
+    ctx.fillRect(tonegenLeft-1, tableTopY-1, tonegenW+2, 2);
+    // body
+    ctx.fillStyle = D('#1c2638', '#e8ddc7');
+    ctx.strokeStyle = D('#00e5ff', '#1a5099');
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    ctx.rect(tonegenLeft, tonegenTopY, tonegenW, tonegenH);
+    ctx.fill();
+    ctx.stroke();
+
+    // Display window
+    var dispPad = 7;
+    var dispW = tonegenW - 2*dispPad;
+    var dispH = Math.min(28, tonegenH * 0.46);
+    var dispX = tonegenLeft + dispPad;
+    var dispY = tonegenTopY + dispPad;
+    ctx.fillStyle = D('#02060a', '#0a1828');
+    ctx.fillRect(dispX, dispY, dispW, dispH);
+    ctx.strokeStyle = D('rgba(168,255,62,0.4)', 'rgba(125,249,255,0.6)');
+    ctx.lineWidth = 1;
+    ctx.strokeRect(dispX, dispY, dispW, dispH);
+    // Display text
+    ctx.fillStyle = D('#a8ff3e', '#7df9ff');
+    var dispText = 'f = '+fmtDk(f, 1)+' Hz';
+    var fontSize = Math.min(15, dispH * 0.55);
+    ctx.font = 'bold '+fontSize+'px "Courier New", monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText(dispText, dispX + dispW/2, dispY + dispH/2 + fontSize/3);
+
+    // TONEGENERATOR label
+    ctx.fillStyle = D('#7df9ff', '#1a5099');
+    ctx.font = 'bold 9px "Share Tech Mono", monospace';
+    ctx.fillText('TONEGENERATOR', tonegenLeft + tonegenW/2, tonegenTopY + dispPad + dispH + 14);
+
+    // Power indicator
+    var blinkT = 0.5 + 0.5*Math.cos(om*physT);
+    ctx.fillStyle = isDark
+      ? 'rgba(168,255,62,'+(0.4 + 0.5*blinkT).toFixed(2)+')'
+      : 'rgba(29,158,117,'+(0.6 + 0.4*blinkT).toFixed(2)+')';
+    ctx.beginPath();
+    ctx.arc(tonegenLeft + tonegenW - 10, tonegenTopY + tonegenH - 10, 2.5, 0, Math.PI*2);
+    ctx.fill();
+
+    // Cable from tonegenerator output to vibrator input (drooping curve)
+    var cableStartX = tonegenLeft + tonegenW;
+    var cableStartY = tonegenTopY + tonegenH * 0.65;
+    var cableEndX   = vibBodyLeft;
+    var cableEndY   = vibBodyTop + vibBodyH * 0.65;
+    var cableMidX   = (cableStartX + cableEndX) / 2;
+    var cableMidY   = Math.max(cableStartY, cableEndY) + 14;
+    ctx.strokeStyle = D('#28384a', '#6a4f3a');
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.moveTo(cableStartX, cableStartY);
+    ctx.quadraticCurveTo(cableMidX, cableMidY, cableEndX, cableEndY);
+    ctx.stroke();
+    // Cable highlight (gives rounded appearance)
+    ctx.strokeStyle = D('rgba(70,90,110,0.5)', 'rgba(140,100,70,0.5)');
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(cableStartX, cableStartY-1);
+    ctx.quadraticCurveTo(cableMidX, cableMidY-1, cableEndX, cableEndY-1);
+    ctx.stroke();
+    // Connector knobs
+    ctx.fillStyle = D('#4a5a70', '#3a2418');
+    ctx.beginPath(); ctx.arc(cableStartX, cableStartY, 2.8, 0, Math.PI*2); ctx.fill();
+    ctx.beginPath(); ctx.arc(cableEndX,   cableEndY,   2.8, 0, Math.PI*2); ctx.fill();
+  }
+
+  // ---- Vibrator body ----
+  ctx.fillStyle = D('rgba(0,0,0,0.30)','rgba(60,40,20,0.18)');
+  ctx.fillRect(vibBodyLeft-1, tableTopY-1, vibBodyW+2, 2);
+  ctx.fillStyle = D('#1c2638', '#e8ddc7');
+  ctx.strokeStyle = D('#00e5ff', '#1a5099');
+  ctx.lineWidth = 1.5;
+  ctx.beginPath();
+  ctx.rect(vibBodyLeft, vibBodyTop, vibBodyW, vibBodyH);
+  ctx.fill();
+  ctx.stroke();
+  // Inset panel
+  ctx.strokeStyle = D('rgba(125,249,255,0.35)', 'rgba(39,103,168,0.4)');
+  ctx.lineWidth = 0.8;
+  ctx.beginPath();
+  ctx.rect(vibBodyLeft+4, vibBodyTop+4, vibBodyW-8, vibBodyH-8);
+  ctx.stroke();
+  // VIBRATOR label
+  ctx.fillStyle = D('#7df9ff', '#1a5099');
+  ctx.font = 'bold 10px "Share Tech Mono", monospace';
+  ctx.textAlign = 'center';
+  ctx.fillText('VIBRATOR', vibBodyLeft + vibBodyW/2, vibBodyTop + vibBodyH/2 - 4);
+  // Power indicator
+  var blinkV = 0.5 + 0.5*Math.cos(om*physT);
+  ctx.fillStyle = isDark
+    ? 'rgba(168,255,62,'+(0.4 + 0.5*blinkV).toFixed(2)+')'
+    : 'rgba(29,158,117,'+(0.6 + 0.4*blinkV).toFixed(2)+')';
+  ctx.beginPath();
+  ctx.arc(vibBodyLeft + vibBodyW/2, vibBodyTop + vibBodyH/2 + 10, 3.5, 0, Math.PI*2);
+  ctx.fill();
+
+  // ---- Vibrating pin ----
+  ctx.fillStyle = D('#b8c4d4', '#404a55');
+  ctx.fillRect(vibX - 2, pinTipY, 4, vibBodyTop - pinTipY);
+  ctx.beginPath();
+  ctx.arc(vibX, pinTipY, 4.5, 0, Math.PI*2);
+  ctx.fillStyle = D('#00e5ff', '#1a5099');
+  ctx.fill();
+  ctx.strokeStyle = D('#7df9ff', '#1a5099');
+  ctx.lineWidth = 1;
+  ctx.stroke();
+
+  // ---- Pulley wheel ----
+  ctx.beginPath();
+  ctx.arc(pulleyX, stringCy, pulleyR, 0, Math.PI*2);
+  ctx.fillStyle = D('#1e2a3a', '#e8ddc7');
+  ctx.fill();
+  ctx.strokeStyle = D('#7df9ff', '#378ADD');
+  ctx.lineWidth = 1.5;
+  ctx.stroke();
+  ctx.beginPath();
+  ctx.arc(pulleyX, stringCy, 2.5, 0, Math.PI*2);
+  ctx.fillStyle = D('#7df9ff', '#378ADD');
+  ctx.fill();
+
+  // ---- Mass ----
+  var massPx = 7 + Mg/30;
+  var massH  = massPx*1.4;
+  var massX  = stringRightX;
+  // Hanger ring just above mass
+  ctx.strokeStyle = D('#a8ff3e', '#1D9E75');
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.arc(massX, massTop, 2.5, 0, Math.PI*2);
+  ctx.stroke();
+  // body — lighter fill in light theme for high contrast text
+  ctx.fillStyle = D('#1e2a3a', '#f4eee3');
+  ctx.lineWidth = 1.5;
+  ctx.beginPath();
+  ctx.rect(massX-massPx, massTop+2, 2*massPx, massH);
+  ctx.fill();
+  ctx.stroke();
+  // mass label — dark navy in light theme (per request); bright green in dark theme
+  ctx.fillStyle = D('#a8ff3e', '#0d2a5c');
+  ctx.font = 'bold 10px "Courier New", monospace';
+  ctx.textAlign = 'center';
+  ctx.fillText(Math.round(Mg)+' g', massX, massTop + 2 + massH/2 + 4);
+
+  // ---- L-label at top of canvas ----
+  ctx.fillStyle = D('#8ab4cf', '#2a4060');
+  ctx.font = 'bold 11px "Courier New", monospace';
+  ctx.textAlign = 'center';
+  var labelY = 14;
+  var lblText = 'L = '+fmtDk(L,2)+' m';
+  var lblCx = (vibX + pulleyX)/2;
+  ctx.strokeStyle = D('rgba(138,180,207,0.6)', 'rgba(42,64,96,0.7)');
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.moveTo(vibX, labelY+4); ctx.lineTo(vibX, labelY+10);
+  ctx.moveTo(vibX, labelY+7); ctx.lineTo(pulleyX, labelY+7);
+  ctx.moveTo(pulleyX, labelY+4); ctx.lineTo(pulleyX, labelY+10);
+  ctx.stroke();
+  var tw = ctx.measureText(lblText).width;
+  ctx.fillStyle = D('#06080f', '#fdfaf4');
+  ctx.fillRect(lblCx - tw/2 - 4, labelY+1, tw + 8, 12);
+  ctx.fillStyle = D('#8ab4cf', '#2a4060');
+  ctx.fillText(lblText, lblCx, labelY+11);
+}
+
+// ===== ANIMATION LOOP =====
+function loop(stamp){
+  if (!lastStamp) lastStamp = stamp;
+  var dtReal = Math.min((stamp - lastStamp)/1000, 0.05);
+  lastStamp = stamp;
+  if (!paused) physT += dtReal * TIME_SCALE;
+
+  drawMain();
+  updateReadouts();
+  requestAnimationFrame(loop);
+}
+
+// ===== READOUTS =====
+// Frequency is shown on the on-canvas tonegenerator display; no DOM readouts to update.
+function updateReadouts(){}
+
+// ===== TABLE RENDERING =====
+function renderTable(){
+  var w = document.getElementById('tableWrap');
+  var data = (experiment === 1) ? exp1Data : exp2Data;
+  if (data.length === 0){
+    w.innerHTML = '<div class="table-empty">Ingen målinger endnu</div>';
+    return;
+  }
+  var html = '<table><thead><tr>';
+  if (experiment === 1){
+    html += '<th>n</th><th>f<sub>n</sub> [Hz]</th><th></th>';
+  } else {
+    html += '<th>#</th><th>m [g]</th><th>f<sub>1</sub> [Hz]</th><th></th>';
+  }
+  html += '</tr></thead><tbody>';
+  for (var i = 0; i < data.length; i++){
+    var d = data[i];
+    html += '<tr>';
+    if (experiment === 1){
+      html += '<td>'+d.n+'</td>';
+      html += '<td>'+fmtDk(d.f,1)+'</td>';
+    } else {
+      html += '<td>'+(i+1)+'</td>';
+      html += '<td>'+fmtDk(d.M,1)+'</td>';
+      html += '<td>'+fmtDk(d.f,2)+'</td>';
+    }
+    html += '<td class="table-row-delete" data-idx="'+i+'">&times;</td>';
+    html += '</tr>';
+  }
+  html += '</tbody></table>';
+  w.innerHTML = html;
+  // wire delete buttons
+  var dels = w.querySelectorAll('.table-row-delete');
+  for (var j = 0; j < dels.length; j++){
+    dels[j].addEventListener('click', function(){
+      var idx = parseInt(this.getAttribute('data-idx'));
+      var arr = (experiment === 1) ? exp1Data : exp2Data;
+      arr.splice(idx, 1);
+      renderTable();
+    });
+  }
+}
+
+// ===== ACTIONS =====
+function recordMeasurement(){
+  if (experiment === 1){
+    var nf = nearestFn();
+    exp1Data.push({
+      n: nf.n,
+      f: f,
+      M_meas: measuredM(),
+      L_meas: measuredL()
+    });
+  } else {
+    exp2Data.push({
+      M: measuredM(),
+      f: f,
+      L_meas: measuredL()
+    });
+  }
+  renderTable();
+  var b = document.getElementById('recordBtn');
+  var orig = b.innerHTML;
+  b.innerHTML = '<span class="action-icon">&#10003;</span> NOTERET';
+  setTimeout(function(){ b.innerHTML = orig; }, 900);
+}
+
+function exportCSV(){
+  var data = (experiment === 1) ? exp1Data : exp2Data;
+  if (data.length === 0){ alert('Tabellen er tom.'); return; }
+  var lines = [];
+  if (experiment === 1){
+    lines.push('n;f_n (Hz);m_vejet (g);L_maalt (m)');
+    for (var i = 0; i < data.length; i++){
+      var d = data[i];
+      lines.push([d.n, fmtDk(d.f,2), fmtDk(d.M_meas,2), fmtDk(d.L_meas,4)].join(';'));
+    }
+  } else {
+    lines.push('m_vejet (g);f_1 (Hz);L_maalt (m)');
+    for (var i = 0; i < data.length; i++){
+      var d = data[i];
+      lines.push([fmtDk(d.M,2), fmtDk(d.f,3), fmtDk(d.L_meas,4)].join(';'));
+    }
+  }
+  var csv = lines.join('\r\n');
+  // BOM for Excel
+  var blob = new Blob(['\ufeff'+csv], {type:'text/csv;charset=utf-8'});
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement('a');
+  a.href = url;
+  a.download = (experiment === 1 ? 'forsoeg1-partialtoner' : 'forsoeg2-grundtone-vs-masse')+'.csv';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+// ===== UI WIRING =====
+function bindH(id, valId, cb){
+  var el = document.getElementById(id), vl = document.getElementById(valId);
+  el.addEventListener('input', function(){ cb(parseFloat(el.value), vl); });
+}
+
+bindH('freqSlider','freqVal', function(v, vl){
+  f = v;
+  vl.textContent = fmtDk(v,1)+' Hz';
+});
+bindH('massSlider','massVal', function(v, vl){
+  Mg = v;
+  vl.textContent = Math.round(v)+' g';
+});
+bindH('lengthSlider','lengthVal', function(v, vl){
+  L = v;
+  vl.textContent = fmtDk(v,2)+' m';
+});
+bindH('muSlider','muVal', function(v, vl){
+  mu_gpm = v;
+  vl.textContent = fmtDk(v,2)+' g/m';
+});
+bindH('gammaSlider','gammaVal', function(v, vl){
+  GAMMA = v;
+  vl.textContent = fmtDk(v,1)+' /s';
+});
+bindH('sigmaMSlider','sigmaMVal', function(v, vl){
+  SIGMA_M = v;
+  vl.textContent = fmtDk(v,1)+' g';
+});
+bindH('sigmaLSlider','sigmaLVal', function(v, vl){
+  SIGMA_L = v;
+  vl.textContent = fmtDk(v,1)+' mm';
+});
+
+// Frequency stepper buttons (fine ±0.1 Hz, hold-to-repeat)
+(function(){
+  var slider = document.getElementById('freqSlider');
+  var valEl  = document.getElementById('freqVal');
+  function stepF(delta){
+    var nf = Math.round((f + delta)*10)/10;
+    if (nf < 1) nf = 1;
+    if (nf > 300) nf = 300;
+    f = nf;
+    slider.value = nf;
+    valEl.textContent = fmtDk(nf,1)+' Hz';
+  }
+  function attachHold(btn, delta){
+    var holdT = null, repeatT = null;
+    function start(e){
+      e.preventDefault();
+      stepF(delta);
+      holdT = setTimeout(function(){
+        repeatT = setInterval(function(){ stepF(delta); }, 60);
+      }, 350);
+    }
+    function stop(){
+      if (holdT){ clearTimeout(holdT); holdT = null; }
+      if (repeatT){ clearInterval(repeatT); repeatT = null; }
+    }
+    btn.addEventListener('mousedown', start);
+    btn.addEventListener('touchstart', start, {passive:false});
+    btn.addEventListener('mouseup', stop);
+    btn.addEventListener('mouseleave', stop);
+    btn.addEventListener('touchend', stop);
+    btn.addEventListener('touchcancel', stop);
+  }
+  attachHold(document.getElementById('freqMinus'), -0.1);
+  attachHold(document.getElementById('freqPlus'),  +0.1);
+})();
+
+function resetTrace(){}  // no-op (kept for safety)
+
+// Experiment radio
+var expRadio = document.getElementById('expRadio');
+var expLabels = expRadio.querySelectorAll('label');
+for (var i = 0; i < expLabels.length; i++){
+  (function(lbl){
+    lbl.addEventListener('click', function(){
+      var ex = parseInt(lbl.getAttribute('data-exp'));
+      experiment = ex;
+      for (var k = 0; k < expLabels.length; k++) expLabels[k].classList.remove('active');
+      lbl.classList.add('active');
+      lbl.querySelector('input').checked = true;
+      var desc = document.getElementById('expDesc');
+      if (ex === 1){
+        desc.innerHTML = 'Hold loddet fast. Sweep f og notér resonanstoppene som f<sub>1</sub>, f<sub>2</sub>, f<sub>3</sub> …';
+      } else {
+        desc.innerHTML = 'Variér loddet M. For hvert M: tun f til grundtone-peak, notér (M, f<sub>1</sub>).';
+      }
+      renderTable();
+    });
+  })(expLabels[i]);
+}
+
+// Collapse for lab settings
+document.getElementById('labHead').addEventListener('click', function(){
+  this.classList.toggle('open');
+});
+
+// Action buttons
+document.getElementById('pauseBtn').addEventListener('click', function(){
+  paused = !paused;
+  this.innerHTML = paused
+    ? '<span class="action-icon">&#9654;</span> AFSPIL'
+    : '<span class="action-icon">&#9646;&#9646;</span> PAUSE';
+  if (!paused) lastStamp = null;
+});
+document.getElementById('recordBtn').addEventListener('click', recordMeasurement);
+document.getElementById('csvBtn').addEventListener('click', exportCSV);
+document.getElementById('clearBtn').addEventListener('click', function(){
+  if (!confirm('Ryd den aktuelle tabel?')) return;
+  if (experiment === 1) exp1Data = []; else exp2Data = [];
+  renderTable();
+});
+document.getElementById('copyBtn').addEventListener('click', function(){
+  var html = document.documentElement.outerHTML;
+  navigator.clipboard.writeText(html).then(function(){
+    var btn = document.getElementById('copyBtn');
+    btn.innerHTML = '<span class="action-icon">&#10003;</span> KOPIERET!';
+    setTimeout(function(){
+      btn.innerHTML = '<span class="action-icon">&#10697;</span> KOPIER KODE';
+    }, 2000);
+  });
+});
+
+document.getElementById('themeBtn').addEventListener('click', function(){
+  isDark = !isDark;
+  if (isDark){
+    document.documentElement.removeAttribute('data-theme');
+    this.textContent = 'Lys tema';
+  } else {
+    document.documentElement.setAttribute('data-theme', 'light');
+    this.textContent = 'Mørkt tema';
+  }
+});
+
+// Initial
+renderTable();
+updateReadouts();
+requestAnimationFrame(loop);
+</script>
+</body>
+</html>
