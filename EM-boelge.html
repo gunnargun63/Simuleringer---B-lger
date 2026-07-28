@@ -3,413 +3,918 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Elektromagnetisk Bølge</title>
-<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@500;700&display=swap" rel="stylesheet">
+<title>Elektromagnetisk bølge</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700&family=Share+Tech+Mono&family=Exo+2:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
-:root{
-  --bg:#06101a;--bg-panel:#0c1c2c;--bg-input:#08141e;
-  --border:#1c3650;--border-hi:#2a4e6e;
-  --cyan:#00d4ff;--cg:rgba(0,212,255,.55);--cg2:rgba(0,212,255,.15);--cdim:rgba(0,212,255,.12);
-  --magenta:#ff4da6;
-  --text:#dceefa;--text-sec:#88bcd8;--label:#6a9ab8;--axis:#1c3448;
+:root {
+  --bg0: #030810;
+  --bg1: #060e18;
+  --bg2: #0a1622;
+  --bg3: #0f1e2d;
+  --border: #1a3a52;
+  --green:  #00ff9f;
+  --cyan:   #00cfff;
+  --yellow: #ffd93d;
+  --text: #d0eef5;
+  --dim:  #8ec8d8;
+  --mono: 'Courier New', 'Lucida Console', monospace;
+  --ui: 'Share Tech Mono', monospace;
+  --body: 'Exo 2', sans-serif;
+  --tr: 0.15s ease;
 }
-.light{
-  --bg:#e8f2f8;--bg-panel:#fff;--bg-input:#f0f6fa;
-  --border:#aecce0;--border-hi:#7aaec8;
-  --cyan:#006699;--cg:rgba(0,102,153,.3);--cg2:rgba(0,102,153,.1);--cdim:rgba(0,102,153,.09);
-  --magenta:#bb0066;
-  --text:#0e1e2a;--text-sec:#2a5570;--label:#3a6880;--axis:#aaccdc;
+[data-theme="light"] {
+  --bg0: #e8e0d2;
+  --bg1: #f4eee3;
+  --bg2: #fdfaf4;
+  --bg3: #fdfaf4;
+  --border: #c8c0b0;
+  --green:  #1D9E75;
+  --cyan:   #378ADD;
+  --yellow: #c07800;
+  --text: #1a1a1a;
+  --dim:  #333333;
 }
-*{margin:0;padding:0;box-sizing:border-box;}
-body{background:var(--bg);color:var(--text);font-family:'Rajdhani',sans-serif;font-size:15px;min-height:100vh;padding:22px;transition:background .3s,color .3s;}
 
-/* Header */
-header{display:flex;justify-content:space-between;align-items:center;padding-bottom:14px;margin-bottom:16px;border-bottom:1px solid var(--border-hi);}
-.tblock{display:flex;flex-direction:column;gap:6px;}
-h1{font-family:'Share Tech Mono',monospace;font-size:19px;font-weight:400;color:var(--cyan);letter-spacing:.15em;text-shadow:0 0 16px var(--cg),0 0 36px var(--cg2);}
-h1 .br{opacity:.5;}
-.sub{font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--text-sec);letter-spacing:.1em;}
-.theme-btn{background:var(--cdim);border:1px solid var(--cyan);color:var(--cyan);padding:9px 18px;cursor:pointer;font-family:'Share Tech Mono',monospace;font-size:12px;letter-spacing:.12em;transition:background .2s;white-space:nowrap;text-shadow:0 0 8px var(--cg);}
-.theme-btn:hover{background:rgba(0,212,255,.22);}
+* { margin: 0; padding: 0; box-sizing: border-box; }
 
-/* Layout */
-.main{display:flex;gap:14px;align-items:flex-start;}
-.lcol{flex:1;min-width:0;}
-.rcol{width:280px;flex-shrink:0;display:flex;flex-direction:column;gap:10px;}
+body {
+  background: var(--bg0);
+  color: var(--text);
+  font-family: var(--body);
+  padding: 10px 14px 22px;
+  min-height: 100vh;
+}
 
-/* Canvas + spectrum */
-.cwrap{background:var(--bg-panel);border:1px solid var(--border-hi);padding:12px;margin-bottom:8px;}
-.swrap{background:var(--bg-panel);border:1px solid var(--border-hi);padding:8px 12px;margin-bottom:10px;}
-canvas{display:block;width:100%;}
+.wrap { max-width: 1280px; margin: 0 auto; }
 
-/* Controls */
-.controls{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px;align-items:center;}
-.btn{background:none;border:1px solid var(--border-hi);color:var(--text-sec);padding:9px 18px;cursor:pointer;font-family:'Share Tech Mono',monospace;font-size:12px;letter-spacing:.12em;transition:all .15s;}
-.btn:hover{border-color:var(--cyan);color:var(--cyan);background:var(--cdim);}
-.btn-play{border-color:var(--cyan);color:var(--cyan);text-shadow:0 0 8px var(--cg);}
-.legend{display:flex;gap:16px;align-items:center;flex-wrap:wrap;}
-.leg{display:flex;align-items:center;gap:7px;font-family:'Share Tech Mono',monospace;font-size:11px;}
-.legline{width:22px;height:2px;display:block;}
-.c{color:var(--cyan);}.m{color:var(--magenta);}
+/* ---------- Kompakt topbjælke ---------- */
+header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  border: 1px solid var(--border);
+  background: var(--bg1);
+  padding: 8px 12px;
+  margin-bottom: 10px;
+}
+[data-theme="light"] header { background: #fdfaf4; }
+.title-group { display: flex; align-items: center; gap: 10px; }
+h1 {
+  font-family: 'Orbitron', sans-serif;
+  font-weight: 700;
+  font-size: 16px;
+  letter-spacing: .16em;
+  color: var(--green);
+  text-transform: uppercase;
+}
+html:not([data-theme="light"]) h1 { text-shadow: 0 0 10px rgba(0,255,159,.4); }
 
-/* Right panel */
-.pcard{background:var(--bg-panel);border:1px solid var(--border-hi);padding:15px 17px;}
-.plbl{font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--label);letter-spacing:.14em;text-transform:uppercase;margin-bottom:9px;}
-.pval{font-family:'Share Tech Mono',monospace;font-size:19px;color:var(--cyan);letter-spacing:.05em;}
-.pval-sm{font-family:'Share Tech Mono',monospace;font-size:13px;color:var(--cyan);letter-spacing:.04em;}
-.wave-name{font-family:'Share Tech Mono',monospace;font-size:15px;color:var(--text);letter-spacing:.06em;margin-bottom:7px;}
-.wave-desc{font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--text-sec);letter-spacing:.04em;line-height:1.8;}
-.irow{display:flex;gap:6px;align-items:center;margin-bottom:10px;}
-.linp{background:var(--bg-input);border:1px solid var(--border-hi);color:var(--cyan);padding:7px 8px;font-family:'Share Tech Mono',monospace;font-size:16px;width:0;flex:1;letter-spacing:.03em;outline:none;transition:border-color .2s;-moz-appearance:textfield;}
-.linp::-webkit-inner-spin-button,.linp::-webkit-outer-spin-button{-webkit-appearance:none;}
-.linp:focus{border-color:var(--cyan);}
-.usel{background:var(--bg-input);border:1px solid var(--border-hi);color:var(--text);padding:7px 5px;font-family:'Share Tech Mono',monospace;font-size:12px;outline:none;cursor:pointer;width:52px;}
-input[type=range].ls{-webkit-appearance:none;appearance:none;width:100%;height:4px;border-radius:2px;outline:none;cursor:pointer;}
-input[type=range].ls::-webkit-slider-thumb{-webkit-appearance:none;width:15px;height:15px;border-radius:50%;background:var(--cyan);cursor:pointer;box-shadow:0 0 7px var(--cg);}
-input[type=range].ls::-moz-range-thumb{width:15px;height:15px;border-radius:50%;border:none;background:var(--cyan);cursor:pointer;box-shadow:0 0 7px var(--cg);}
-.slbls{display:flex;justify-content:space-between;font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--label);letter-spacing:.03em;margin-top:5px;}
+/* Blinkende antenne-ikon */
+.icon-em { width: 26px; height: 26px; display: block; }
+.icon-em .mast { stroke: var(--green); }
+.icon-em .dot { fill: var(--green); }
+.icon-em .arc { stroke: var(--green); fill: none; }
+.icon-em .arc.a1 { animation: pulseArc 1.6s ease-in-out infinite; }
+.icon-em .arc.a2 { animation: pulseArc 1.6s ease-in-out infinite .5s; }
+@keyframes pulseArc {
+  0%, 100% { opacity: .15; }
+  40%      { opacity: 1; }
+}
+html:not([data-theme="light"]) .icon-em { filter: drop-shadow(0 0 4px rgba(0,255,159,.6)); }
+
+.hdr-btns { display: flex; gap: 7px; flex-wrap: wrap; }
+.btn-hdr {
+  font-family: var(--ui);
+  font-size: 12px;
+  letter-spacing: .08em;
+  border: 1px solid var(--border);
+  background: var(--bg3);
+  color: var(--text);
+  padding: 6px 13px;
+  cursor: pointer;
+  text-transform: uppercase;
+  transition: var(--tr);
+  user-select: none;
+}
+.btn-hdr:hover { border-color: var(--green); color: var(--green); }
+html:not([data-theme="light"]) .btn-hdr:hover { box-shadow: 0 0 10px rgba(0,255,159,.35); }
+[data-theme="light"] .btn-hdr { font-weight: 700; }
+
+/* ---------- Hovedlayout: sidebar + canvas ---------- */
+.main-grid {
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  gap: 10px;
+  align-items: start;
+}
+@media (max-width: 880px) {
+  .main-grid { grid-template-columns: 1fr; }
+}
+
+.panel {
+  background: var(--bg1);
+  border: 1px solid var(--border);
+  padding: 11px 12px;
+}
+[data-theme="light"] .panel { background: #fdfaf4; }
+.panel + .panel { margin-top: 10px; }
+
+canvas#scene {
+  display: block;
+  width: 100%;
+  height: auto;
+  background: var(--bg2);
+  border: 1px solid var(--border);
+}
+[data-theme="light"] canvas#scene { background: #fdfaf4; }
+
+canvas#band {
+  display: block;
+  width: 100%;
+  height: auto;
+  cursor: pointer;
+}
+
+.sec-title {
+  font-family: var(--ui);
+  font-size: 11px;
+  letter-spacing: .22em;
+  color: var(--green);
+  text-transform: uppercase;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 5px;
+  margin-bottom: 10px;
+}
+[data-theme="light"] .sec-title { font-weight: 700; }
+
+/* symboler må aldrig uppercases */
+.sym { text-transform: none; }
+
+/* ---------- Slidere ---------- */
+.ctl-row { margin-bottom: 13px; }
+.ctl-label {
+  font-family: var(--ui);
+  font-size: 12px;
+  letter-spacing: .08em;
+  color: var(--text);
+  text-transform: uppercase;
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+[data-theme="light"] .ctl-label { font-weight: 700; }
+.ctl-label .val {
+  font-family: var(--mono);
+  font-weight: 700;
+  color: var(--cyan);
+  text-transform: none;
+  white-space: nowrap;
+}
+
+input[type="range"] {
+  width: 100%;
+  -webkit-appearance: none;
+  appearance: none;
+  height: 6px;
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  outline: none;
+  cursor: pointer;
+}
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 18px;
+  height: 18px;
+  background: var(--green);
+  border: 2px solid var(--bg0);
+  border-radius: 50%;
+  cursor: pointer;
+}
+input[type="range"]::-moz-range-thumb {
+  width: 16px;
+  height: 16px;
+  background: var(--green);
+  border: 2px solid var(--bg0);
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+.slider-ends {
+  display: flex;
+  justify-content: space-between;
+  font-family: var(--mono);
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--dim);
+  margin-top: 4px;
+}
+
+/* ---------- Knapper ---------- */
+.btn-row { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 2px; }
+.btn {
+  font-family: var(--ui);
+  font-size: 12px;
+  letter-spacing: .1em;
+  border: 1px solid var(--green);
+  background: var(--bg3);
+  color: var(--green);
+  padding: 8px 18px;
+  cursor: pointer;
+  text-transform: uppercase;
+  transition: var(--tr);
+  user-select: none;
+}
+[data-theme="light"] .btn { font-weight: 700; }
+.btn:hover { background: rgba(0,255,159,.09); }
+html:not([data-theme="light"]) .btn:hover { box-shadow: 0 0 10px rgba(0,255,159,.4); }
+[data-theme="light"] .btn:hover { background: rgba(29,158,117,.10); }
+.btn.sec { border-color: var(--cyan); color: var(--cyan); }
+.btn.sec:hover { background: rgba(0,207,255,.09); }
+[data-theme="light"] .btn.sec:hover { background: rgba(55,138,221,.10); }
+
+/* ---------- Aflæsninger ---------- */
+.readouts { display: flex; flex-direction: column; gap: 8px; }
+.ro {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  padding: 8px 11px;
+}
+[data-theme="light"] .ro { background: #ffffff; }
+.ro .k {
+  font-family: var(--ui);
+  font-size: 12px;
+  letter-spacing: .08em;
+  color: var(--text);
+  display: block;
+  margin-bottom: 3px;
+}
+[data-theme="light"] .ro .k { font-weight: 700; }
+.ro .v {
+  font-family: var(--mono);
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--cyan);
+  display: block;
+}
+.ro .v.grn { color: var(--green); }
+.ro .v.yel { color: var(--yellow); }
+
+/* ---------- Modaler ---------- */
+.modal-bg {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.65);
+  z-index: 50;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+.modal-bg.open { display: flex; }
+.modal {
+  background: var(--bg1);
+  border: 1px solid var(--green);
+  max-width: 720px;
+  width: 100%;
+  max-height: 84vh;
+  overflow-y: auto;
+  padding: 20px 24px;
+}
+[data-theme="light"] .modal { background: #fdfaf4; border-color: #1D9E75; }
+.modal h2 {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 15px;
+  letter-spacing: .1em;
+  color: var(--green);
+  text-transform: uppercase;
+  margin-bottom: 14px;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 8px;
+}
+.modal p, .modal li {
+  font-size: 14.5px;
+  line-height: 1.7;
+  color: var(--text);
+  margin-bottom: 10px;
+}
+.modal ol, .modal ul { margin: 0 0 10px 22px; }
+.modal .acc { color: var(--cyan); font-weight: 600; }
+.modal .acc-y { color: var(--yellow); font-weight: 600; }
+[data-theme="light"] .modal .acc-y { color: #c07800; }
+.modal-close-row { text-align: right; margin-top: 12px; }
+
+.toast {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--bg3);
+  border: 1px solid var(--green);
+  color: var(--green);
+  font-family: var(--ui);
+  font-size: 13px;
+  letter-spacing: .08em;
+  padding: 10px 22px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .3s;
+  z-index: 99;
+}
+.toast.show { opacity: 1; }
 </style>
 </head>
 <body>
+<div class="wrap">
 
-<header>
-  <div class="tblock">
-    <h1><span class="br">{</span> ELEKTROMAGNETISK BØLGE <span class="br">›</span> UDBREDELSE <span class="br">}</span></h1>
-    <div class="sub">Tværgående bølge &nbsp;·&nbsp; E ⊥ B ⊥ k &nbsp;·&nbsp; felterne svinger i fase</div>
-  </div>
-  <button class="theme-btn" id="themeBtn" onclick="toggleTheme()">☀ LYS</button>
-</header>
-
-<div class="main">
-  <div class="lcol">
-    <div class="cwrap"><canvas id="wc" height="265"></canvas></div>
-    <div class="swrap"><canvas id="sc" height="60"></canvas></div>
-    <div class="controls">
-      <button class="btn btn-play" id="playBtn" onclick="togglePlay()">▶ AFSPIL</button>
-      <button class="btn" onclick="resetWave()">↺ NULSTIL</button>
-      <button class="btn" id="copyBtn" onclick="copyCode()">⧉ KOPIER KODE</button>
+  <header>
+    <div class="title-group">
+      <svg class="icon-em" viewBox="0 0 26 26" aria-hidden="true">
+        <line class="mast" x1="8" y1="23" x2="8" y2="7" stroke-width="2.4" stroke-linecap="round"/>
+        <circle class="dot" cx="8" cy="5.5" r="2.6"/>
+        <path class="arc a1" d="M 12 2 A 5 5 0 0 1 12 9" stroke-width="2" stroke-linecap="round"/>
+        <path class="arc a2" d="M 16 0.5 A 8.5 8.5 0 0 1 16 10.5" stroke-width="2" stroke-linecap="round"/>
+      </svg>
+      <h1>Elektromagnetisk b&oslash;lge</h1>
     </div>
-    <div class="legend">
-      <div class="leg"><span class="legline" style="background:var(--cyan)"></span><span class="c">E-felt (elektrisk)</span></div>
-      <div class="leg"><span class="legline" style="background:var(--magenta)"></span><span class="m">B-felt (magnetisk)</span></div>
+    <div class="hdr-btns">
+      <button class="btn-hdr" id="btnForklaring">Forklaring</button>
+      <button class="btn-hdr" id="btnOpgave">Opgave</button>
+      <button class="btn-hdr" id="btnKopier">Kopier kode</button>
+      <button class="btn-hdr" id="btnTema">Lyst tema</button>
     </div>
-  </div>
+  </header>
 
-  <div class="rcol">
-    <div class="pcard">
-      <div class="plbl">Bølgelængde (λ)</div>
-      <div class="irow">
-        <input class="linp" type="number" id="lval" value="500" min="0.0001" step="any" oninput="onNum()">
-        <select class="usel" id="usel" onchange="onNum()">
-          <option value="1e-9">nm</option>
-          <option value="1e-6">μm</option>
-          <option value="1e-3">mm</option>
-          <option value="1">m</option>
-        </select>
+  <div class="main-grid">
+
+    <div class="sidebar">
+      <div class="panel">
+        <div class="sec-title">Kontrol</div>
+
+        <div class="ctl-row">
+          <div class="ctl-label">
+            <span>B&oslash;lgel&aelig;ngde <span class="sym">&lambda;</span></span>
+            <span class="val" id="lamVal">&ndash;</span>
+          </div>
+          <input type="range" id="lamSlider" min="0" max="1000" step="1" value="250">
+          <div class="slider-ends"><span>1 km</span><span>10<sup>&minus;13</sup> m</span></div>
+        </div>
+
+        <div class="ctl-row">
+          <div class="ctl-label">
+            <span>Animationshastighed</span>
+            <span class="val" id="spdVal">1,0&times;</span>
+          </div>
+          <input type="range" id="spdSlider" min="10" max="300" step="5" value="100">
+        </div>
+
+        <div class="btn-row">
+          <button class="btn" id="btnPause">Pause</button>
+          <button class="btn sec" id="btnReset">Nulstil</button>
+        </div>
       </div>
-      <input type="range" class="ls" id="ls" min="-11" max="1" step="0.01" value="-6.301" oninput="onSlider()">
-      <div class="slbls"><span>0,01 nm</span><span>1 nm</span><span>1 μm</span><span>1 mm</span><span>10 m</span></div>
+
+      <div class="panel">
+        <div class="sec-title">Afl&aelig;sninger</div>
+        <div class="readouts">
+          <div class="ro"><span class="k">B&oslash;lgel&aelig;ngde <span class="sym">&lambda;</span></span><span class="v" id="roLam">&ndash;</span></div>
+          <div class="ro"><span class="k">Frekvens <span class="sym">f</span></span><span class="v grn" id="roFrq">&ndash;</span></div>
+          <div class="ro"><span class="k">Fotonenergi <span class="sym">E</span> = <span class="sym">h&middot;f</span></span><span class="v yel" id="roEph">&ndash;</span></div>
+        </div>
+      </div>
     </div>
-    <div class="pcard">
-      <div class="plbl">Frekvens &nbsp;( f = c / λ )</div>
-      <div class="pval" id="fdisp">—</div>
+
+    <div class="content-col">
+      <div class="panel">
+        <canvas id="scene" width="940" height="430"></canvas>
+      </div>
+      <div class="panel">
+        <div class="sec-title">Det elektromagnetiske spektrum &mdash; klik p&aring; et omr&aring;de</div>
+        <canvas id="band" width="940" height="92"></canvas>
+      </div>
     </div>
-    <div class="pcard">
-      <div class="plbl">Bølgetype</div>
-      <div class="wave-name" id="wname">—</div>
-      <div class="wave-desc" id="wdesc">Angiv en bølgelængde.</div>
-    </div>
-    <div class="pcard">
-      <div class="plbl">Lyshastighed</div>
-      <div class="pval-sm">c = 3,00 × 10⁸ m/s</div>
-    </div>
+
+  </div>
+
+</div>
+
+<!-- Modaler SKAL ligge f&oslash;r script-tagget -->
+<div class="modal-bg" id="modalForklaring">
+  <div class="modal">
+    <h2>Forklaring</h2>
+    <p>En elektromagnetisk b&oslash;lge best&aring;r af et <span class="acc-y">elektrisk felt <span class="sym">E</span></span> og et <span class="acc">magnetisk felt <span class="sym">B</span></span>, der svinger vinkelret p&aring; hinanden og vinkelret p&aring; udbredelsesretningen. B&oslash;lgen er alts&aring; en <em>transversalb&oslash;lge</em>.</p>
+    <p>B&oslash;lgen skabes af ladninger i acceleration &mdash; her illustreret ved en elektron, der svinger op og ned i en dipolantenne. En ladning i hvile eller med konstant hastighed udsender ingen str&aring;ling; det er accelerationen, der skaber b&oslash;lgen.</p>
+    <p>De to felter svinger <em>i fase</em>: N&aring;r det elektriske felt er st&oslash;rst, er det magnetiske felt ogs&aring; st&oslash;rst. P&aring; tegningen har de to felter sammenlignelig st&oslash;rrelse, s&aring; begge kan ses tydeligt &mdash; men i virkeligheden er feltstyrkerne forbundet ved <span class="acc"><span class="sym">B</span> = <span class="sym">E</span>/<span class="sym">c</span></span>, s&aring; m&aring;lt i SI-enheder er <span class="sym">B</span>-feltets talv&aelig;rdi ca. 300 millioner gange mindre end <span class="sym">E</span>-feltets.</p>
+    <p>B&oslash;lgen udbreder sig i vakuum med lysets hastighed <span class="acc"><span class="sym">c</span> = 2,998&times;10<sup>8</sup> m/s</span>, og der g&aelig;lder sammenh&aelig;ngen <span class="acc"><span class="sym">c</span> = <span class="sym">&lambda;</span>&middot;<span class="sym">f</span></span>. Kortere b&oslash;lgel&aelig;ngde betyder derfor h&oslash;jere frekvens &mdash; det ses direkte i animationen, hvor udbredelsesfarten er den samme uanset b&oslash;lgel&aelig;ngden.</p>
+    <p>Lyset kan ogs&aring; beskrives som fotoner med energien <span class="acc-y"><span class="sym">E</span> = <span class="sym">h</span>&middot;<span class="sym">f</span></span>, hvor <span class="sym">h</span> = 6,626&times;10<sup>&minus;34</sup> J&middot;s er Plancks konstant. Jo h&oslash;jere frekvens, desto mere energi b&aelig;rer den enkelte foton.</p>
+    <p><em>Bem&aelig;rk om skalaen:</em> Spektret sp&aelig;nder over ca. 16 tierpotenser i b&oslash;lgel&aelig;ngde. B&oslash;lgen p&aring; sk&aelig;rmen kan derfor ikke vises i korrekt skala &mdash; den tegnede b&oslash;lgel&aelig;ngde varierer kun moderat, mens de korrekte v&aelig;rdier st&aring;r i afl&aelig;sningsfelterne. Pr&oslash;v at &aelig;ndre b&oslash;lgel&aelig;ngden, mens animationen k&oslash;rer: De nye b&oslash;lger skubber de gamle foran sig med lysets hastighed.</p>
+    <div class="modal-close-row"><button class="btn" data-close="modalForklaring">Luk</button></div>
   </div>
 </div>
 
+<div class="modal-bg" id="modalOpgave">
+  <div class="modal">
+    <h2>Opgave</h2>
+    <ol>
+      <li>S&aelig;t animationen p&aring; pause og unders&oslash;g figuren: Hvilken retning peger det elektriske felt og det magnetiske felt i forhold til udbredelsesretningen? Er de to felter i fase eller forskudt i forhold til hinanden?</li>
+      <li>Indstil b&oslash;lgel&aelig;ngden til ca. 500 nm (gr&oslash;nt lys). Afl&aelig;s b&oslash;lgel&aelig;ngden og frekvensen, og kontroll&eacute;r med en beregning, at <span class="sym">c</span> = <span class="sym">&lambda;</span>&middot;<span class="sym">f</span> passer for de afl&aelig;ste v&aelig;rdier.</li>
+      <li>Beregn fotonenergien for den b&oslash;lgel&aelig;ngde, du afl&aelig;ste i opgave 2, i b&aring;de joule og elektronvolt, og sammenlign med afl&aelig;sningen.</li>
+      <li>&AElig;ndr b&oslash;lgel&aelig;ngden fra stor til lille, mens animationen k&oslash;rer. Beskriv hvad du ser p&aring; overgangen mellem de gamle og de nye b&oslash;lger &mdash; og forklar hvorfor overgangen bev&aelig;ger sig med lysets hastighed.</li>
+      <li>Elektronen i antennen svinger op og ned. Forklar hvorfor en ladning i hvile eller med konstant hastighed ikke udsender elektromagnetisk str&aring;ling.</li>
+    </ol>
+    <div class="modal-close-row"><button class="btn" data-close="modalOpgave">Luk</button></div>
+  </div>
+</div>
+
+<div class="modal-bg" id="modalSpektrum">
+  <div class="modal">
+    <h2 id="spekTitle">&nbsp;</h2>
+    <div id="spekBody"></div>
+    <div class="modal-close-row"><button class="btn" data-close="modalSpektrum">Luk</button></div>
+  </div>
+</div>
+
+<div class="toast" id="toast">Kode kopieret til udklipsholderen</div>
+
 <script>
-const wc=document.getElementById('wc'), ctx=wc.getContext('2d');
-const sc=document.getElementById('sc'), sctx=sc.getContext('2d');
-const C=3e8, LMIN=-11, LMAX=1, SPD=2.5, EMX=20;
+'use strict';
 
-let cLog=Math.log10(500e-9), phase=0, wf=0, running=false, animId=null, isLight=false;
+/* ================= Konstanter ================= */
+const C_LIGHT = 2.998e8;        // m/s
+const H_PLANCK = 6.626e-34;     // J*s
+const EV = 1.602e-19;           // J
 
-const css=v=>getComputedStyle(document.body).getPropertyValue(v).trim();
+/* Slider: logλ fra +3 (1 km) til -13 (10^-13 m) */
+const LOGLAM_MAX = 3, LOGLAM_MIN = -13;
 
-function initC(){
-  wc.width=wc.parentElement.clientWidth-24; wc.height=265;
-  sc.width=sc.parentElement.clientWidth-24; sc.height=60;
+/* Visuel skala: skærm-bølgelængde (px) aftager monotont gennem spektret */
+const SCREEN_LAM_MAX = 240, SCREEN_LAM_MIN = 55;
+const V_SCREEN = 125;           // px pr. sim-sekund — konstant "lysets hastighed" på skærmen
+
+/* ================= Tema ================= */
+const htmlEl = document.documentElement;
+const btnTema = document.getElementById('btnTema');
+function isLight() { return htmlEl.getAttribute('data-theme') === 'light'; }
+function D(dark, light) { return isLight() ? light : dark; }
+btnTema.addEventListener('click', () => {
+  if (isLight()) { htmlEl.removeAttribute('data-theme'); btnTema.textContent = 'Lyst tema'; }
+  else { htmlEl.setAttribute('data-theme', 'light'); btnTema.textContent = 'M\u00f8rkt tema'; }
+});
+
+/* ================= Modaler ================= */
+function bindModal(btnId, modalId) {
+  document.getElementById(btnId).addEventListener('click', () =>
+    document.getElementById(modalId).classList.add('open'));
 }
+bindModal('btnForklaring', 'modalForklaring');
+bindModal('btnOpgave', 'modalOpgave');
+document.querySelectorAll('[data-close]').forEach(b =>
+  b.addEventListener('click', () => document.getElementById(b.dataset.close).classList.remove('open')));
+document.querySelectorAll('.modal-bg').forEach(m =>
+  m.addEventListener('click', e => { if (e.target === m) m.classList.remove('open'); }));
 
-/* Visual wavelength: logarithmically maps log(lambda) to canvas pixels */
-function visLam(){
-  const t=(cLog-LMIN)/(LMAX-LMIN); // 0=gamma, 1=radio
-  return Math.max(8, wc.width*(0.04+0.63*t));
-}
+/* ================= Kopier kode ================= */
+document.getElementById('btnKopier').addEventListener('click', () => {
+  const code = '<!DOCTYPE html>\n' + document.documentElement.outerHTML;
+  navigator.clipboard.writeText(code).then(() => {
+    const t = document.getElementById('toast');
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 2200);
+  });
+});
 
-/* EM info */
-function waveInfo(m){
-  if(m>=1)      return{n:'Radiobølger',      d:'λ ≥ 1 m\nFM/AM-radio, TV og mobilkommunikation.'};
-  if(m>=1e-3)   return{n:'Mikrobølger',       d:'1 mm – 1 m\nMikrobølgeovn, radar og Wi-Fi.'};
-  if(m>=700e-9) return{n:'Infrarød stråling', d:'700 nm – 1 mm\nFornemmes som varme.\nFjernstyring og termokameraer.'};
-  if(m>=380e-9) return{n:'Synligt lys',       d:'380 – 700 nm\nDen eneste del af EM-spektret\nvi kan se med øjet.'};
-  if(m>=10e-9)  return{n:'Ultraviolet (UV)',  d:'10 – 380 nm\nFra solen. Kan skade hud og DNA.'};
-  if(m>=1e-11)  return{n:'Røntgenstråling',   d:'0,01 – 10 nm\nGennemtrænger blødt væv.\nBrugt i medicinsk diagnostik.'};
-  return             {n:'Gammastråling',     d:'λ < 0,01 nm\nFra radioaktivt henfald og\nkosmiske eksplosioner.'};
+/* ================= Dansk talformatering ================= */
+function daNum(x, digits) {
+  return x.toLocaleString('da-DK', { minimumFractionDigits: digits, maximumFractionDigits: digits });
 }
-function fmtF(hz){
-  if(hz>=1e18)return(hz/1e18).toPrecision(3)+' EHz';
-  if(hz>=1e15)return(hz/1e15).toPrecision(3)+' PHz';
-  if(hz>=1e12)return(hz/1e12).toPrecision(3)+' THz';
-  if(hz>=1e9) return(hz/1e9 ).toPrecision(3)+' GHz';
-  if(hz>=1e6) return(hz/1e6 ).toPrecision(3)+' MHz';
-  if(hz>=1e3) return(hz/1e3 ).toPrecision(3)+' kHz';
-  return hz.toPrecision(3)+' Hz';
-}
-function m2disp(m){
-  if(m>=1)    return{v:m,      s:'1'};
-  if(m>=1e-3) return{v:m*1e3, s:'1e-3'};
-  if(m>=1e-6) return{v:m*1e6, s:'1e-6'};
-  return           {v:m*1e9, s:'1e-9'};
-}
-function updatePanel(){
-  const m=Math.pow(10,cLog);
-  document.getElementById('fdisp').textContent=fmtF(C/m);
-  const i=waveInfo(m);
-  document.getElementById('wname').textContent=i.n;
-  document.getElementById('wdesc').textContent=i.d.replace(/\n/g,' ');
-}
-function updSliderFill(){
-  const s=document.getElementById('ls');
-  const p=((cLog-LMIN)/(LMAX-LMIN))*100;
-  s.style.background=`linear-gradient(to right,${css('--cyan')} ${p}%,${css('--border-hi')} ${p}%)`;
-}
-function onSlider(){
-  cLog=parseFloat(document.getElementById('ls').value);
-  const d=m2disp(Math.pow(10,cLog));
-  document.getElementById('lval').value=parseFloat(d.v.toPrecision(4));
-  document.getElementById('usel').value=d.s;
-  updSliderFill(); updatePanel(); drawSpec();
-}
-function onNum(){
-  const v=parseFloat(document.getElementById('lval').value)||0;
-  const u=parseFloat(document.getElementById('usel').value);
-  const m=v*u; if(m<=0)return;
-  cLog=Math.max(LMIN,Math.min(LMAX,Math.log10(m)));
-  document.getElementById('ls').value=cLog;
-  updSliderFill(); updatePanel(); drawSpec();
-}
-
-/* Arrow */
-function arw(x1,y1,x2,y2,col,lw){
-  const dx=x2-x1,dy=y2-y1,len=Math.hypot(dx,dy);
-  if(len<4)return;
-  const a=Math.atan2(dy,dx),hl=Math.min(10,len*0.28);
-  ctx.save();ctx.strokeStyle=col;ctx.fillStyle=col;ctx.lineWidth=lw;ctx.lineCap='round';
-  ctx.globalAlpha=0.88;ctx.beginPath();ctx.moveTo(x1,y1);ctx.lineTo(x2,y2);ctx.stroke();
-  ctx.globalAlpha=1;ctx.beginPath();ctx.moveTo(x2,y2);
-  ctx.lineTo(x2-hl*Math.cos(a-.38),y2-hl*Math.sin(a-.38));
-  ctx.lineTo(x2-hl*Math.cos(a+.38),y2-hl*Math.sin(a+.38));
-  ctx.closePath();ctx.fill();ctx.restore();
-}
-
-/* Emitter */
-function drawEmitter(cy,ph,CC,active){
-  const pulse=(1+Math.sin(ph*2.5))/2;
-  const op=active?(.55+.45*pulse):.28;
-  ctx.save();
-
-  /* Ground line */
-  ctx.strokeStyle=CC;ctx.lineWidth=1.5;ctx.globalAlpha=op*.7;
-  ctx.beginPath();ctx.moveTo(EMX-7,cy+17);ctx.lineTo(EMX+7,cy+17);ctx.stroke();
-
-  /* Antenna */
-  ctx.lineWidth=2;ctx.globalAlpha=op;
-  ctx.beginPath();ctx.moveTo(EMX,cy-16);ctx.lineTo(EMX,cy+17);ctx.stroke();
-
-  /* Pulsing core */
-  const r=active?(4+pulse*3):4;
-  ctx.fillStyle=CC;ctx.globalAlpha=active?(.65+.35*pulse):.2;
-  ctx.beginPath();ctx.arc(EMX,cy,r,0,Math.PI*2);ctx.fill();
-
-  /* Radiating arcs */
-  if(active&&wf>5){
-    for(let ri=1;ri<=4;ri++){
-      const rad=ri*7;
-      const ao=(1-ri/4.8)*(0.45+0.4*pulse);
-      ctx.globalAlpha=Math.max(0,ao);
-      ctx.strokeStyle=CC;ctx.lineWidth=1;
-      ctx.beginPath();ctx.arc(EMX,cy,rad,-Math.PI/3,Math.PI/3);ctx.stroke();
+/* Vælg SI-præfiks så mantissen ligger i [1, 1000) */
+function fmtSI(value, unit, prefixes) {
+  for (const p of prefixes) {
+    const m = value / p.f;
+    if (m >= 1 && m < 1000) {
+      const digits = m < 10 ? 2 : (m < 100 ? 1 : 0);
+      return daNum(m, digits) + ' ' + p.s + unit;
     }
   }
-  ctx.restore();
+  const p = prefixes[prefixes.length - 1];
+  return daNum(value / p.f, 2) + ' ' + p.s + unit;
+}
+const PRE_LAM = [
+  { f: 1e3, s: 'k' }, { f: 1, s: '' }, { f: 1e-3, s: 'm' }, { f: 1e-6, s: '\u00b5' },
+  { f: 1e-9, s: 'n' }, { f: 1e-12, s: 'p' }, { f: 1e-15, s: 'f' }
+];
+const PRE_FRQ = [
+  { f: 1e21, s: 'Z' }, { f: 1e18, s: 'E' }, { f: 1e15, s: 'P' }, { f: 1e12, s: 'T' },
+  { f: 1e9, s: 'G' }, { f: 1e6, s: 'M' }, { f: 1e3, s: 'k' }, { f: 1, s: '' }
+];
+const PRE_EV = [
+  { f: 1e6, s: 'M' }, { f: 1e3, s: 'k' }, { f: 1, s: '' }, { f: 1e-3, s: 'm' },
+  { f: 1e-6, s: '\u00b5' }, { f: 1e-9, s: 'n' }, { f: 1e-12, s: 'p' }
+];
+
+/* ================= Tilstand ================= */
+const lamSlider = document.getElementById('lamSlider');
+const spdSlider = document.getElementById('spdSlider');
+const btnPause = document.getElementById('btnPause');
+const btnReset = document.getElementById('btnReset');
+
+let logLam = sliderToLog(+lamSlider.value);
+let speed = 1.0;
+let paused = false;
+
+function sliderToLog(v) { return LOGLAM_MAX + (v / 1000) * (LOGLAM_MIN - LOGLAM_MAX); }
+function lambdaMeters() { return Math.pow(10, logLam); }
+function screenLambda() {
+  const u = (LOGLAM_MAX - logLam) / (LOGLAM_MAX - LOGLAM_MIN);   // 0..1 gennem spektret
+  return SCREEN_LAM_MAX * Math.pow(SCREEN_LAM_MIN / SCREEN_LAM_MAX, u);
 }
 
-/* Main wave draw */
-function draw(){
-  const W=wc.width,H=wc.height;
-  ctx.clearRect(0,0,W,H);
-  const cy=H/2, amp=H*0.27;
-  const lam=visLam(), k=(2*Math.PI)/lam;
-  const bA=28*Math.PI/180, bS=0.55;
-  const CC=css('--cyan'),M=css('--magenta'),AX=css('--axis'),LB=css('--label');
-  const x0=EMX+16, xEnd=W-10;
+/* ================= Retarderet fase (ringbuffer) =================
+   Kildens fase φ(t) gemmes med fast sim-tidsskridt. Feltet i afstand z
+   er sin(φ(t − z/v)) — så en ændring af λ udbreder sig fysisk korrekt
+   fra antennen med "lysets hastighed" i stedet for at ændre hele bølgen. */
+const SIM_DT = 1 / 240;
+const BUF_LEN = 8192;
+const phaseBuf = new Float64Array(BUF_LEN);
+let head = -1;          // indeks for seneste sample (antal samples - 1)
+let phase = 0;
+let acc = 0;            // tidsakkumulator
 
-  /* Axis */
-  ctx.save();ctx.strokeStyle=AX;ctx.lineWidth=1;ctx.setLineDash([5,8]);
-  ctx.beginPath();ctx.moveTo(x0,cy);ctx.lineTo(xEnd,cy);ctx.stroke();ctx.restore();
+function resetWave() { head = -1; phase = 0; acc = 0; }
 
-  drawEmitter(cy,phase,CC,running||wf>0);
+function stepSim(realDt) {
+  acc += Math.min(realDt, 0.1) * speed;
+  const omega = 2 * Math.PI * V_SCREEN / screenLambda();
+  while (acc >= SIM_DT) {
+    acc -= SIM_DT;
+    phase += omega * SIM_DT;
+    head++;
+    phaseBuf[head % BUF_LEN] = phase;
+  }
+}
 
-  const xF=Math.min(x0+wf,xEnd);
+/* Fase ved retarderet tid; null hvis bølgen ikke er nået frem endnu */
+function retardedPhase(delaySec) {
+  const back = delaySec / SIM_DT;
+  const idx = head - back;
+  if (idx < 0 || head < 0) return null;
+  const i0 = Math.floor(idx), i1 = i0 + 1, frac = idx - i0;
+  if (head - i0 >= BUF_LEN) return null;   // ældre end bufferen
+  const p0 = phaseBuf[i0 % BUF_LEN];
+  const p1 = phaseBuf[Math.min(i1, head) % BUF_LEN];
+  return p0 + (p1 - p0) * frac;
+}
 
-  if(wf>2){
-    /* Clip to wavefront */
-    ctx.save();ctx.beginPath();ctx.rect(x0,0,xF-x0,H);ctx.clip();
+/* ================= Aflæsninger ================= */
+const lamVal = document.getElementById('lamVal');
+const roLam = document.getElementById('roLam');
+const roFrq = document.getElementById('roFrq');
+const roEph = document.getElementById('roEph');
 
-    /* Arrows: spaced ~40% of lambda */
-    const spacing=lam*0.38;
-    const N=Math.min(38,Math.max(5,Math.round((xEnd-x0)/spacing)));
+function updateReadouts() {
+  const lam = lambdaMeters();
+  const f = C_LIGHT / lam;
+  const Eev = H_PLANCK * f / EV;
+  const lamTxt = fmtSI(lam, 'm', PRE_LAM);
+  lamVal.textContent = lamTxt;
+  roLam.textContent = lamTxt;
+  roFrq.textContent = fmtSI(f, 'Hz', PRE_FRQ);
+  roEph.textContent = fmtSI(Eev, 'eV', PRE_EV);
+}
 
-    /* B field */
-    for(let i=0;i<=N;i++){
-      const x=x0+(i/N)*(xEnd-x0);if(x>xF)continue;
-      const v=amp*Math.sin(k*(x-x0)-phase);
-      if(Math.abs(v)>6)arw(x,cy,x+v*bS*Math.cos(bA),cy+v*bS*Math.sin(bA),M,1.5);
+lamSlider.addEventListener('input', () => { logLam = sliderToLog(+lamSlider.value); updateReadouts(); });
+spdSlider.addEventListener('input', () => {
+  speed = (+spdSlider.value) / 100;
+  document.getElementById('spdVal').textContent = daNum(speed, 1) + '\u00d7';
+});
+btnPause.addEventListener('click', () => {
+  paused = !paused;
+  btnPause.textContent = paused ? 'Afspil' : 'Pause';
+});
+btnReset.addEventListener('click', resetWave);
+
+/* ================= Tegning ================= */
+/* HiDPI: canvas tegnes i devicePixelRatio-gange opløsning, så Retina-skærme
+   (iPad, Mac) får skarpe streger. Alle koordinater forbliver logiske. */
+const DPR = Math.min(window.devicePixelRatio || 1, 3);
+function setupHiDPI(canvas, w, h) {
+  canvas.width = Math.round(w * DPR);
+  canvas.height = Math.round(h * DPR);
+  const c = canvas.getContext('2d');
+  c.setTransform(DPR, 0, 0, DPR, 0, 0);
+  return c;
+}
+
+const cv = document.getElementById('scene');
+const W = 940, H = 430;
+const ctx = setupHiDPI(cv, W, H);
+
+/* Scene-geometri */
+const Z0 = 100;                 // antennens skærm-x
+const ZMAX = W - 34;            // bølgens højre grænse
+const YMID = H / 2 + 4;         // udbredelsesaksens skærm-y
+const AMP = 82;                 // visuel amplitude (ens for E og B)
+/* B-feltets retning i perspektiv (enhedsvektor på skærmen) */
+const BX = 0.55, BY = 0.33;
+
+function colE() { return D('#ffd93d', '#c07800'); }
+function colB() { return D('#00cfff', '#378ADD'); }
+function colAxis() { return D('#3a5a72', '#8a8070'); }
+function colText() { return D('#d0eef5', '#1a1a1a'); }
+function colDim() { return D('#8ec8d8', '#333333'); }
+
+function fieldAt(zPx) {
+  const p = retardedPhase((zPx - Z0) / V_SCREEN);
+  return p === null ? null : Math.sin(p);
+}
+
+function drawArrow(x0, y0, x1, y1, color, lw) {
+  const dx = x1 - x0, dy = y1 - y0;
+  const len = Math.hypot(dx, dy);
+  if (len < 3) return;
+  ctx.strokeStyle = color; ctx.fillStyle = color; ctx.lineWidth = lw;
+  ctx.beginPath(); ctx.moveTo(x0, y0); ctx.lineTo(x1, y1); ctx.stroke();
+  const ux = dx / len, uy = dy / len, hs = Math.min(7, len * 0.5);
+  ctx.beginPath();
+  ctx.moveTo(x1, y1);
+  ctx.lineTo(x1 - hs * ux - hs * 0.55 * uy, y1 - hs * uy + hs * 0.55 * ux);
+  ctx.lineTo(x1 - hs * ux + hs * 0.55 * uy, y1 - hs * uy - hs * 0.55 * ux);
+  ctx.closePath(); ctx.fill();
+}
+
+function drawScene() {
+  ctx.clearRect(0, 0, W, H);
+  const light = isLight();
+  const lwCurve = light ? 2.6 : 2.2;
+  const lwArrow = light ? 2.2 : 1.8;
+
+  /* Udbredelsesakse */
+  ctx.strokeStyle = colAxis();
+  ctx.lineWidth = 1.4;
+  ctx.setLineDash([5, 5]);
+  ctx.beginPath(); ctx.moveTo(Z0, YMID); ctx.lineTo(ZMAX, YMID); ctx.stroke();
+  ctx.setLineDash([]);
+  drawArrow(ZMAX - 26, YMID, ZMAX, YMID, colAxis(), 1.4);
+  /* label UNDER hele bølgen, nederst til højre */
+  ctx.fillStyle = colDim();
+  ctx.font = '700 14px "Exo 2", sans-serif';
+  ctx.textAlign = 'right';
+  ctx.fillText('udbredelsesretning \u2192', ZMAX, H - 12);
+  ctx.textAlign = 'left';
+
+  const STEP_ARROW = 26, STEP_CURVE = 4;
+
+  /* --- Magnetisk felt (bagest) --- */
+  if (!light) { ctx.shadowColor = colB(); ctx.shadowBlur = 6; }
+  ctx.strokeStyle = colB(); ctx.lineWidth = lwCurve;
+  ctx.beginPath();
+  let started = false;
+  for (let z = Z0; z <= ZMAX; z += STEP_CURVE) {
+    const s = fieldAt(z);
+    if (s === null) break;
+    const x = z + s * AMP * BX, y = YMID - s * AMP * BY;
+    if (!started) { ctx.moveTo(x, y); started = true; } else ctx.lineTo(x, y);
+  }
+  ctx.stroke();
+  ctx.shadowBlur = 0;
+  for (let z = Z0 + STEP_ARROW / 2; z <= ZMAX; z += STEP_ARROW) {
+    const s = fieldAt(z);
+    if (s === null) break;
+    drawArrow(z, YMID, z + s * AMP * BX, YMID - s * AMP * BY, colB(), lwArrow);
+  }
+
+  /* --- Elektrisk felt (forrest) --- */
+  if (!light) { ctx.shadowColor = colE(); ctx.shadowBlur = 6; }
+  ctx.strokeStyle = colE(); ctx.lineWidth = lwCurve;
+  ctx.beginPath();
+  started = false;
+  for (let z = Z0; z <= ZMAX; z += STEP_CURVE) {
+    const s = fieldAt(z);
+    if (s === null) break;
+    const x = z, y = YMID - s * AMP;
+    if (!started) { ctx.moveTo(x, y); started = true; } else ctx.lineTo(x, y);
+  }
+  ctx.stroke();
+  ctx.shadowBlur = 0;
+  for (let z = Z0 + STEP_ARROW / 2; z <= ZMAX; z += STEP_ARROW) {
+    const s = fieldAt(z);
+    if (s === null) break;
+    drawArrow(z, YMID, z, YMID - s * AMP, colE(), lwArrow);
+  }
+
+  /* --- Dipolantenne med svingende elektron --- */
+  const rodTop = YMID - AMP - 16, rodBot = YMID + AMP + 16;
+  ctx.strokeStyle = colText();
+  ctx.lineWidth = light ? 5 : 4;
+  ctx.beginPath(); ctx.moveTo(Z0, rodTop); ctx.lineTo(Z0, rodBot); ctx.stroke();
+  /* fødepunkt (lille gab) */
+  ctx.strokeStyle = D('#0a1622', '#fdfaf4');
+  ctx.lineWidth = 8;
+  ctx.beginPath(); ctx.moveTo(Z0, YMID - 5); ctx.lineTo(Z0, YMID + 5); ctx.stroke();
+  /* elektronen */
+  const sNow = head >= 0 ? Math.sin(phaseBuf[head % BUF_LEN]) : 0;
+  const qy = YMID - sNow * (AMP - 22);
+  if (!light) { ctx.shadowColor = colE(); ctx.shadowBlur = 12; }
+  ctx.fillStyle = colE();
+  ctx.beginPath(); ctx.arc(Z0, qy, 9, 0, 2 * Math.PI); ctx.fill();
+  ctx.shadowBlur = 0;
+  ctx.fillStyle = D('#0a1622', '#ffffff');
+  ctx.font = '700 15px "Courier New", monospace';
+  ctx.textAlign = 'center';
+  ctx.fillText('\u2212', Z0, qy + 5);
+  ctx.textAlign = 'left';
+  ctx.fillStyle = colDim();
+  ctx.font = '700 13px "Exo 2", sans-serif';
+  ctx.fillText('antenne', Z0 - 28, rodBot + 20);
+
+  /* --- Signaturforklaring --- */
+  ctx.font = '700 16px "Exo 2", sans-serif';
+  ctx.fillStyle = colE();
+  ctx.fillText('Elektrisk felt', Z0 + 30, 26);
+  ctx.fillStyle = colB();
+  ctx.fillText('Magnetisk felt', Z0 + 175, 26);
+  if (paused) {
+    ctx.fillStyle = colText();
+    ctx.font = '700 15px "Share Tech Mono", monospace';
+    ctx.textAlign = 'right';
+    ctx.fillText('PAUSERET', ZMAX, 26);
+    ctx.textAlign = 'left';
+  }
+}
+
+/* ================= Spektralbånd ================= */
+const bandCv = document.getElementById('band');
+const W2 = 940, H2 = 92;
+const bctx = setupHiDPI(bandCv, W2, H2);
+const BAND = { x0: 14, x1: 926, yTop: 32, barH: 30 };
+
+const LOG_VIS_R = Math.log10(7e-7);   // 700 nm — rød kant
+const LOG_VIS_V = Math.log10(4e-7);   // 400 nm — violet kant
+
+/* Regioner fra lang til kort bølgelængde. logHi = lang-λ-grænse, logLo = kort-λ-grænse. */
+const REGIONS = [
+  {
+    id: 'radio', name: 'Radiob\u00f8lger', logHi: 3, logLo: 0,
+    colD: '#3f6f9e', colL: '#34618f', openLong: true,
+    body: '<p>Radiob\u00f8lger bruges til radio- og tv-udsendelser, DAB, kommunikation med fly og skibe samt radioastronomi. FM-radio ligger fx omkring <span class="acc">\u03bb \u2248 3 m</span> (100 MHz).</p><p>Radiob\u00f8lger skabes i antenner, hvor elektroner svinger frem og tilbage \u2014 pr\u00e6cis som i animationen ovenfor. Modtagerantennen virker omvendt: Den ankommende b\u00f8lges elektriske felt f\u00e5r elektronerne i antennen til at svinge.</p>'
+  },
+  {
+    id: 'mikro', name: 'Mikrob\u00f8lger', logHi: 0, logLo: -3,
+    colD: '#00a8d8', colL: '#0e7fb0',
+    body: '<p>Mikrob\u00f8lgeovnen bruger <span class="acc">\u03bb = 12,2 cm</span> (2,45 GHz), som is\u00e6r optages af vandmolekyler i maden.</p><p>Wi-fi, bluetooth, mobilnet, radar og satellitkommunikation ligger ogs\u00e5 i dette omr\u00e5de.</p><p>Den kosmiske baggrundsstr\u00e5ling \u2014 efterladt fra universets barndom \u2014 topper ved <span class="acc">\u03bb \u2248 1,9 mm</span> og er alts\u00e5 mikrob\u00f8lgestr\u00e5ling.</p>'
+  },
+  {
+    id: 'ir', name: 'Infrar\u00f8d', logHi: -3, logLo: LOG_VIS_R,
+    colD: '#d05038', colL: '#b03c20',
+    body: '<p>Alle legemer udsender varmestr\u00e5ling, og ved almindelige temperaturer ligger den i det infrar\u00f8de omr\u00e5de. Termiske kameraer og natkikkerter "ser" denne str\u00e5ling.</p><p>Fjernbetjeninger bruger infrar\u00f8dt lys omkring <span class="acc">\u03bb \u2248 940 nm</span>.</p><p>Drivhuseffekten skyldes, at CO<sub>2</sub> og vanddamp i atmosf\u00e6ren absorberer infrar\u00f8d str\u00e5ling fra jordoverfladen.</p>'
+  },
+  {
+    id: 'vis', name: 'Synligt lys', logHi: LOG_VIS_R, logLo: LOG_VIS_V,
+    colD: null, colL: null, rainbow: true,
+    body: '<p>Det eneste omr\u00e5de af spektret, \u00f8jet kan se: fra r\u00f8dt ved <span class="acc">\u03bb \u2248 700 nm</span> til violet ved <span class="acc">\u03bb \u2248 400 nm</span>. En regnbue er sollys, der er splittet op i disse b\u00f8lgel\u00e6ngder.</p><p>Solens udstr\u00e5ling er kraftigst netop i det synlige omr\u00e5de \u2014 det er n\u00e6ppe et tilf\u00e6lde, at \u00f8jet har udviklet sig til at se pr\u00e6cis her. Fotosyntesen i planter drives ogs\u00e5 af synligt lys.</p>'
+  },
+  {
+    id: 'uv', name: 'Ultraviolet', logHi: LOG_VIS_V, logLo: -8,
+    colD: '#8a5cf6', colL: '#6a3fd0',
+    body: '<p>Solen udsender ultraviolet str\u00e5ling. UV-B giver solskoldning, men s\u00e6tter ogs\u00e5 gang i kroppens produktion af D-vitamin. Ozonlaget absorberer den farligste del (UV-C), f\u00f8r den n\u00e5r jordoverfladen.</p><p>UV-lys bruges til sterilisering og til at afsl\u00f8re fluorescerende sikkerhedstr\u00e5de i pengesedler. Fotonenergien er h\u00f8j nok til at skade DNA \u2014 derfor solcreme.</p>'
+  },
+  {
+    id: 'xray', name: 'R\u00f8ntgen', logHi: -8, logLo: -11,
+    colD: '#6ac4b0', colL: '#2a9078',
+    body: '<p>R\u00f8ntgenstr\u00e5ling g\u00e5r let gennem bl\u00f8dt v\u00e6v, men stoppes i h\u00f8jere grad af knogler \u2014 derfor kan man fotografere skelettet. CT-skannere og bagageskannere i lufthavne bruger ogs\u00e5 r\u00f8ntgenstr\u00e5ling.</p><p>Str\u00e5lingen er <em>ioniserende</em>: Fotonenergien er stor nok til at rive elektroner l\u00f8s fra atomer. Derfor b\u00e6rer personalet blyafsk\u00e6rmning, og dosis holdes s\u00e5 lav som muligt.</p>'
+  },
+  {
+    id: 'gamma', name: 'Gammastr\u00e5ling', logHi: -11, logLo: -13,
+    colD: '#d43a8c', colL: '#c0306a', openShort: true,
+    body: '<p>Gammastr\u00e5ling udsendes fra <em>atomkerner</em>, typisk n\u00e5r en kerne efter et radioaktivt henfald kommer af med oversk\u00f8dsenergi. Det er den mest energirige og mest gennemtr\u00e6ngende str\u00e5ling i spektret \u2014 og den er ioniserende.</p><p>Gammastr\u00e5ling bruges til str\u00e5leterapi mod kr\u00e6ft, til sterilisering af medicinsk udstyr og i PET-skanning, hvor der m\u00e5les fotoner p\u00e5 pr\u00e6cis 511 keV fra annihilation af positroner.</p>'
+  }
+];
+
+function logToX(lg) {
+  return BAND.x0 + (LOGLAM_MAX - lg) / (LOGLAM_MAX - LOGLAM_MIN) * (BAND.x1 - BAND.x0);
+}
+function xToLog(x) {
+  return LOGLAM_MAX - (x - BAND.x0) / (BAND.x1 - BAND.x0) * (LOGLAM_MAX - LOGLAM_MIN);
+}
+
+function drawBand() {
+  bctx.clearRect(0, 0, W2, H2);
+  const light = isLight();
+  const yT = BAND.yTop, bh = BAND.barH;
+
+  for (const r of REGIONS) {
+    const xa = logToX(r.logHi), xb = logToX(r.logLo);
+    if (r.rainbow) {
+      const g = bctx.createLinearGradient(xa, 0, xb, 0);
+      g.addColorStop(0.00, '#ff2000');
+      g.addColorStop(0.28, '#ffd400');
+      g.addColorStop(0.50, '#00c830');
+      g.addColorStop(0.76, '#0050ff');
+      g.addColorStop(1.00, '#8800e0');
+      bctx.fillStyle = g;
+    } else {
+      bctx.fillStyle = light ? r.colL : r.colD;
     }
-    ctx.save();ctx.strokeStyle=M;ctx.lineWidth=2.4;ctx.beginPath();let fb=true;
-    for(let x=x0;x<=xF;x+=2){
-      const v=amp*Math.sin(k*(x-x0)-phase);
-      const sx=x+v*bS*Math.cos(bA),sy=cy+v*bS*Math.sin(bA);
-      fb?(ctx.moveTo(sx,sy),fb=false):ctx.lineTo(sx,sy);
-    }
-    ctx.stroke();ctx.restore();
+    bctx.fillRect(xa, yT, xb - xa, bh);
+    bctx.strokeStyle = D('#030810', '#e8e0d2');
+    bctx.lineWidth = 1;
+    bctx.strokeRect(xa + 0.5, yT + 0.5, xb - xa - 1, bh - 1);
 
-    /* E field */
-    for(let i=0;i<=N;i++){
-      const x=x0+(i/N)*(xEnd-x0);if(x>xF)continue;
-      const v=amp*Math.sin(k*(x-x0)-phase);
-      if(Math.abs(v)>6)arw(x,cy,x,cy-v,CC,1.5);
-    }
-    ctx.save();ctx.strokeStyle=CC;ctx.lineWidth=2.4;ctx.beginPath();
-    for(let x=x0;x<=xF;x+=2){
-      const y=amp*Math.sin(k*(x-x0)-phase);
-      x===x0?ctx.moveTo(x,cy-y):ctx.lineTo(x,cy-y);
-    }
-    ctx.stroke();ctx.restore();
-
-    ctx.restore(); /* end clip */
-
-    /* Wavefront indicator */
-    if(xF<xEnd-4){
-      ctx.save();ctx.strokeStyle=CC;ctx.lineWidth=1.2;
-      ctx.setLineDash([3,5]);ctx.globalAlpha=0.4;
-      ctx.beginPath();ctx.moveTo(xF,cy-amp*.9);ctx.lineTo(xF,cy+amp*.65);ctx.stroke();ctx.restore();
+    /* navn over segmentet, hvis der er plads */
+    const cx = (xa + xb) / 2;
+    bctx.font = '700 13px "Exo 2", sans-serif';
+    bctx.textAlign = 'center';
+    bctx.fillStyle = colText();
+    if (xb - xa >= 62) {
+      bctx.fillText(r.name, cx, yT - 9);
+    } else {
+      /* smalt segment (Synligt lys): navn under båndet med markeringsstreg */
+      bctx.strokeStyle = colText();
+      bctx.lineWidth = 1.4;
+      bctx.beginPath();
+      bctx.moveTo(cx, yT + bh + 2);
+      bctx.lineTo(cx, yT + bh + 12);
+      bctx.stroke();
+      bctx.fillText(r.name, cx, yT + bh + 26);
     }
   }
 
-  /* E / B labels */
-  if(wf>35){
-    ctx.save();ctx.font='bold 13px "Share Tech Mono",monospace';
-    ctx.fillStyle=CC;ctx.fillText('E',x0+4,cy-amp-10);
-    ctx.fillStyle=M;ctx.fillText('B',x0+6+amp*bS*Math.cos(bA),cy+amp*bS*Math.sin(bA)+4);
-    ctx.restore();
+  /* markør: hvor slideren står */
+  const mx = logToX(logLam);
+  bctx.fillStyle = colText();
+  bctx.strokeStyle = colText();
+  bctx.lineWidth = 2;
+  bctx.beginPath();
+  bctx.moveTo(mx, yT - 2);
+  bctx.lineTo(mx, yT + bh + 2);
+  bctx.stroke();
+  bctx.beginPath();
+  bctx.moveTo(mx - 6, yT - 8);
+  bctx.lineTo(mx + 6, yT - 8);
+  bctx.lineTo(mx, yT - 1);
+  bctx.closePath();
+  bctx.fill();
+  bctx.textAlign = 'left';
+}
+
+/* Klik: flyt slideren til områdets midte OG åbn infoboksen */
+bandCv.addEventListener('click', e => {
+  const rect = bandCv.getBoundingClientRect();
+  const x = (e.clientX - rect.left) * (W2 / rect.width);
+  const y = (e.clientY - rect.top) * (H2 / rect.height);
+  if (x < BAND.x0 || x > BAND.x1 || y < BAND.yTop - 14 || y > BAND.yTop + BAND.barH + 30) return;
+  const lg = xToLog(x);
+  const r = REGIONS.find(r => lg <= r.logHi && lg >= r.logLo);
+  if (!r) return;
+  const center = (r.logHi + r.logLo) / 2;
+  logLam = center;
+  lamSlider.value = Math.round((LOGLAM_MAX - center) / (LOGLAM_MAX - LOGLAM_MIN) * 1000);
+  updateReadouts();
+  openSpekModal(r);
+});
+
+function openSpekModal(r) {
+  const lamHi = Math.pow(10, r.logHi), lamLo = Math.pow(10, r.logLo);
+  const fLo = C_LIGHT / lamHi, fHi = C_LIGHT / lamLo;
+  const eLo = H_PLANCK * fLo / EV, eHi = H_PLANCK * fHi / EV;
+  let facts;
+  if (r.openLong) {
+    facts = '<p><span class="acc">B\u00f8lgel\u00e6ngde:</span> l\u00e6ngere end ' + fmtSI(lamLo, 'm', PRE_LAM) +
+      ' &nbsp;\u00b7&nbsp; <span class="acc">Frekvens:</span> under ' + fmtSI(fHi, 'Hz', PRE_FRQ) +
+      ' &nbsp;\u00b7&nbsp; <span class="acc-y">Fotonenergi:</span> under ' + fmtSI(eHi, 'eV', PRE_EV) + '</p>';
+  } else if (r.openShort) {
+    facts = '<p><span class="acc">B\u00f8lgel\u00e6ngde:</span> kortere end ' + fmtSI(lamHi, 'm', PRE_LAM) +
+      ' &nbsp;\u00b7&nbsp; <span class="acc">Frekvens:</span> over ' + fmtSI(fLo, 'Hz', PRE_FRQ) +
+      ' &nbsp;\u00b7&nbsp; <span class="acc-y">Fotonenergi:</span> over ' + fmtSI(eLo, 'eV', PRE_EV) + '</p>';
+  } else {
+    facts = '<p><span class="acc">B\u00f8lgel\u00e6ngde:</span> ' + fmtSI(lamHi, 'm', PRE_LAM) + ' \u2013 ' + fmtSI(lamLo, 'm', PRE_LAM) +
+      ' &nbsp;\u00b7&nbsp; <span class="acc">Frekvens:</span> ' + fmtSI(fLo, 'Hz', PRE_FRQ) + ' \u2013 ' + fmtSI(fHi, 'Hz', PRE_FRQ) +
+      ' &nbsp;\u00b7&nbsp; <span class="acc-y">Fotonenergi:</span> ' + fmtSI(eLo, 'eV', PRE_EV) + ' \u2013 ' + fmtSI(eHi, 'eV', PRE_EV) + '</p>';
   }
-
-  /* k arrow */
-  const ax=xEnd-40;
-  arw(ax,cy,ax+28,cy,LB,1.5);
-  ctx.save();ctx.fillStyle=LB;ctx.font='11px "Share Tech Mono",monospace';
-  ctx.fillText('k',ax-14,cy+4);ctx.restore();
+  document.getElementById('spekTitle').textContent = r.name;
+  document.getElementById('spekBody').innerHTML = facts + r.body;
+  document.getElementById('modalSpektrum').classList.add('open');
 }
 
-/* EM Spectrum strip */
-function drawSpec(){
-  const W=sc.width,H=sc.height;
-  sctx.clearRect(0,0,W,H);
-  const SH=30; /* strip height */
-  const lx=l=>(l-LMIN)/(LMAX-LMIN)*W;
-
-  const regions=[
-    {l0:-11, l1:-10,  col:'#4a0077', lbl:'Gamma'},
-    {l0:-10, l1:-8,   col:'#00338b', lbl:'Røntgen'},
-    {l0:-8,  l1:-6.42,col:'#6600bb', lbl:'UV'},
-    {l0:-6.42,l1:-6.15,vis:true,     lbl:'Synligt lys'},
-    {l0:-6.15,l1:-3,  col:'#991100', lbl:'Infrarød'},
-    {l0:-3,  l1:0,    col:'#995500', lbl:'Mikrobølger'},
-    {l0:0,   l1:1,    col:'#335577', lbl:'Radio'},
-  ];
-
-  for(const r of regions){
-    const rx0=lx(r.l0),rx1=lx(r.l1),rw=rx1-rx0;
-    if(r.vis){
-      const g=sctx.createLinearGradient(rx0,0,rx1,0);
-      g.addColorStop(0,'#8800ff');g.addColorStop(.18,'#2200ff');
-      g.addColorStop(.35,'#00aaee');g.addColorStop(.52,'#00bb00');
-      g.addColorStop(.68,'#cccc00');g.addColorStop(.84,'#ff8800');
-      g.addColorStop(1,'#cc0000');
-      sctx.fillStyle=g;
-    } else { sctx.fillStyle=r.col; }
-    sctx.fillRect(rx0,0,rw,SH);
-    /* Separator */
-    sctx.fillStyle='rgba(0,0,0,0.35)';sctx.fillRect(rx1-.5,0,1,SH);
-  }
-
-  /* Current position marker */
-  const mx=lx(cLog);
-  sctx.save();
-  sctx.strokeStyle=css('--cyan');sctx.lineWidth=2.5;
-  if(!isLight){sctx.shadowBlur=10;sctx.shadowColor=css('--cyan');}
-  sctx.beginPath();sctx.moveTo(mx,0);sctx.lineTo(mx,SH+5);sctx.stroke();
-  sctx.fillStyle=css('--cyan');
-  sctx.beginPath();sctx.moveTo(mx-5,SH+1);sctx.lineTo(mx+5,SH+1);sctx.lineTo(mx,SH+8);sctx.closePath();sctx.fill();
-  sctx.restore();
-
-  /* Region labels */
-  sctx.textAlign='center';sctx.font='10px "Share Tech Mono",monospace';
-  for(const r of regions){
-    const rw=lx(r.l1)-lx(r.l0),cx=(lx(r.l0)+lx(r.l1))/2;
-    if(rw<22)continue; /* skip if too narrow */
-    sctx.fillStyle=r.vis?'#000':'rgba(255,255,255,.82)';
-    /* Abbreviate if narrow */
-    const txt=rw<50?r.lbl.split(' ')[0]:r.lbl;
-    sctx.fillText(txt,cx,SH+19);
-  }
-  sctx.textAlign='left';
+/* ================= Hovedloop ================= */
+let lastT = performance.now();
+function loop(now) {
+  const realDt = (now - lastT) / 1000;
+  lastT = now;
+  if (!paused) stepSim(realDt);
+  drawScene();
+  drawBand();
+  requestAnimationFrame(loop);
 }
 
-/* Animation loop */
-function step(){
-  const lam=visLam();
-  const xEnd=wc.width-10, x0=EMX+16;
-  wf=Math.min(wf+SPD,xEnd-x0);
-  phase+=SPD*(2*Math.PI)/lam;
-  draw();
-  animId=requestAnimationFrame(step);
-}
-
-function togglePlay(){
-  const btn=document.getElementById('playBtn');
-  if(running){running=false;cancelAnimationFrame(animId);btn.textContent='▶ AFSPIL';}
-  else{running=true;btn.textContent='⏸ PAUSE';step();}
-}
-function resetWave(){
-  if(running){running=false;cancelAnimationFrame(animId);document.getElementById('playBtn').textContent='▶ AFSPIL';}
-  phase=0;wf=0;draw();drawSpec();
-}
-function toggleTheme(){
-  isLight=!isLight;document.body.classList.toggle('light',isLight);
-  document.getElementById('themeBtn').textContent=isLight?'☾ MØRK':'☀ LYS';
-  updSliderFill();draw();drawSpec();
-}
-function copyCode(){
-  const btn=document.getElementById('copyBtn');
-  navigator.clipboard.writeText('<!DOCTYPE html>\n'+document.documentElement.outerHTML)
-    .then(()=>{btn.textContent='✓ KOPIERET!';setTimeout(()=>btn.textContent='⧉ KOPIER KODE',2500);})
-    .catch(()=>{btn.textContent='✗ FEJL';setTimeout(()=>btn.textContent='⧉ KOPIER KODE',2000);});
-}
-
-window.addEventListener('resize',()=>{initC();draw();drawSpec();});
-initC();updatePanel();updSliderFill();draw();drawSpec();
+updateReadouts();
+requestAnimationFrame(loop);
 </script>
 </body>
 </html>
