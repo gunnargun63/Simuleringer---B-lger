@@ -2,489 +2,1290 @@
 <html lang="da">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Lydbølge Simulering</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lydb&oslash;lge i en gas</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Share+Tech+Mono&family=Exo+2:wght@300;400;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700&family=Share+Tech+Mono&family=Exo+2:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
-body{margin:0;padding:24px;box-sizing:border-box;background:#dad4c4;min-height:100vh;display:flex;justify-content:center;align-items:flex-start;font-family:'Exo 2',sans-serif;transition:background .25s}
-#wrapper{width:100%;max-width:880px}
+:root {
+  --bg0: #030810;
+  --bg1: #060e18;
+  --bg2: #0a1622;
+  --bg3: #0f1e2d;
+  --border: #1a3a52;
+  --green:  #00ff9f;
+  --cyan:   #00cfff;
+  --yellow: #ffd93d;
+  --text: #d0eef5;
+  --dim:  #8ec8d8;
+  --mono: 'Courier New', 'Lucida Console', monospace;
+  --ui: 'Share Tech Mono', monospace;
+  --body: 'Exo 2', sans-serif;
+  --tr: 0.15s ease;
+}
+[data-theme="light"] {
+  --bg0: #e8e0d2;
+  --bg1: #f4eee3;
+  --bg2: #fdfaf4;
+  --bg3: #fdfaf4;
+  --border: #c8c0b0;
+  --green:  #1D9E75;
+  --cyan:   #378ADD;
+  --yellow: #c07800;
+  --text: #1a1a1a;
+  --dim:  #333333;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  background: var(--bg0);
+  color: var(--text);
+  font-family: var(--body);
+  padding: 10px 14px 18px;
+  min-height: 100vh;
+}
+
+.wrap { max-width: 1280px; margin: 0 auto; }
+
+/* ---------- Kompakt topbjælke ---------- */
+header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  border: 1px solid var(--border);
+  background: var(--bg1);
+  padding: 7px 12px;
+  margin-bottom: 8px;
+}
+[data-theme="light"] header { background: #fdfaf4; }
+.title-group { display: flex; align-items: center; gap: 10px; }
+h1 {
+  font-family: 'Orbitron', sans-serif;
+  font-weight: 700;
+  font-size: 16px;
+  letter-spacing: .16em;
+  color: var(--green);
+  text-transform: uppercase;
+}
+html:not([data-theme="light"]) h1 { text-shadow: 0 0 10px rgba(0,255,159,.4); }
+
+/* Højtaler-ikon med pulserende lydbuer */
+.icon-sp { width: 26px; height: 26px; display: block; }
+.icon-sp .cone { fill: var(--green); }
+.icon-sp .arc { stroke: var(--green); fill: none; }
+.icon-sp .arc.a1 { animation: pulseArc 1.6s ease-in-out infinite; }
+.icon-sp .arc.a2 { animation: pulseArc 1.6s ease-in-out infinite .5s; }
+@keyframes pulseArc {
+  0%, 100% { opacity: .15; }
+  40%      { opacity: 1; }
+}
+html:not([data-theme="light"]) .icon-sp { filter: drop-shadow(0 0 4px rgba(0,255,159,.6)); }
+
+.hdr-btns { display: flex; gap: 7px; flex-wrap: wrap; }
+.btn-hdr {
+  font-family: var(--ui);
+  font-size: 12px;
+  letter-spacing: .08em;
+  border: 1px solid var(--border);
+  background: var(--bg3);
+  color: var(--text);
+  padding: 6px 13px;
+  cursor: pointer;
+  text-transform: uppercase;
+  transition: var(--tr);
+  user-select: none;
+}
+.btn-hdr:hover { border-color: var(--green); color: var(--green); }
+html:not([data-theme="light"]) .btn-hdr:hover { box-shadow: 0 0 10px rgba(0,255,159,.35); }
+[data-theme="light"] .btn-hdr { font-weight: 700; }
+
+/* ---------- Hovedlayout: sidebar + canvas ---------- */
+.main-grid {
+  display: grid;
+  grid-template-columns: 272px 1fr;
+  gap: 8px;
+  align-items: start;
+}
+@media (max-width: 880px) {
+  .main-grid { grid-template-columns: 1fr; }
+}
+
+.panel {
+  background: var(--bg1);
+  border: 1px solid var(--border);
+  padding: 9px 11px;
+}
+[data-theme="light"] .panel { background: #fdfaf4; }
+.panel + .panel { margin-top: 8px; }
+
+canvas#scene, canvas#graph {
+  display: block;
+  width: 100%;
+  height: auto;
+  background: var(--bg2);
+  border: 1px solid var(--border);
+}
+[data-theme="light"] canvas#scene,
+[data-theme="light"] canvas#graph { background: #fdfaf4; }
+
+.sec-title {
+  font-family: var(--ui);
+  font-size: 11px;
+  letter-spacing: .22em;
+  color: var(--green);
+  text-transform: uppercase;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 4px;
+  margin-bottom: 8px;
+}
+[data-theme="light"] .sec-title { font-weight: 700; }
+
+/* symboler må aldrig uppercases */
+.sym { text-transform: none; }
+
+/* ---------- LaTeX-agtig matematik ---------- */
+.eq {
+  font-family: 'Cambria Math', 'STIX Two Math', 'Latin Modern Math', Georgia, 'Times New Roman', serif;
+  font-size: 1.08em;
+  white-space: nowrap;
+  text-transform: none;
+}
+.eq .v { font-style: italic; }              /* variabler i kursiv */
+.eq .o { padding: 0 .18em; font-style: normal; }   /* operatorer med tynd luft */
+.eq sub, .eq sup { font-size: .72em; }
+.sqrt { white-space: nowrap; font-style: normal; }
+.sqrt > .rad { font-size: 1.16em; }
+.sqrt > .rc {
+  border-top: 1.3px solid currentColor;
+  padding: 0 .22em 0 .04em;
+  margin-left: -.05em;
+}
+.frac {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  vertical-align: middle;
+  font-size: .82em;
+  line-height: 1.05;
+  margin: 0 .05em;
+}
+.frac > .num { border-bottom: 1.2px solid currentColor; padding: 0 .3em; }
+.frac > .den { padding: 0 .3em; }
+
+/* ---------- Slidere ---------- */
+.ctl-row { margin-bottom: 9px; }
+.ctl-label {
+  font-family: var(--ui);
+  font-size: 12px;
+  letter-spacing: .08em;
+  color: var(--text);
+  text-transform: uppercase;
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 8px;
+  margin-bottom: 5px;
+}
+[data-theme="light"] .ctl-label { font-weight: 700; }
+.ctl-label .val {
+  font-family: var(--mono);
+  font-weight: 700;
+  color: var(--cyan);
+  text-transform: none;
+  white-space: nowrap;
+}
+
+input[type="range"] {
+  width: 100%;
+  -webkit-appearance: none;
+  appearance: none;
+  height: 6px;
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  outline: none;
+  cursor: pointer;
+}
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 18px;
+  height: 18px;
+  background: var(--green);
+  border: 2px solid var(--bg0);
+  border-radius: 50%;
+  cursor: pointer;
+}
+input[type="range"]::-moz-range-thumb {
+  width: 16px;
+  height: 16px;
+  background: var(--green);
+  border: 2px solid var(--bg0);
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+.slider-ends {
+  display: flex;
+  justify-content: space-between;
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--dim);
+  margin-top: 3px;
+}
+
+/* ---------- Knapper ---------- */
+.btn-row { display: flex; gap: 7px; flex-wrap: wrap; margin-top: 2px; }
+.btn-row + .btn-row { margin-top: 7px; }
+.btn {
+  font-family: var(--ui);
+  font-size: 12px;
+  letter-spacing: .1em;
+  border: 1px solid var(--green);
+  background: var(--bg3);
+  color: var(--green);
+  padding: 7px 13px;
+  cursor: pointer;
+  text-transform: uppercase;
+  transition: var(--tr);
+  user-select: none;
+}
+[data-theme="light"] .btn { font-weight: 700; }
+.btn:hover { background: rgba(0,255,159,.09); }
+html:not([data-theme="light"]) .btn:hover { box-shadow: 0 0 10px rgba(0,255,159,.4); }
+[data-theme="light"] .btn:hover { background: rgba(29,158,117,.10); }
+.btn.sec { border-color: var(--cyan); color: var(--cyan); }
+.btn.sec:hover { background: rgba(0,207,255,.09); }
+[data-theme="light"] .btn.sec:hover { background: rgba(55,138,221,.10); }
+
+/* ---------- Aflæsninger ---------- */
+.readouts { display: flex; flex-direction: column; gap: 6px; }
+.ro {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  padding: 6px 10px;
+}
+[data-theme="light"] .ro { background: #ffffff; }
+.ro .k {
+  font-family: var(--ui);
+  font-size: 12px;
+  letter-spacing: .08em;
+  color: var(--text);
+  display: block;
+  margin-bottom: 2px;
+}
+[data-theme="light"] .ro .k { font-weight: 700; }
+.ro .v {
+  font-family: var(--mono);
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--cyan);
+  display: block;
+}
+.ro .v.grn { color: var(--green); }
+.ro .v.yel { color: var(--yellow); }
+
+/* ---------- Modaler ---------- */
+.modal-bg {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.65);
+  z-index: 50;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+.modal-bg.open { display: flex; }
+.modal {
+  background: var(--bg1);
+  border: 1px solid var(--green);
+  max-width: 720px;
+  width: 100%;
+  max-height: 84vh;
+  overflow-y: auto;
+  padding: 20px 24px;
+}
+[data-theme="light"] .modal { background: #fdfaf4; border-color: #1D9E75; }
+.modal h2 {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 15px;
+  letter-spacing: .1em;
+  color: var(--green);
+  text-transform: uppercase;
+  margin-bottom: 14px;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 8px;
+}
+.modal p, .modal li {
+  font-size: 14.5px;
+  line-height: 1.7;
+  color: var(--text);
+  margin-bottom: 10px;
+}
+.modal ol, .modal ul { margin: 0 0 10px 22px; }
+.modal .acc { color: var(--cyan); font-weight: 600; }
+.modal .acc-y { color: var(--yellow); font-weight: 600; }
+[data-theme="light"] .modal .acc-y { color: #c07800; }
+.modal-close-row { text-align: right; margin-top: 12px; }
+
+.toast {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--bg3);
+  border: 1px solid var(--green);
+  color: var(--green);
+  font-family: var(--ui);
+  font-size: 13px;
+  letter-spacing: .08em;
+  padding: 10px 22px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .3s;
+  z-index: 99;
+}
+.toast.show { opacity: 1; }
 </style>
 </head>
 <body>
-<div id="wrapper">
-<div id="sim" style="padding:.25rem 0">
-<style>
-#shell{border-radius:10px;overflow:hidden;border:1px solid var(--bd);transition:background .25s}
-.sec{padding:10px 14px;border-bottom:1px solid var(--bd)}
-.sec:last-child{border-bottom:none}
-.hdr-row{display:flex;justify-content:space-between;align-items:center;gap:8px}
-.htitle{font-family:'Orbitron',sans-serif;font-size:13px;font-weight:700;letter-spacing:.14em;color:var(--ac);text-transform:uppercase}
-.hbtns{display:flex;gap:6px}
-.slbl{font-family:'Share Tech Mono',monospace;font-size:10px;letter-spacing:.13em;color:var(--ac);text-transform:uppercase;margin:0 0 6px}
-.main-row{display:flex;gap:0;border-bottom:1px solid var(--bd)}
-.col-canvas{flex:1 1 0;min-width:0;display:flex;flex-direction:column;background:var(--bg)}
-.col-controls{width:240px;flex-shrink:0;border-left:1px solid var(--bd);padding:10px 14px;display:flex;flex-direction:column;gap:9px}
-.mg4{display:grid;grid-template-columns:1fr 1fr;gap:5px}
-.mc2{background:var(--sf);border:1px solid var(--bd);border-radius:4px;padding:5px 7px}
-.mc2.derived{border-style:dashed}
-.ml2{font-family:'Share Tech Mono',monospace;font-size:9.5px;letter-spacing:.06em;color:var(--dim);margin:0 0 2px}
-.mv2{font-family:'Courier New',monospace;font-size:13.5px;font-weight:500;margin:0;color:var(--rd);text-shadow:var(--rdg)}
-.cr2{display:flex;flex-direction:column;gap:1px;margin:1px 0}
-.cr2 label{font-family:'Exo 2',sans-serif;font-size:10.5px;color:var(--tx);font-weight:var(--fw);display:flex;justify-content:space-between}
-.cr2 label span{font-family:'Courier New',monospace;color:var(--rd);text-shadow:var(--rdg)}
-input[type=range]{accent-color:var(--ac);width:100%;height:14px;margin:0}
-#cv,#oc{display:block;width:100%}
-.btnrow{display:flex;gap:8px;padding:10px 14px}
-.btnrow.tight{padding-top:4px;padding-bottom:10px}
-.cbtn{font-family:'Share Tech Mono',monospace;font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;padding:7px 12px;border-radius:6px;cursor:pointer;transition:opacity .15s,background .15s,color .15s;background:var(--btn-bg);color:var(--btn-fg);border:1.5px solid var(--btn-fg)}
-.cbtn.fx{flex:1}
-.cbtn:hover{opacity:.75}
-.cbtn:active{opacity:.5}
-.cbtn:disabled{opacity:.30;cursor:not-allowed}
-.cbtn:disabled:hover{opacity:.30}
-.cbtn.active{background:var(--btn-fg);color:var(--btn-bg)}
-.gas-row{display:flex;margin:0 0 7px}
-.gas-btn{flex:1;font-family:'Share Tech Mono',monospace;font-size:10.5px;letter-spacing:.06em;padding:5px 4px;background:transparent;color:var(--btn-fg);border:1px solid var(--btn-fg);cursor:pointer;text-transform:none;transition:background .15s,color .15s}
-.gas-btn:first-child{border-radius:5px 0 0 5px}
-.gas-btn:last-child{border-radius:0 5px 5px 0}
-.gas-btn:not(:first-child){border-left:none}
-.gas-btn.active{background:var(--btn-fg);color:var(--btn-bg)}
-.gas-btn:hover:not(.active){opacity:.75}
-.seg-group{display:flex;flex:2;min-width:0}
-.cbtn.seg{flex:1;border-radius:0;letter-spacing:.06em;text-transform:none;padding-left:6px;padding-right:6px}
-.cbtn.seg:first-child{border-radius:6px 0 0 6px}
-.cbtn.seg:last-child{border-radius:0 6px 6px 0;border-left-width:.75px}
-</style>
-<div id="shell">
-  <div class="sec hdr-row">
-    <span class="htitle">▌ Lydbølge Simulering</span>
-    <div class="hbtns">
-      <button class="cbtn" id="bcopy">⊞ Kopier kode</button>
-      <button class="cbtn" id="bsnd">♪ Lyd fra</button>
-      <button class="cbtn" id="btn-th">◑ Mørk tilstand</button>
+<div class="wrap">
+
+  <header>
+    <div class="title-group">
+      <svg class="icon-sp" viewBox="0 0 26 26" aria-hidden="true">
+        <path class="cone" d="M3 10 h4.2 l6 -5.4 v16.8 l-6 -5.4 H3 z"/>
+        <path class="arc a1" d="M17 9 A 5.5 5.5 0 0 1 17 17" stroke-width="2" stroke-linecap="round"/>
+        <path class="arc a2" d="M20.5 6 A 9.5 9.5 0 0 1 20.5 20" stroke-width="2" stroke-linecap="round"/>
+      </svg>
+      <h1>Lydb&oslash;lge i en gas</h1>
     </div>
-  </div>
-  <div class="main-row">
-    <div class="col-canvas">
-      <canvas id="cv" height="320"></canvas>
+    <div class="hdr-btns">
+      <button class="btn-hdr" id="btnForklaring">Forklaring</button>
+      <button class="btn-hdr" id="btnOpgave">Opgave</button>
+      <button class="btn-hdr" id="btnKopier">Kopier kode</button>
+      <button class="btn-hdr" id="btnTema">Lyst tema</button>
     </div>
-    <div class="col-controls">
-      <div>
-        <p class="slbl">Målinger</p>
-        <div class="mg4">
-          <div class="mc2"><p class="ml2">v (m/s)</p><p class="mv2" id="dspd">340</p></div>
-          <div class="mc2"><p class="ml2">f (Hz)</p><p class="mv2" id="dfrq">440</p></div>
-          <div class="mc2 derived"><p class="ml2">λ (m) ↗</p><p class="mv2" id="dlam">0,77</p></div>
-          <div class="mc2 derived"><p class="ml2">T (ms) ↗</p><p class="mv2" id="dper">2,27</p></div>
+  </header>
+
+  <div class="main-grid">
+
+    <div class="sidebar">
+      <div class="panel">
+        <div class="sec-title">Kontrol</div>
+
+        <div class="ctl-row">
+          <div class="ctl-label">
+            <span>Frekvens <span class="sym">f</span></span>
+            <span class="val" id="fVal">1000 Hz</span>
+          </div>
+          <input type="range" id="fSlider" min="200" max="2000" step="20" value="1000">
+          <div class="slider-ends"><span>200 Hz</span><span>2000 Hz</span></div>
+        </div>
+
+        <div class="ctl-row">
+          <div class="ctl-label">
+            <span>Amplitude <span class="sym">A</span></span>
+            <span class="val" id="aVal">2,0 cm</span>
+          </div>
+          <input type="range" id="aSlider" min="5" max="36" step="1" value="20">
+          <div class="slider-ends"><span>0,5 cm</span><span>3,6 cm</span></div>
+        </div>
+
+        <div class="ctl-row">
+          <div class="ctl-label">
+            <span>Temperatur <span class="sym">T</span></span>
+            <span class="val" id="tVal">293 K (20 &deg;C)</span>
+          </div>
+          <input type="range" id="tSlider" min="100" max="900" step="1" value="293">
+          <div class="slider-ends"><span>100 K</span><span>900 K</span></div>
+        </div>
+
+        <div class="ctl-row">
+          <div class="ctl-label">
+            <span>Antal molekyler <span class="sym">N</span></span>
+            <span class="val" id="nVal">4000</span>
+          </div>
+          <input type="range" id="nSlider" min="500" max="6000" step="100" value="4000">
+          <div class="slider-ends"><span>500</span><span>6000</span></div>
+        </div>
+
+        <div class="ctl-row">
+          <div class="ctl-label">
+            <span>Tempo (afspilning)</span>
+            <span class="val" id="tempoVal">100 %</span>
+          </div>
+          <input type="range" id="tempoSlider" min="10" max="100" step="5" value="100">
+          <div class="slider-ends"><span>10 %</span><span>100 %</span></div>
+        </div>
+
+        <div class="btn-row">
+          <button class="btn" id="btnSpk">T&aelig;nd h&oslash;jtaler</button>
+          <button class="btn sec" id="btnLyd">Lyd til</button>
+        </div>
+        <div class="btn-row">
+          <button class="btn" id="btnPause">Pause</button>
+          <button class="btn sec" id="btnReset">Nulstil</button>
+          <button class="btn sec" id="btnTrail">Skjul spor</button>
         </div>
       </div>
-      <div>
-        <p class="slbl">Parametre</p>
-        <div class="gas-row">
-          <button class="gas-btn" id="gas-he">He</button>
-          <button class="gas-btn active" id="gas-air">Luft</button>
-          <button class="gas-btn" id="gas-co2">CO₂</button>
+
+      <div class="panel">
+        <div class="sec-title">Skalamodel</div>
+        <div class="readouts">
+          <div class="ro"><span class="k">R&oslash;rets l&aelig;ngde</span><span class="v grn" id="roLen">2,00 m</span></div>
+          <div class="ro"><span class="k">Slowmotion</span><span class="v" id="roSlow">&ndash;</span></div>
+          <div class="ro"><span class="k">Fysisk tid <span class="sym">t</span> (fra t&aelig;nd)</span><span class="v yel" id="roTime">&ndash;</span></div>
         </div>
-        <div class="cr2"><label>Hastighed <span style="text-transform:none">v</span> (m/s) <span id="svo">340</span></label><input type="range" id="slv" min="320" max="360" value="340" step="1"></div>
-        <div class="cr2"><label>Frekvens <span style="text-transform:none">f</span> (Hz) <span id="sfo">440</span></label><input type="range" id="slf" min="170" max="1700" value="440" step="10"></div>
-        <div class="cr2"><label>Amplitude <span id="samp">9</span></label><input type="range" id="slamp" min="0" max="15" value="9" step="1"></div>
-        <div class="cr2"><label>Termisk støj <span id="sto">50 %</span></label><input type="range" id="slt" min="0" max="100" value="50" step="1"></div>
-        <div class="cr2"><label>Animationsfart <span id="sao">1×</span></label><input type="range" id="sla" min="0.25" max="4" value="1" step="0.25"></div>
       </div>
     </div>
-  </div>
-  <div class="sec">
-    <p class="slbl">Oscilloskop — sporet molekyle (forskydning ξ)</p>
-    <canvas id="oc" height="88"></canvas>
-  </div>
-  <div class="btnrow">
-    <button class="cbtn fx" id="bplay">⏸ Pause</button>
-    <button class="cbtn fx" id="breset">↺ Nulstil</button>
-  </div>
-  <div class="btnrow tight">
-    <div class="seg-group">
-      <button class="cbtn seg active" id="bmodec">Kontinuerlig</button>
-      <button class="cbtn seg" id="bmodep">Puls</button>
+
+    <div class="content-col">
+      <div class="panel">
+        <canvas id="scene" width="940" height="360"></canvas>
+      </div>
+      <div class="panel">
+        <div class="sec-title">T&aelig;thedsgraf <span class="sym">&rho;(x)</span> &mdash; afl&aelig;s b&oslash;lgel&aelig;ngden <span class="sym">&lambda;</span> i cm</div>
+        <canvas id="graph" width="940" height="180">></canvas>
+      </div>
     </div>
-    <button class="cbtn fx" id="bpuls" disabled>Send puls</button>
+
+  </div>
+
+</div>
+
+<!-- Modaler SKAL ligge f&oslash;r script-tagget -->
+<div class="modal-bg" id="modalForklaring">
+  <div class="modal">
+    <h2>Forklaring</h2>
+    <p>Simuleringen viser et 2,00 m langt r&oslash;r med en gas af molekyler. N&aring;r h&oslash;jtaleren er slukket, ses kun molekylernes <em>termiske</em> uro: Hvert molekyle vrimler tilf&aelig;ldigt rundt i sit lokalomr&aring;de, og gassen er ens overalt &mdash; t&aelig;thedsgrafen ligger fladt omkring 1.</p>
+    <p>N&aring;r <span class="acc">h&oslash;jtalerhinden</span> t&aelig;ndes, skubber den til gassen, og forstyrrelsen breder sig mod h&oslash;jre som en <span class="acc">l&aelig;ngdeb&oslash;lge</span>: Molekylerne forskydes frem og tilbage <em>langs</em> udbredelsesretningen, og der opst&aring;r fort&aelig;tninger og fortyndinger, der vandrer gennem r&oslash;ret med lydens fart. F&oslash;lg <span class="acc">b&oslash;lgefronten</span> lige efter t&aelig;nding &mdash; den bev&aelig;ger sig med pr&aelig;cis den fart, lyden har. Molekylerne farves efter den lokale t&aelig;thed: <span class="acc">lyse b&aring;nd er fort&aelig;tninger</span>, m&oslash;rke b&aring;nd er fortyndinger.</p>
+    <p>De <span class="acc-y">gule sporingsmolekyler</span> viser simuleringens vigtigste pointe: Det enkelte molekyle svinger blot frem og tilbage omkring sin plads. Stoffet rejser ikke med b&oslash;lgen &mdash; det er <em>m&oslash;nsteret</em> af fort&aelig;tninger, der bev&aelig;ger sig, og det er den vej, energien transporteres.</p>
+    <p>Grafen <span class="eq"><span class="v">&rho;</span>(<span class="v">x</span>)</span> t&aelig;ller de viste molekyler i smalle lodrette striber. Her viser vi kun nogle f&aring; tusind molekyler, s&aring; man kan f&oslash;lge de enkelte &mdash; derfor <em>sitrer</em> kurven en smule, og med endnu f&aelig;rre molekyler (lavere <span class="sym">N</span>) vokser st&oslash;jen, s&aring; det er sv&aelig;rt at se b&oslash;lgen. I virkeligheden er der ufatteligt mange molekyler: alene i én kubikcentimeter luft er der omkring 30 trillioner (3&middot;10<sup>19</sup>). Med s&aring; mange forsvinder den tilf&aelig;ldige st&oslash;j helt, og t&aelig;thedskurven bliver en fuldkommen j&aelig;vn sinuskurve. B&oslash;lgen d&aelig;mpes desuden svagt p&aring; vejen gennem r&oslash;ret, s&aring; toppene er lidt lavere i h&oslash;jre side. I h&oslash;jre ende opsluges b&oslash;lgen helt af en <em>absorberende zone</em> &mdash; uden den ville b&oslash;lgen reflekteres, og der ville opst&aring; st&aring;ende b&oslash;lger.</p>
+    <p><em>Om modellen:</em> B&oslash;lgens udbredelse beregnes ud fra lydens fart i luft, og molekylernes bev&aelig;gelse er b&oslash;lgens forskydning plus termisk uro. Det er alts&aring; en animation af b&oslash;lgefeltet &mdash; ikke en beregning af hvert enkelt molekylst&oslash;d. Selve frekvens-tallene (Hz) er skaleret, s&aring; der er nogle f&aring; b&oslash;lger i r&oslash;ret; ved de laveste frekvenser ses kun en halv b&oslash;lge. Til geng&aelig;ld er farten den rigtige: <span class="eq"><span class="v">v</span><span class="o">=</span>331 m/s<span class="o">&middot;</span><span class="sqrt"><span class="rad">&radic;</span><span class="rc"><span class="v">T</span><span class="o">/</span>273 K</span></span></span>, alts&aring; <span class="eq">343 m/s</span> ved 20 &deg;C. Der g&aelig;lder <span class="eq"><span class="v">v</span><span class="o">=</span><span class="v">f</span><span class="o">&middot;</span><span class="v">&lambda;</span></span> ved alle frekvenser og amplituder, og farten vokser proportionalt med kvadratroden af den absolutte temperatur, <span class="eq"><span class="v">v</span><span class="o">=</span>331 m/s<span class="o">&middot;</span><span class="sqrt"><span class="rad">&radic;</span><span class="rc"><span class="v">T</span><span class="o">/</span>273 K</span></span></span> (<span class="sym">T</span> i kelvin) &mdash; pr&aelig;cis som for rigtig lyd.</p>
+    <p><em>Om skalamodellen:</em> Alt vises i slowmotion &mdash; faktoren st&aring;r i panelet til venstre, og med <span class="acc">Tempo</span>-slideren kan afspilningen s&aelig;ttes yderligere ned. Aflæsningen <span class="acc-y">Fysisk tid</span> viser den virkelige tid i millisekunder og starter forfra, hver gang h&oslash;jtaleren t&aelig;ndes &mdash; den fungerer som stopur til fart-m&aring;linger. N&aring;r h&oslash;jtaleren er t&aelig;ndt, kan du trykke <span class="acc">Lyd til</span> og h&oslash;re, hvordan tonen ved den valgte frekvens rent faktisk lyder.</p>
+    <div class="modal-close-row"><button class="btn" data-close="modalForklaring">Luk</button></div>
   </div>
 </div>
+
+<div class="modal-bg" id="modalOpgave">
+  <div class="modal">
+    <h2>Opgave</h2>
+    <ol>
+      <li>Start med h&oslash;jtaleren slukket. Beskriv molekylernes bev&aelig;gelse og grafen <span class="eq"><span class="v">&rho;</span>(<span class="v">x</span>)</span>. Er der nogen b&oslash;lge i gassen?</li>
+      <li>T&aelig;nd h&oslash;jtaleren og f&oslash;lg b&oslash;lgefronten hen gennem r&oslash;ret. F&oslash;lg derefter et gult sporingsmolekyle: Rejser det med b&oslash;lgen hen mod h&oslash;jre v&aelig;g? Hvad er det, der bev&aelig;ger sig gennem r&oslash;ret?</li>
+      <li><em>M&aring;l farten direkte:</em> Stopuret (Fysisk tid) starter, n&aring;r h&oslash;jtaleren t&aelig;ndes. Tryk Pause, n&aring;r b&oslash;lgefronten n&aring;r den absorberende zone (<span class="eq"><span class="v">x</span><span class="o">=</span>200 cm</span>), og beregn <span class="eq"><span class="v">v</span><span class="o">=</span>2,00 m<span class="o">/</span><span class="v">t</span></span>. Du kan roligt s&aelig;tte Tempo ned f&oslash;rst, s&aring; det er lettere at ramme &oslash;jeblikket &mdash; <span class="acc-y">Fysisk tid</span> m&aring;ler den virkelige tid og p&aring;virkes ikke af tempoet, s&aring; resultatet bliver det samme.</li>
+      <li><em>M&aring;l farten via b&oslash;lgel&aelig;ngden:</em> Tryk Pause, og klik p&aring; grafen ved to nabotoppe &mdash; afstanden <span class="eq"><span class="v">&Delta;x</span><span class="o">=</span><span class="v">&lambda;</span></span> vises automatisk i cm. Beregn <span class="eq"><span class="v">v</span><span class="o">=</span><span class="v">f</span><span class="o">&middot;</span><span class="v">&lambda;</span></span>. Stemmer de to metoder overens &mdash; og passer resultatet med tabelv&aelig;rdien for lyd i luft ved 20 &deg;C (343 m/s)?</li>
+      <li>Gentag m&aring;lingen ved en anden frekvens og en anden amplitude. &AElig;ndres b&oslash;lgehastigheden? S&aelig;t derefter temperaturen op til fx 600 K og m&aring;l farten igen: Bliver lyden hurtigere, n&aring;r gassen varmes op &mdash; og passer det med, at <span class="eq"><span class="v">v</span><span class="o">=</span>331 m/s<span class="o">&middot;</span><span class="sqrt"><span class="rad">&radic;</span><span class="rc"><span class="v">T</span><span class="o">/</span>273 K</span></span></span> for lydens hastighed i luft?</li>
+      <li>S&aelig;t antallet af molekyler ned til <span class="eq"><span class="v">N</span><span class="o">=</span>500</span>. Hvad sker der med kurven <span class="eq"><span class="v">&rho;</span>(<span class="v">x</span>)</span>, og hvorfor? Hvad fort&aelig;ller det om at m&aring;le p&aring; f&aring; molekyler?</li>
+    </ol>
+    <div class="modal-close-row"><button class="btn" data-close="modalOpgave">Luk</button></div>
+  </div>
+</div>
+
+<div class="toast" id="toast">Kode kopieret til udklipsholderen</div>
+
 <script>
-(function(){
-const cv=document.getElementById('cv'),cx=cv.getContext('2d');
-const oc=document.getElementById('oc'),ox=oc.getContext('2d');
-let spd=340,freq=440,asp=1,therm=50,amp=9,simT=0,running=true,lastTS=null;
-let mode='cont';
-let pulseParams=null;
-let W=600,OW=600;
-const H=320,OH=88;
-let darkMode=false;
-const OSC_LEN=260;
-const oscBuf=new Float32Array(OSC_LEN);
-let oscHead=0;
-const TRAIL=70;
-const trailX=new Float32Array(TRAIL).fill(NaN);
-const trailY=new Float32Array(TRAIL).fill(NaN);
-let trailHead=0;
-const VIS_SPEED=110;
-const MEMX=68,MOLX0=96,MOLSP=18,MOLR=5;
-const A_MEM_FACTOR=12/9;
-const AMP_REF=15;
-const N_CYCLES_PULSE=4;
-const SPKX=4,SPKW=64;
-const ROWS=[H*.10,H*.23,H*.37,H*.50,H*.63,H*.77,H*.90];
-const TR_ROW=3,TR_IDX=9;
-const NMOL_MAX=80;
-const thermalX=[],thermalY=[];
-for(let i=0;i<ROWS.length;i++){thermalX.push(new Float32Array(NMOL_MAX));thermalY.push(new Float32Array(NMOL_MAX));}
+'use strict';
 
-// audio
-let audioCtx=null,audioOsc=null,audioGain=null,soundOn=false;
+/* ================= Tema ================= */
+const htmlEl = document.documentElement;
+const btnTema = document.getElementById('btnTema');
+function isLight() { return htmlEl.getAttribute('data-theme') === 'light'; }
+function D(dark, light) { return isLight() ? light : dark; }
 
-const TH={
-  dk:{bg:'#0a0c14',sf:'#0f1320',bd:'#1e2a3a',tx:'#c8d8e8',dim:'#8a9bb0',ac:'#00e5ff',rd:'#a8ff3e',rdg:'0 0 8px rgba(168,255,62,.5)',fw:'300',
-      btnBg:'#0a0c14',btnFg:'#00e5ff',body:'#06080e',
-      mI:'#3a4860',mM:'#3a87ff',
-      sB:'#15203a',sI:'#080c18',cone:'#0a1830',mem:'#00e5ff',
-      wf:'rgba(0,229,255,.05)',trk:'#a8ff3e',tG:'rgba(168,255,62,.55)',
-      oscB:'#080c18',oscG:'rgba(40,80,180,.22)',oscT:'#a8ff3e',oTG:'rgba(168,255,62,.7)',
-      oscZ:'rgba(60,100,200,.35)',lbl:'#1a2438',lblB:'#8898ac'},
-  lt:{bg:'#e8e0d2',sf:'#f4eee3',bd:'#d6cbb8',tx:'#1a1a1a',dim:'#5a503a',ac:'#2767a8',rd:'#0c6e54',rdg:'none',fw:'700',
-      btnBg:'#f4eee3',btnFg:'#2767a8',body:'#dad4c4',
-      mI:'#9a8c74',mM:'#1f5fbb',
-      sB:'#7a6c50',sI:'#d4cab4',cone:'#a8a08c',mem:'#2767a8',
-      wf:'rgba(39,103,168,.08)',trk:'#0c6e54',tG:'rgba(12,110,84,.35)',
-      oscB:'#f4eee3',oscG:'rgba(31,95,187,.10)',oscT:'#0c6e54',oTG:'none',
-      oscZ:'rgba(60,80,140,.28)',lbl:'#c8bda6',lblB:'#5a4f38'}
+/* ================= Modaler ================= */
+function bindModal(btnId, modalId) {
+  document.getElementById(btnId).addEventListener('click', () =>
+    document.getElementById(modalId).classList.add('open'));
+}
+bindModal('btnForklaring', 'modalForklaring');
+bindModal('btnOpgave', 'modalOpgave');
+document.querySelectorAll('[data-close]').forEach(b =>
+  b.addEventListener('click', () => document.getElementById(b.dataset.close).classList.remove('open')));
+document.querySelectorAll('.modal-bg').forEach(m =>
+  m.addEventListener('click', e => { if (e.target === m) m.classList.remove('open'); }));
+
+/* ================= Kopier kode ================= */
+document.getElementById('btnKopier').addEventListener('click', () => {
+  const code = '<!DOCTYPE html>\n' + document.documentElement.outerHTML;
+  navigator.clipboard.writeText(code).then(() => {
+    const t = document.getElementById('toast');
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 2200);
+  });
+});
+
+/* ================= Dansk talformatering ================= */
+/* Fysik-konvention: decimalkomma, men ALDRIG tusindtalsseparator (2400, ikke 2.400) */
+function daNum(x, digits) {
+  return x.toLocaleString('da-DK', {
+    minimumFractionDigits: digits, maximumFractionDigits: digits, useGrouping: false });
+}
+
+/* === FYSIK-KERNE START ===
+   Model: foreskrevet b\u00f8lgefelt + termisk uro.
+   B\u00f8lgens udbredelse beregnes med RETARDERET TID ud fra hindens historik:
+   forskydningen i afstanden d fra hinden er hindens udsving for d/c sekunder
+   siden, d\u00e6mpet med en svag faktor. Fronten, frekvensskift og slukning
+   udbreder sig dermed alle med pr\u00e6cis lydens fart c. Molekylernes bev\u00e6gelse
+   er b\u00f8lgeforskydningen plus en lokal termisk vandring (OU-proces omkring et
+   ankerpunkt), s\u00e5 gassen ser levende ud uden at kunne klumpe.
+   Skala: r\u00f8ret XL..XABS = 2,00 m. slowmotion-faktor S_SLOW: 1 fysisk sekund vises
+   som S_SLOW sim-sekunder.
+   B\u00f8lgefarten er luftens rigtige v = 331 m/s \u00b7 sqrt(T/273 K), s\u00e5 v = 343 m/s
+   ved 293 K. Frekvens-etiketten (Hz) er derimod skaleret, s\u00e5 der er nogle f\u00e5
+   b\u00f8lger i r\u00f8ret; ved lav frekvens ses kun en halv b\u00f8lge, hvilket er fint.
+   v = f\u00b7\u03bb og v \u221d sqrt(T) g\u00e6lder begge eksakt.
+   Sektionen er DOM-fri og k\u00f8res ogs\u00e5 i Node under validering. */
+
+const WORLD = {
+  XL: 70,        /* hindens hvileposition */
+  XR: 906,       /* h\u00f8jre v\u00e6g */
+  YT: 10,
+  YB: 350,
+  XABS: 790      /* absorberende zone starter her */
 };
-const c=()=>TH[darkMode?'dk':'lt'];
+const SIM_DT = 1 / 240;
+const ROR_M = 2.00;                                 /* r\u00f8rets l\u00e6ngde i meter */
+const ME_PER_M = (WORLD.XABS - WORLD.XL) / ROR_M;   /* px pr. meter (r\u00f8ret = XL..XABS) */
+const S_SLOW = 1500;                    /* slowmotion-faktor (fast, pænt tempo) */
+const ALPHA = 0.0005;                   /* d\u00e6mpning pr. px (svag; \u03bb-uafh\u00e6ngig) */
 
-function fmtDk(x,dec){return (typeof x==='number'?x.toFixed(dec):String(x)).replace('.',',');}
-function fmtAsp(v){return v.toString().replace('.',',')+'\u00d7';}
+const sim = {
+  N: 4000,
+  fPhys: 1000,     /* Hz (etiket) */
+  A: 12,           /* hindens amplitude i px (s\u00e6ttes fra cm-slider) */
+  TK: 293,         /* kelvin */
+  spkOn: false,
+  time: 0,         /* sim-sekunder */
+  step: 0,         /* antal delskridt */
+  phase: 0,        /* hindens fasevinkel (kontinuert ved frekvensskift) */
+  Acur: 0,         /* glidende amplitude (klikfri t\u00e6nd/sluk og A-skift) */
+  ax: null, ay: null,       /* ankerpunkter */
+  jx: null, jy: null,       /* termisk offset */
+  vjx: null, vjy: null,     /* termisk hastighed */
+  px: null, py: null,       /* tegnede positioner (anker + jitter + b\u00f8lge) */
+  attn: null                /* d\u00e6mpnings- og absorberfaktor pr. molekyle */
+};
 
-function applyTheme(){
-  const t=c(),s=document.getElementById('shell');
-  s.style.background=t.bg;
-  [['--bd',t.bd],['--sf',t.sf],['--dim',t.dim],['--ac',t.ac],['--tx',t.tx],
-   ['--btn-bg',t.btnBg],['--btn-fg',t.btnFg],['--rd',t.rd],['--rdg',t.rdg],['--fw',t.fw],['--bg',t.bg]]
-    .forEach(([k,v])=>s.style.setProperty(k,v));
-  document.body.style.background=t.body;
-  document.getElementById('btn-th').textContent=darkMode?'◐ Lys tilstand':'◑ Mørk tilstand';
-  document.getElementById('bplay').textContent=running?'⏸ Pause':'► Afspil';
-}
+/* B\u00f8lgefart: luftens rigtige v = 331 m/s \u00b7 sqrt(T/273 K), fysisk (m/s) og
+   i modelenheder pr. sim-sekund */
+function vPhys() { return 331 * Math.sqrt(sim.TK / 273); }          /* m/s */
+function cSim() { return vPhys() * ME_PER_M / S_SLOW; }             /* m.e./sim-s */
 
-function resz(){
-  const nw=cv.offsetWidth||600;if(nw>0&&nw!==W){W=nw;cv.width=W;}
-  const no=oc.offsetWidth||600;if(no>0&&no!==OW){OW=no;oc.width=OW;}
-}
+/* Ringbuffer med hindens forskydning, \u00e9n v\u00e6rdi pr. delskridt */
+const RB_LEN = 8192;                    /* > maks. forsinkelse (12 s ved 100 K) */
+const rb = new Float32Array(RB_LEN);
 
-function rrect(ctx,x,y,w,h,r){
-  ctx.beginPath();ctx.moveTo(x+r,y);ctx.lineTo(x+w-r,y);ctx.arcTo(x+w,y,x+w,y+r,r);
-  ctx.lineTo(x+w,y+h-r);ctx.arcTo(x+w,y+h,x+w-r,y+h,r);
-  ctx.lineTo(x+r,y+h);ctx.arcTo(x,y+h,x,y+h-r,r);
-  ctx.lineTo(x,y+r);ctx.arcTo(x,y,x+r,y,r);ctx.closePath();
-}
-
-function drawSpeaker(md){
-  const t=c(),cy=H/2,cH=Math.round(H*.88),cY=cy-cH/2,mX=MEMX+md,cL=SPKX+15,nH=18,wH=cH-32;
-  rrect(cx,SPKX,cY,SPKW,cH,5);cx.fillStyle=t.sB;cx.fill();
-  rrect(cx,SPKX+5,cY+5,SPKW-11,cH-10,3);cx.fillStyle=t.sI;cx.fill();
-  cx.fillStyle=t.cone;cx.beginPath();
-  cx.moveTo(cL,cy-nH/2);cx.lineTo(mX,cy-wH/2);cx.lineTo(mX,cy+wH/2);cx.lineTo(cL,cy+nH/2);
-  cx.closePath();cx.fill();
-  cx.strokeStyle=t.sB;cx.lineWidth=1.2;
-  cx.beginPath();cx.moveTo(SPKX+5,cY+5);cx.quadraticCurveTo(mX-8,cY+5,mX,cy-wH/2);cx.stroke();
-  cx.beginPath();cx.moveTo(SPKX+5,cY+cH-5);cx.quadraticCurveTo(mX-8,cY+cH-5,mX,cy+wH/2);cx.stroke();
-  if(darkMode){cx.shadowColor='rgba(0,229,255,.6)';cx.shadowBlur=9;}
-  cx.strokeStyle=t.mem;cx.lineWidth=3;
-  cx.beginPath();cx.moveTo(mX,cy-wH/2-2);cx.lineTo(mX,cy+wH/2+2);cx.stroke();
-  cx.shadowBlur=0;
-  cx.fillStyle=t.sB;cx.beginPath();cx.arc(cL+3,cy,6,0,Math.PI*2);cx.fill();
-  cx.fillStyle=t.mem;cx.globalAlpha=.4;cx.beginPath();cx.arc(cL+3,cy,2.5,0,Math.PI*2);cx.fill();cx.globalAlpha=1;
-  cx.font='8px "Share Tech Mono",monospace';cx.textAlign='center';cx.fillStyle=t.lblB;
-  cx.fillText('BØLGEGIVER',SPKX+SPKW/2,cY-4);
-}
-
-// Returns wave signal (env factor + displacement) at a molecule with given propagation delay tau.
-// Continuous mode: env=1 once wavefront passes, full sine.
-// Pulse mode: gaussian envelope captured at pulse-send time.
-function waveSig(simT,tau,lp_cur,omega_cur){
-  if(amp===0)return{env:0,disp:0};
-  if(mode==='cont'){
-    if(simT<tau)return{env:0,disp:0};
-    return{env:1,disp:amp*Math.sin(omega_cur*(simT-tau))};
+/* D\u00e6mpning + blid udtoning inde i absorberzonen */
+function attnOf(x0) {
+  let a = Math.exp(-ALPHA * (x0 - WORLD.XL));
+  if (x0 > WORLD.XABS) {
+    const u = Math.min(1, (x0 - WORLD.XABS) / (WORLD.XR - WORLD.XABS));
+    a *= (1 - u * u * (3 - 2 * u));     /* smoothstep 1 \u2192 0 */
   }
-  if(!pulseParams)return{env:0,disp:0};
-  const tauEff=simT-pulseParams.startT-tau;
-  if(tauEff<0||tauEff>pulseParams.duration)return{env:0,disp:0};
-  const center=pulseParams.duration/2;
-  const sig=pulseParams.duration/4;
-  const env=Math.exp(-Math.pow((tauEff-center)/sig,2));
-  return{env:env,disp:pulseParams.amp*env*Math.sin(pulseParams.omega*tauEff)};
+  return a;
 }
 
-function hex2rgb(h){return[parseInt(h.slice(1,3),16),parseInt(h.slice(3,5),16),parseInt(h.slice(5,7),16)];}
-function mixCol(c1,c2,r){
-  const a=hex2rgb(c1),b=hex2rgb(c2);
-  return 'rgb('+Math.round(a[0]*(1-r)+b[0]*r)+','+Math.round(a[1]*(1-r)+b[1]*r)+','+Math.round(a[2]*(1-r)+b[2]*r)+')';
+/* B\u00f8lgeforskydningen i position x0 til NUV\u00c6RENDE tid (retarderet opslag) */
+function waveS(x0) {
+  const delay = (x0 - WORLD.XL) / cSim() / SIM_DT;   /* i delskridt */
+  const idx = sim.step - delay;
+  if (idx <= 0) return 0;
+  const i0 = Math.floor(idx);
+  const frac = idx - i0;
+  const a = rb[i0 % RB_LEN], b = rb[(i0 + 1) % RB_LEN];
+  return a + frac * (b - a);
 }
 
-function mCol(env){
-  const t=c();
-  if(env<0.01)return t.mI;
-  if(env>0.99)return t.mM;
-  return mixCol(t.mI,t.mM,env);
+/* Gaussisk fordelt tilf\u00e6ldigt tal (Box-Muller, cachet par) */
+let gaussSpare = null;
+function gauss() {
+  if (gaussSpare !== null) { const v = gaussSpare; gaussSpare = null; return v; }
+  let u = 0;
+  while (u === 0) u = Math.random();
+  const v = Math.random();
+  const m = Math.sqrt(-2 * Math.log(u));
+  gaussSpare = m * Math.sin(2 * Math.PI * v);
+  return m * Math.cos(2 * Math.PI * v);
 }
 
-function updateThermal(){
-  const ss=(therm/100)*3.5;
-  const decay=ss===0?0.85:0.90;
-  for(let r=0;r<ROWS.length;r++){
-    const ax=thermalX[r],ay=thermalY[r];
-    for(let i=0;i<NMOL_MAX;i++){
-      ax[i]*=decay;ay[i]*=decay;
-      if(ss>0){
-        ax[i]+=(Math.random()+Math.random()-1)*ss*2;
-        ay[i]+=(Math.random()+Math.random()-1)*ss*1.4;
+/* Termisk uro: OU-proces omkring ankeret.
+   Parametre giver vandringsradius ~9 m.e. og fartskala \u221d sqrt(T). */
+const OU_K = 25, OU_G = 2.5;
+function jitterSigma() { return 100 * Math.sqrt(sim.TK / 293); }
+
+function initMolecules(N) {
+  sim.N = N;
+  sim.ax = new Float32Array(N); sim.ay = new Float32Array(N);
+  sim.jx = new Float32Array(N); sim.jy = new Float32Array(N);
+  sim.vjx = new Float32Array(N); sim.vjy = new Float32Array(N);
+  sim.px = new Float32Array(N); sim.py = new Float32Array(N);
+  sim.attn = new Float32Array(N);
+  const vr = jitterSigma() / Math.sqrt(2 * OU_G);   /* station\u00e6r hastigheds-RMS */
+  for (let i = 0; i < N; i++) {
+    sim.ax[i] = WORLD.XL + 4 + Math.random() * (WORLD.XR - WORLD.XL - 8);
+    sim.ay[i] = WORLD.YT + 4 + Math.random() * (WORLD.YB - WORLD.YT - 8);
+    sim.jx[i] = 0; sim.jy[i] = 0;
+    sim.vjx[i] = vr * gauss(); sim.vjy[i] = vr * gauss();
+    sim.attn[i] = attnOf(sim.ax[i]);
+  }
+  sim.time = 0; sim.step = 0;
+  sim.phase = 0; sim.Acur = 0;
+  sim.spkOn = false;
+  rb.fill(0);
+}
+
+/* \u00c9t delskridt */
+function stepPhysics(dt) {
+  /* hindens historik. Fasen l\u00f8ber KUN mens h\u00f8jtaleren er t\u00e6ndt og nulstilles
+     ved t\u00e6nding (se btnSpk), s\u00e5 hinden altid starter i ligev\u00e6gt (sin 0 = 0)
+     med et fuldt fremadrettet ryk \u2014 det giver en skarp, m\u00e5lbar b\u00f8lgefront.
+     Ingen amplituderampe: fuld amplitude fra f\u00f8rste \u00f8jeblik. */
+  sim.step++;
+  sim.time += dt;
+  if (sim.spkOn) {
+    sim.phase += 2 * Math.PI * (sim.fPhys / S_SLOW) * dt;
+    if (sim.phase > 1e9) sim.phase %= 2 * Math.PI;
+    rb[sim.step % RB_LEN] = sim.A * Math.sin(sim.phase);
+  } else {
+    rb[sim.step % RB_LEN] = 0;
+  }
+
+  /* termisk uro (OU omkring anker) */
+  const sn = jitterSigma() * Math.sqrt(dt);
+  const N = sim.N;
+  for (let i = 0; i < N; i++) {
+    sim.vjx[i] += (-OU_K * sim.jx[i] - OU_G * sim.vjx[i]) * dt + sn * gauss();
+    sim.vjy[i] += (-OU_K * sim.jy[i] - OU_G * sim.vjy[i]) * dt + sn * gauss();
+    sim.jx[i] += sim.vjx[i] * dt;
+    sim.jy[i] += sim.vjy[i] * dt;
+  }
+}
+
+/* Beregn tegnede positioner (kaldes \u00e9n gang pr. frame efter delskridtene) */
+function updatePositions() {
+  const N = sim.N;
+  for (let i = 0; i < N; i++) {
+    sim.px[i] = sim.ax[i] + sim.jx[i] + sim.attn[i] * waveS(sim.ax[i]);
+    sim.py[i] = sim.ay[i] + sim.jy[i];
+  }
+}
+
+/* T\u00e6thedsbins over de TEGNEDE molekyler, normeret til ligev\u00e6gt */
+function densityBins(nb, X0, X1, out) {
+  const counts = out || new Float32Array(nb);
+  counts.fill(0);
+  const bw = (X1 - X0) / nb;
+  for (let i = 0; i < sim.N; i++) {
+    /* NB: (x-X0)/bw | 0 trunkerer MOD NUL \u2014 test t >= 0 F\u00d8R afrunding */
+    const t = (sim.px[i] - X0) / bw;
+    if (t >= 0 && t < nb) counts[t | 0]++;
+  }
+  const rho0 = sim.N / (WORLD.XR - WORLD.XL);
+  const expected = rho0 * bw;
+  for (let b = 0; b < nb; b++) counts[b] /= expected;
+  return counts;
+}
+
+/* Analytisk relativ t\u00e6thed i x (til farvel\u00e6gning \u2014 st\u00f8jfri):
+   rho/rho0 = 1/(1 + ds/dx) \u2248 1 \u2212 ds/dx */
+function rhoRelAt(x) {
+  const d = 8;
+  const strain = (attnOf(x + d) * waveS(x + d) - attnOf(x - d) * waveS(x - d)) / (2 * d);
+  return 1 - Math.max(-0.6, Math.min(0.6, strain));
+}
+/* === FYSIK-KERNE SLUT === */
+
+/* ================= UI-tilstand ================= */
+const fSlider = document.getElementById('fSlider');
+const aSlider = document.getElementById('aSlider');
+const tSlider = document.getElementById('tSlider');
+const nSlider = document.getElementById('nSlider');
+const tempoSlider = document.getElementById('tempoSlider');
+const btnSpk = document.getElementById('btnSpk');
+const btnLyd = document.getElementById('btnLyd');
+const btnPause = document.getElementById('btnPause');
+const btnReset = document.getElementById('btnReset');
+const btnTrail = document.getElementById('btnTrail');
+
+let paused = false;
+let showTrails = true;
+let tempo01 = 1.0;
+let tPhysMs = 0;   /* stopur: fysisk tid siden h\u00f8jtaleren blev t\u00e6ndt */
+
+/* ================= Lyd (Web Audio) =================
+   \u00c6gte sinustone, hvis frekvens = frekvens-sliderens tal (1:1). Kr\u00e6ver et
+   f\u00f8rste klik pga. browserpolitik. Blid ind/udtoning, s\u00e5 den ikke knækker. */
+let audioCtx = null, osc = null, gainNode = null, soundOn = false;
+function setupAudio() {
+  if (audioCtx) return;
+  audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  osc = audioCtx.createOscillator();
+  gainNode = audioCtx.createGain();
+  osc.type = 'sine';
+  osc.frequency.value = sim.fPhys;
+  gainNode.gain.value = 0;
+  osc.connect(gainNode).connect(audioCtx.destination);
+  osc.start();
+}
+function setSoundGain(on) {
+  if (!gainNode) return;
+  const now = audioCtx.currentTime;
+  gainNode.gain.cancelScheduledValues(now);
+  gainNode.gain.setValueAtTime(gainNode.gain.value, now);
+  gainNode.gain.linearRampToValueAtTime(on ? 0.10 : 0, now + 0.05);
+}
+function updateAudioFreq() {
+  if (osc) osc.frequency.setTargetAtTime(sim.fPhys, audioCtx.currentTime, 0.02);
+}
+
+function updateSlowRo() {
+  document.getElementById('roSlow').textContent = '\u00d7' + daNum(S_SLOW / tempo01, 0);
+}
+
+/* ================= T\u00e6thedsgraf: glattede bins ================= */
+const NB = 40, XPLOT0 = 110, XPLOT1 = 790;
+const BW = (XPLOT1 - XPLOT0) / NB;
+const binRaw = new Float32Array(NB);
+const binS = new Float32Array(NB).fill(1);
+const binTmp = new Float32Array(NB);
+const TAU_FAST = 0.10;   /* sim-s: << b\u00f8lgeperioden (2,4 s ved 1000 Hz) */
+
+function updateDensity(dtSim) {
+  const aF = 1 - Math.exp(-dtSim / TAU_FAST);
+  densityBins(NB, XPLOT0, XPLOT1, binRaw);
+  for (let b = 0; b < NB; b++) {
+    const l = binRaw[Math.max(0, b - 1)], r = binRaw[Math.min(NB - 1, b + 1)];
+    binTmp[b] = 0.25 * l + 0.5 * binRaw[b] + 0.25 * r;
+  }
+  for (let b = 0; b < NB; b++) binS[b] += aF * (binTmp[b] - binS[b]);
+}
+
+/* ================= Sporingsmolekyler ================= */
+const TRACER_TARGETS = [[180, 180], [330, 180], [480, 180], [630, 180]];
+let tracerIdx = [];
+let trails = [];
+const TRAIL_LEN = 80;
+
+function pickTracers() {
+  tracerIdx = [];
+  trails = [];
+  for (const t of TRACER_TARGETS) {
+    let best = -1, bd = Infinity;
+    for (let i = 0; i < sim.N; i++) {
+      if (tracerIdx.indexOf(i) !== -1) continue;
+      const dx = sim.ax[i] - t[0], dy = sim.ay[i] - t[1];
+      const d = dx * dx + dy * dy;
+      if (d < bd) { bd = d; best = i; }
+    }
+    tracerIdx.push(best);
+    trails.push([]);
+  }
+}
+
+function pushTrails() {
+  for (let k = 0; k < tracerIdx.length; k++) {
+    const i = tracerIdx[k];
+    trails[k].push(sim.px[i], sim.py[i]);
+    if (trails[k].length > TRAIL_LEN * 2) trails[k].splice(0, 2);
+  }
+}
+
+/* ================= Afl\u00e6sninger ================= */
+const roTime = document.getElementById('roTime');
+let lastRo = 0;
+function updateReadouts(now) {
+  if (now - lastRo < 100) return;
+  lastRo = now;
+  roTime.textContent = daNum(tPhysMs, 2) + ' ms';
+}
+
+/* ================= Kontrol-events ================= */
+fSlider.addEventListener('input', () => {
+  sim.fPhys = +fSlider.value;
+  document.getElementById('fVal').textContent = sim.fPhys + ' Hz';
+  updateAudioFreq();
+});
+aSlider.addEventListener('input', () => {
+  const cm = +aSlider.value / 10;
+  sim.A = cm / 100 * ME_PER_M;   /* cm \u2192 px */
+  document.getElementById('aVal').textContent = daNum(cm, 1) + ' cm';
+});
+tSlider.addEventListener('input', () => {
+  sim.TK = +tSlider.value;
+  document.getElementById('tVal').textContent = sim.TK + ' K (' + (sim.TK - 273) + ' \u00b0C)';
+});
+nSlider.addEventListener('input', () => {
+  document.getElementById('nVal').textContent = nSlider.value;
+});
+nSlider.addEventListener('change', () => { resetGas(); });
+tempoSlider.addEventListener('input', () => {
+  tempo01 = +tempoSlider.value / 100;
+  document.getElementById('tempoVal').textContent = tempoSlider.value + ' %';
+  updateSlowRo();
+});
+
+function resetGas() {
+  sim.TK = +tSlider.value;
+  sim.fPhys = +fSlider.value;
+  sim.A = (+aSlider.value / 10) / 100 * ME_PER_M;
+  initMolecules(+nSlider.value);
+  updatePositions();
+  pickTracers();
+  binS.fill(1);
+  tPhysMs = 0;
+  btnSpk.textContent = 'T\u00e6nd h\u00f8jtaler';
+  if (soundOn) { soundOn = false; setSoundGain(false); }
+  refreshLydBtn();
+  paused = false;
+  btnPause.textContent = 'Pause';
+  updateSlowRo();
+}
+
+function refreshLydBtn() {
+  /* Lyd kr\u00e6ver t\u00e6ndt h\u00f8jtaler \u2014 knappen er inaktiv, n\u00e5r h\u00f8jtaleren er slukket */
+  btnLyd.disabled = !sim.spkOn;
+  btnLyd.style.opacity = sim.spkOn ? '1' : '0.4';
+  btnLyd.style.cursor = sim.spkOn ? 'pointer' : 'not-allowed';
+  btnLyd.textContent = (soundOn && sim.spkOn) ? 'Lyd fra' : 'Lyd til';
+}
+
+btnSpk.addEventListener('click', () => {
+  if (sim.spkOn) {
+    sim.spkOn = false;
+    btnSpk.textContent = 'T\u00e6nd h\u00f8jtaler';
+    if (soundOn) { soundOn = false; setSoundGain(false); }   /* lyd f\u00f8lger h\u00f8jtaleren */
+  } else {
+    sim.spkOn = true;
+    sim.phase = 0;   /* start i ligev\u00e6gt med fuldt fremadryk */
+    tPhysMs = 0;   /* stopuret starter ved t\u00e6nding */
+    btnSpk.textContent = 'Sluk h\u00f8jtaler';
+  }
+  refreshLydBtn();
+});
+btnPause.addEventListener('click', () => {
+  paused = !paused;
+  btnPause.textContent = paused ? 'Afspil' : 'Pause';
+});
+btnLyd.addEventListener('click', () => {
+  if (!sim.spkOn) return;
+  setupAudio();
+  if (audioCtx.state === 'suspended') audioCtx.resume();
+  soundOn = !soundOn;
+  setSoundGain(soundOn);
+  btnLyd.textContent = soundOn ? 'Lyd fra' : 'Lyd til';
+});
+btnReset.addEventListener('click', resetGas);
+btnTrail.addEventListener('click', () => {
+  showTrails = !showTrails;
+  btnTrail.textContent = showTrails ? 'Skjul spor' : 'Vis spor';
+  if (!showTrails) for (const tr of trails) tr.length = 0;
+});
+
+/* ================= Tegning ================= */
+const DPR = Math.min(window.devicePixelRatio || 1, 3);
+function setupHiDPI(canvas, w, h) {
+  canvas.width = Math.round(w * DPR);
+  canvas.height = Math.round(h * DPR);
+  const c = canvas.getContext('2d');
+  c.setTransform(DPR, 0, 0, DPR, 0, 0);
+  return c;
+}
+
+const W = 940, H = 360;
+const ctx = setupHiDPI(document.getElementById('scene'), W, H);
+const GW = 940, GH = 180;
+const gctx = setupHiDPI(document.getElementById('graph'), GW, GH);
+
+function colMol()  { return D('#00cfff', '#378ADD'); }
+function colTrc()  { return D('#ffd93d', '#c07800'); }
+function colAxis() { return D('#3a5a72', '#8a8070'); }
+function colText() { return D('#d0eef5', '#1a1a1a'); }
+function colDim()  { return D('#8ec8d8', '#333333'); }
+function colGrn()  { return D('#00ff9f', '#1D9E75'); }
+
+/* ---- Interaktiv m\u00e5ling p\u00e5 t\u00e6thedsgrafen ----
+   Muspegning viser en lodret mark" med x-position i cm. Klik s\u00e6tter et fast
+   m\u00e6rke; to m\u00e6rker viser afstanden \u0394x (= b\u00f8lgel\u00e6ngden \u03bb) i cm. Tredje klik
+   nulstiller. Aflæsningen er elevens egen \u2014 ingen automatisk top-gætning. */
+const graphCanvas = document.getElementById('graph');
+let hoverCm = null;           /* cm under musen, eller null */
+let markCm = [];              /* 0, 1 eller 2 faste m\u00e6rker i cm */
+const GXPX0 = XPLOT0, GXPX1 = XPLOT1;   /* plotomr\u00e5dets logiske px (110..790) */
+const CM_LO = (GXPX0 - WORLD.XL) / ME_PER_M * 100;   /* ~4,8 cm */
+const CM_HI = (GXPX1 - WORLD.XL) / ME_PER_M * 100;   /* ~86,1 cm */
+
+function evtToCm(e) {
+  const rect = graphCanvas.getBoundingClientRect();
+  const cx = (e.touches ? e.touches[0].clientX : e.clientX) - rect.left;
+  const logicalX = cx / rect.width * GW;          /* CSS-px \u2192 logisk px */
+  const cm = (logicalX - WORLD.XL) / ME_PER_M * 100;
+  return Math.max(CM_LO, Math.min(CM_HI, cm));
+}
+function cmToGraphPx(cm) { return WORLD.XL + cm / 100 * ME_PER_M; }
+
+graphCanvas.addEventListener('mousemove', e => { hoverCm = evtToCm(e); });
+graphCanvas.addEventListener('mouseleave', () => { hoverCm = null; });
+graphCanvas.addEventListener('click', e => {
+  const cm = evtToCm(e);
+  if (markCm.length >= 2) markCm = [];
+  else markCm.push(cm);
+});
+graphCanvas.addEventListener('touchstart', e => {
+  e.preventDefault();
+  const cm = evtToCm(e);
+  hoverCm = cm;
+  if (markCm.length >= 2) markCm = [];
+  else markCm.push(cm);
+}, { passive: false });
+graphCanvas.style.cursor = 'crosshair';
+
+/* ---- Sprites: molekyler farvet efter lokal fort\u00e6tning (analytisk) ----
+   Kontinuert farvegradient med mange trin, s\u00e5 overgangen er glidende og ikke
+   ligner en trappefunktion. Kontrasten er bevidst lav: farven g\u00e5r fra en
+   d\u00e6mpet til en lys cyan, men ikke fra n\u00e6sten-sort til gl\u00f8dende. */
+const NSHADE = 24;
+const SPR_SIZE = 9, SPR_R = 2.0;
+let sprites = [], tracerSprite = null;
+/* endepunkter (RGB) for m\u00f8rkt og lyst tema \u2014 mild spredning */
+const GRAD_DARK = [[42, 116, 140], [120, 224, 245]];    /* #2a748c \u2192 #78e0f5 */
+const GRAD_LIGHT = [[120, 152, 190], [40, 108, 180]];   /* #7898be \u2192 #286cb4 */
+
+function lerpCol(a, b, t) {
+  return 'rgb(' + Math.round(a[0] + (b[0] - a[0]) * t) + ',' +
+    Math.round(a[1] + (b[1] - a[1]) * t) + ',' +
+    Math.round(a[2] + (b[2] - a[2]) * t) + ')';
+}
+
+function makeSprite(color, r, glow) {
+  const cv = document.createElement('canvas');
+  cv.width = cv.height = SPR_SIZE * DPR;
+  const c = cv.getContext('2d');
+  c.setTransform(DPR, 0, 0, DPR, 0, 0);
+  if (glow) { c.shadowColor = color; c.shadowBlur = 4; }
+  c.fillStyle = color;
+  c.beginPath();
+  c.arc(SPR_SIZE / 2, SPR_SIZE / 2, r, 0, 2 * Math.PI);
+  c.fill();
+  return cv;
+}
+function rebuildSprites() {
+  const g = isLight() ? GRAD_LIGHT : GRAD_DARK;
+  sprites = [];
+  for (let i = 0; i < NSHADE; i++) {
+    const t = i / (NSHADE - 1);
+    /* svagt gl\u00f8d kun i den lyseste tredjedel af det m\u00f8rke tema */
+    sprites.push(makeSprite(lerpCol(g[0], g[1], t), SPR_R, !isLight() && t > 0.66));
+  }
+  tracerSprite = makeSprite(colTrc(), 3.6, !isLight());
+}
+rebuildSprites();
+btnTema.addEventListener('click', () => {
+  if (isLight()) { htmlEl.removeAttribute('data-theme'); btnTema.textContent = 'Lyst tema'; }
+  else { htmlEl.setAttribute('data-theme', 'light'); btnTema.textContent = 'M\u00f8rkt tema'; }
+  rebuildSprites();
+});
+
+/* farveskygge-indeks pr. s\u00f8jle ud fra ANALYTISK t\u00e6thed.
+   Bredt interval 0,72..1,28 \u2192 lav kontrast pr. t\u00e6thedsenhed. */
+const NCOL = 94;                 /* dobbelt s\u00e5 mange, smallere s\u00f8jler = glattere */
+const colShade = new Uint8Array(NCOL);
+const COL_W = (WORLD.XR - WORLD.XL) / NCOL;
+function updateColLevels() {
+  for (let b = 0; b < NCOL; b++) {
+    const xc = WORLD.XL + (b + 0.5) * COL_W;
+    let s = Math.round((rhoRelAt(xc) - 0.72) / 0.56 * (NSHADE - 1));
+    if (s < 0) s = 0; else if (s >= NSHADE) s = NSHADE - 1;
+    colShade[b] = s;
+  }
+}
+
+function drawScene() {
+  ctx.clearRect(0, 0, W, H);
+  const xw = WORLD.XL + waveS(WORLD.XL + 0.01);
+
+  /* top- og bundv\u00e6g */
+  ctx.strokeStyle = colAxis();
+  ctx.lineWidth = 1.4;
+  ctx.beginPath();
+  ctx.moveTo(0, WORLD.YT - 3); ctx.lineTo(W, WORLD.YT - 3);
+  ctx.moveTo(0, WORLD.YB + 3); ctx.lineTo(W, WORLD.YB + 3);
+  ctx.stroke();
+
+  /* cm-m\u00e6rker p\u00e5 bundv\u00e6ggen (hver 25 cm; tal st\u00e5r p\u00e5 grafen) */
+  ctx.lineWidth = 1.2;
+  ctx.beginPath();
+  for (let cm = 25; cm <= 175; cm += 25) {
+    const px = WORLD.XL + cm / 100 * ME_PER_M;
+    ctx.moveTo(px, WORLD.YB + 3);
+    ctx.lineTo(px, WORLD.YB - 4);
+  }
+  ctx.stroke();
+
+  /* absorberende zone: skravering */
+  ctx.save();
+  ctx.beginPath();
+  ctx.rect(WORLD.XABS, WORLD.YT, WORLD.XR - WORLD.XABS, WORLD.YB - WORLD.YT);
+  ctx.clip();
+  ctx.strokeStyle = colAxis();
+  ctx.globalAlpha = 0.4;
+  ctx.lineWidth = 1;
+  for (let x = WORLD.XABS - (WORLD.YB - WORLD.YT); x < WORLD.XR; x += 14) {
+    ctx.beginPath();
+    ctx.moveTo(x, WORLD.YB);
+    ctx.lineTo(x + (WORLD.YB - WORLD.YT), WORLD.YT);
+    ctx.stroke();
+  }
+  ctx.restore();
+  ctx.globalAlpha = 1;
+  ctx.setLineDash([5, 5]);
+  ctx.strokeStyle = colAxis();
+  ctx.lineWidth = 1.4;
+  ctx.beginPath();
+  ctx.moveTo(WORLD.XABS, WORLD.YT); ctx.lineTo(WORLD.XABS, WORLD.YB);
+  ctx.stroke();
+  ctx.setLineDash([]);
+
+  /* molekyler: sprite pr. farves\u00f8jle (analytisk fort\u00e6tning, glidende farve) */
+  updateColLevels();
+  const off = SPR_SIZE / 2;
+  for (let i = 0; i < sim.N; i++) {
+    let b = ((sim.px[i] - WORLD.XL) / COL_W) | 0;
+    if (b < 0) b = 0; else if (b >= NCOL) b = NCOL - 1;
+    ctx.drawImage(sprites[colShade[b]], sim.px[i] - off, sim.py[i] - off, SPR_SIZE, SPR_SIZE);
+  }
+
+  /* d\u00e6mp molekylerne inde i absorberzonen */
+  ctx.fillStyle = D('rgba(10,22,34,0.45)', 'rgba(253,250,244,0.45)');
+  ctx.fillRect(WORLD.XABS, WORLD.YT, WORLD.XR - WORLD.XABS, WORLD.YB - WORLD.YT);
+
+  /* spor */
+  if (showTrails) {
+    ctx.lineWidth = 1.6;
+    for (const tr of trails) {
+      const n = tr.length / 2;
+      for (let k = 1; k < n; k++) {
+        ctx.globalAlpha = 0.12 + 0.6 * (k / n);
+        ctx.strokeStyle = colTrc();
+        ctx.beginPath();
+        ctx.moveTo(tr[2 * k - 2], tr[2 * k - 1]);
+        ctx.lineTo(tr[2 * k], tr[2 * k + 1]);
+        ctx.stroke();
       }
     }
+    ctx.globalAlpha = 1;
   }
+
+  /* sporingsmolekyler */
+  for (const i of tracerIdx) {
+    ctx.drawImage(tracerSprite, sim.px[i] - off, sim.py[i] - off, SPR_SIZE, SPR_SIZE);
+  }
+
+  /* h\u00f8jtaler: fast kabinet + bev\u00e6gelig hinde */
+  ctx.fillStyle = D('#0f1e2d', '#e0d8c6');
+  ctx.fillRect(0, WORLD.YT - 3, xw - 3, WORLD.YB - WORLD.YT + 6);
+  ctx.strokeStyle = colAxis();
+  ctx.lineWidth = 1;
+  ctx.globalAlpha = 0.6;
+  for (let y = WORLD.YT + 20; y < WORLD.YB - 10; y += 32) {
+    ctx.beginPath();
+    ctx.moveTo(8, y); ctx.lineTo(xw - 10, y);
+    ctx.stroke();
+  }
+  ctx.globalAlpha = 1;
+  if (!isLight()) { ctx.shadowColor = colGrn(); ctx.shadowBlur = 10; }
+  ctx.fillStyle = colGrn();
+  ctx.fillRect(xw - 3, WORLD.YT - 3, 6, WORLD.YB - WORLD.YT + 6);
+  ctx.shadowBlur = 0;
+  ctx.save();
+  ctx.translate(30, (WORLD.YT + WORLD.YB) / 2);
+  ctx.rotate(-Math.PI / 2);
+  ctx.fillStyle = colText();
+  ctx.font = '700 13px "Share Tech Mono", monospace';
+  ctx.textAlign = 'center';
+  ctx.fillText('H\u00d8JTALER', 0, 0);
+  ctx.restore();
+
+  /* lodret tekst i absorberzonen */
+  ctx.save();
+  ctx.translate((WORLD.XABS + WORLD.XR) / 2 + 4, (WORLD.YT + WORLD.YB) / 2);
+  ctx.rotate(-Math.PI / 2);
+  ctx.fillStyle = colDim();
+  ctx.font = '700 12px "Share Tech Mono", monospace';
+  ctx.textAlign = 'center';
+  ctx.fillText('ABSORBERENDE ZONE', 0, 0);
+  ctx.restore();
+
+  /* status-tekster */
+  ctx.font = '700 13px "Share Tech Mono", monospace';
+  if (!sim.spkOn) {
+    ctx.fillStyle = colDim();
+    ctx.textAlign = 'left';
+    ctx.fillText('H\u00d8JTALER SLUKKET \u2014 KUN TERMISK BEV\u00c6GELSE', WORLD.XL + 48, 30);
+  }
+  if (paused) {
+    ctx.fillStyle = colText();
+    ctx.textAlign = 'right';
+    ctx.fillText('PAUSERET', WORLD.XABS - 12, 30);
+  }
+  ctx.textAlign = 'left';
 }
 
-function drawOsc(trDisp,trEnv){
-  const t=c();
-  ox.fillStyle=t.oscB;ox.fillRect(0,0,OW,OH);
-  if(darkMode){ox.fillStyle='rgba(0,0,8,.07)';for(let y=0;y<OH;y+=2)ox.fillRect(0,y,OW,1);}
-  ox.strokeStyle=t.oscG;ox.lineWidth=.5;
-  for(const v of [-1,-.5,.5,1]){const y=OH/2-v*(OH/2-11);ox.beginPath();ox.moveTo(30,y);ox.lineTo(OW,y);ox.stroke();}
-  ox.strokeStyle=t.oscZ;ox.lineWidth=1;ox.beginPath();ox.moveTo(30,OH/2);ox.lineTo(OW,OH/2);ox.stroke();
-  ox.strokeStyle=t.oscT;ox.lineWidth=1.6;
-  if(darkMode){ox.shadowColor=t.oTG;ox.shadowBlur=5;}
-  ox.beginPath();let first=true;
-  for(let i=0;i<OSC_LEN;i++){
-    const idx=(oscHead-OSC_LEN+i+OSC_LEN*2)%OSC_LEN;
-    const x=30+(i/(OSC_LEN-1))*(OW-32),y=OH/2-oscBuf[idx]*(OH/2-11);
-    first?(ox.moveTo(x,y),first=false):ox.lineTo(x,y);
+/* T\u00e6thedsgraf: x-aksen flugter med scenen, fast y-akse 0,6..1,4, x i cm */
+function drawGraph() {
+  gctx.clearRect(0, 0, GW, GH);
+  const light = isLight();
+  const PT = 34, PB = 134;
+  const AX = 100;
+  const yOf = v => PB - (Math.max(0.6, Math.min(1.4, v)) - 0.6) / 0.8 * (PB - PT);
+
+  gctx.strokeStyle = colAxis();
+  gctx.lineWidth = 1;
+  gctx.globalAlpha = 0.45;
+  for (const v of [0.8, 1.2]) {
+    gctx.beginPath(); gctx.moveTo(AX, yOf(v)); gctx.lineTo(XPLOT1, yOf(v)); gctx.stroke();
   }
-  ox.stroke();ox.shadowBlur=0;
-  const curY=OH/2-(trDisp/AMP_REF)*(OH/2-11);
-  if(darkMode){ox.shadowColor=t.oTG;ox.shadowBlur=8;}
-  ox.fillStyle=t.oscT;ox.beginPath();ox.arc(OW-2,curY,3,0,Math.PI*2);ox.fill();ox.shadowBlur=0;
-  ox.font='8.5px "Courier New",monospace';ox.fillStyle=t.lblB;
-  ox.textAlign='left';ox.fillText('+1',2,12);ox.fillText(' 0',2,OH/2+4);ox.fillText('-1',2,OH-4);
-  ox.fillStyle=t.oscT;ox.fillText('\u2195 \u03be',32,OH-4);
-  ox.fillStyle=t.lblB;ox.textAlign='right';ox.fillText('tid \u2192',OW-2,OH-4);
-}
+  gctx.globalAlpha = 1;
+  gctx.setLineDash([5, 5]);
+  gctx.beginPath(); gctx.moveTo(AX, yOf(1)); gctx.lineTo(XPLOT1, yOf(1)); gctx.stroke();
+  gctx.setLineDash([]);
 
-function frame(){
-  resz();
-  const t=c();
-  const lam=spd/freq;
-  const lp=Math.max(38,Math.min(320,50+(lam-.1)/1.9*250));
-  const k=2*Math.PI/lp,omega=2*Math.PI*VIS_SPEED/lp;
-  const wfx=MEMX+VIS_SPEED*simT;
+  gctx.strokeStyle = colAxis();
+  gctx.lineWidth = 1.4;
+  gctx.beginPath();
+  gctx.moveTo(AX, PT); gctx.lineTo(AX, PB);
+  gctx.moveTo(AX, PB); gctx.lineTo(XPLOT1 + 6, PB);
+  gctx.stroke();
 
-  updateThermal();
+  gctx.fillStyle = colText();
+  gctx.font = '700 12px "Courier New", monospace';
+  gctx.textAlign = 'right';
+  for (const v of [0.6, 0.8, 1, 1.2, 1.4]) {
+    const yy = yOf(v);
+    gctx.strokeStyle = colAxis();
+    gctx.beginPath(); gctx.moveTo(AX - 5, yy); gctx.lineTo(AX, yy); gctx.stroke();
+    gctx.fillText(daNum(v, 1), AX - 9, yy + 4);
+  }
+  gctx.textAlign = 'center';
+  for (let cm = 25; cm <= 200; cm += 25) {
+    const px = WORLD.XL + cm / 100 * ME_PER_M;
+    gctx.strokeStyle = colAxis();
+    gctx.beginPath(); gctx.moveTo(px, PB); gctx.lineTo(px, PB + 5); gctx.stroke();
+    gctx.fillText(String(cm), px, PB + 19);
+  }
 
-  // speaker source displacement
-  const speakerSig=waveSig(simT,0,lp,omega);
+  gctx.textAlign = 'left';
+  gctx.font = '700 13px "Exo 2", sans-serif';
+  gctx.fillStyle = colText();
+  gctx.fillText('\u03c1 / \u03c1\u2080', 14, PT + 10);
+  gctx.textAlign = 'right';
+  gctx.fillText('x (cm)', XPLOT1 + 6, PB + 34);
 
-  const nM=Math.min(NMOL_MAX,Math.floor((W-MOLX0-8)/MOLSP));
-  const rowData=[];
-  for(let ri=0;ri<ROWS.length;ri++){
-    const ry=ROWS[ri],row=[];
-    for(let i=0;i<nM;i++){
-      const x0=MOLX0+i*MOLSP;
-      const dist=x0-MEMX;
-      const tau=dist/VIS_SPEED;
-      const sig=waveSig(simT,tau,lp,omega);
-      const tdx=thermalX[ri][i],tdy=thermalY[ri][i];
-      row.push({x:x0+sig.disp+tdx,y:ry+tdy,env:sig.env,base:x0,isTrk:(ri===TR_ROW&&i===TR_IDX)});
+  gctx.textAlign = 'left';
+  gctx.font = '700 12px "Exo 2", sans-serif';
+  gctx.fillStyle = colDim();
+  gctx.fillText('top = fort\u00e6tning', 806, 76);
+  gctx.fillText('dal = fortynding', 806, 96);
+
+  if (!light) { gctx.shadowColor = colMol(); gctx.shadowBlur = 6; }
+  gctx.strokeStyle = colMol();
+  gctx.lineWidth = light ? 2.6 : 2.2;
+  gctx.beginPath();
+  for (let b = 0; b < NB; b++) {
+    const xb = XPLOT0 + (b + 0.5) * BW;
+    const yb = yOf(binS[b]);
+    if (b === 0) gctx.moveTo(xb, yb); else gctx.lineTo(xb, yb);
+  }
+  gctx.stroke();
+  gctx.shadowBlur = 0;
+
+  /* ---- m\u00e5le-markører ---- */
+  const PTm = 34, PBm = 134;
+  const clampLbl = x => Math.max(AX + 22, Math.min(XPLOT1 - 22, x));
+  function drawMark(cm, color, solid, labelY) {
+    const px = cmToGraphPx(cm);
+    gctx.strokeStyle = color;
+    gctx.lineWidth = 1.6;
+    gctx.setLineDash(solid ? [] : [4, 4]);
+    gctx.beginPath(); gctx.moveTo(px, PTm); gctx.lineTo(px, PBm); gctx.stroke();
+    gctx.setLineDash([]);
+    gctx.fillStyle = color;
+    gctx.font = '700 12px "Courier New", monospace';
+    gctx.textAlign = 'center';
+    gctx.fillText(daNum(cm, 1) + ' cm', clampLbl(px), labelY);
+  }
+
+  if (markCm.length === 2) {
+    /* to faste m\u00e6rker: positioner \u00f8verst, \u0394x-m\u00e5l lige over plottet */
+    drawMark(markCm[0], colGrn(), true, 13);
+    drawMark(markCm[1], colGrn(), true, 13);
+    const dCm = Math.abs(markCm[1] - markCm[0]);
+    const px0 = cmToGraphPx(Math.min(markCm[0], markCm[1]));
+    const px1 = cmToGraphPx(Math.max(markCm[0], markCm[1]));
+    const yb = 30;
+    gctx.strokeStyle = colGrn();
+    gctx.lineWidth = 1.4;
+    gctx.beginPath();
+    gctx.moveTo(px0, yb); gctx.lineTo(px1, yb);
+    gctx.moveTo(px0, yb - 4); gctx.lineTo(px0, yb + 4);
+    gctx.moveTo(px1, yb - 4); gctx.lineTo(px1, yb + 4);
+    gctx.stroke();
+    gctx.fillStyle = colGrn();
+    gctx.font = '700 13px "Courier New", monospace';
+    gctx.textAlign = 'center';
+    gctx.fillText('\u0394x = ' + daNum(dCm, 1) + ' cm', clampLbl((px0 + px1) / 2), yb - 8);
+  } else {
+    for (const cm of markCm) drawMark(cm, colGrn(), true, 25);
+    if (hoverCm !== null) drawMark(hoverCm, colDim(), false, 25);
+    if (markCm.length === 0 && hoverCm === null) {
+      gctx.fillStyle = colDim();
+      gctx.font = '600 12px "Exo 2", sans-serif';
+      gctx.textAlign = 'left';
+      gctx.fillText('Klik p\u00e5 to nabotoppe for at m\u00e5le \u03bb', AX + 8, 22);
     }
-    rowData.push(row);
   }
+}
 
-  // tracked molecule
-  const trM=rowData[TR_ROW][TR_IDX];
-  const trDispVis=trM.x-trM.base;
-  const trEnv=trM.env;
-  oscBuf[oscHead]=trDispVis/AMP_REF;
-  oscHead=(oscHead+1)%OSC_LEN;
-  trailX[trailHead]=trM.x;trailY[trailHead]=trM.y;
-  trailHead=(trailHead+1)%TRAIL;
+/* ================= Hovedloop ================= */
+let lastT = performance.now();
+let acc = 0;
 
-  // background
-  cx.fillStyle=t.bg;cx.fillRect(0,0,W,H);
-  if(darkMode){cx.fillStyle='rgba(0,0,10,.07)';for(let y=0;y<H;y+=2)cx.fillRect(0,y,W,1);}
-
-  cx.strokeStyle=t.lbl;cx.lineWidth=.5;cx.setLineDash([1,8]);
-  for(let gx=MOLX0;gx<W;gx+=36){cx.beginPath();cx.moveTo(gx,0);cx.lineTo(gx,H);cx.stroke();}
-  for(let gy=0;gy<H;gy+=36){cx.beginPath();cx.moveTo(MOLX0,gy);cx.lineTo(W,gy);cx.stroke();}
-  cx.setLineDash([]);
-
-  // wavefront fade (only in continuous mode with active wave)
-  if(mode==='cont'&&amp>0&&wfx>MOLX0&&wfx<W+80){
-    const g=cx.createLinearGradient(wfx-80,0,wfx+5,0);
-    g.addColorStop(0,'transparent');g.addColorStop(1,t.wf);
-    cx.fillStyle=g;cx.fillRect(wfx-80,0,85,H);
-  }
-
-  drawSpeaker(speakerSig.disp*A_MEM_FACTOR);
-
-  // tracked vertical guide
-  const trX0=MOLX0+TR_IDX*MOLSP;
-  cx.strokeStyle=t.trk;cx.lineWidth=.8;cx.globalAlpha=.2;cx.setLineDash([3,5]);
-  cx.beginPath();cx.moveTo(trX0,ROWS[TR_ROW]-28);cx.lineTo(trX0,ROWS[TR_ROW]+28);cx.stroke();
-  cx.setLineDash([]);cx.globalAlpha=1;
-
-  // molecules
-  for(let ri=0;ri<ROWS.length;ri++){
-    for(const p of rowData[ri]){
-      if(p.isTrk)continue;
-      cx.beginPath();cx.arc(p.x,p.y,MOLR,0,Math.PI*2);
-      cx.fillStyle=mCol(p.env);cx.fill();
+function loop(now) {
+  const realDt = Math.min((now - lastT) / 1000, 0.05);
+  lastT = now;
+  if (!paused) {
+    acc += realDt * tempo01;
+    let steps = 0;
+    while (acc >= SIM_DT && steps < 10) {
+      stepPhysics(SIM_DT);
+      acc -= SIM_DT;
+      steps++;
+    }
+    if (acc > SIM_DT) acc = 0;
+    if (steps > 0) {
+      tPhysMs += steps * SIM_DT / S_SLOW * 1000;
+      updatePositions();
+      if (showTrails) pushTrails();
+      updateDensity(steps * SIM_DT);
     }
   }
-
-  // trail
-  const rgb=darkMode?'168,255,62':'12,110,84';
-  for(let i=0;i<TRAIL;i++){
-    const idx=(trailHead-1-i+TRAIL)%TRAIL,tx=trailX[idx],ty=trailY[idx];
-    if(isNaN(tx))break;
-    cx.beginPath();cx.arc(tx,ty,1.2+2.2*(1-i/TRAIL),0,Math.PI*2);
-    cx.fillStyle='rgba('+rgb+','+((1-i/TRAIL)*.5)+')';cx.fill();
-  }
-
-  // tracked molecule (always drawn)
-  if(darkMode){cx.shadowColor=t.tG;cx.shadowBlur=16;}
-  cx.beginPath();cx.arc(trM.x,trM.y,9,0,Math.PI*2);cx.fillStyle=t.trk;cx.fill();
-  cx.strokeStyle=darkMode?'rgba(220,255,200,.6)':'rgba(255,255,255,.7)';cx.lineWidth=1.2;cx.stroke();
-  cx.shadowBlur=0;
-  cx.font='bold 8px "Share Tech Mono",monospace';cx.textAlign='center';cx.fillStyle=t.trk;
-  cx.fillText('SPORET',trM.x,trM.y-14);
-
-  // legend
-  cx.font='8.5px "Share Tech Mono",monospace';cx.textAlign='left';
-  const lY=H-6;
-  const legend=[[t.mM,'aktiv'],[t.mI,'ej aktiveret'],[t.trk,'sporet']];
-  legend.forEach(function(entry,i){
-    const col=entry[0],lbl=entry[1];
-    const lx=MOLX0+i*92;if(lx+80>W)return;
-    cx.fillStyle=col;cx.beginPath();cx.arc(lx+3,lY-2,3.5,0,Math.PI*2);cx.fill();
-    cx.fillStyle=t.lblB;cx.fillText(lbl,lx+10,lY);
-  });
-
-  drawOsc(trDispVis,trEnv);
+  drawScene();
+  drawGraph();
+  updateReadouts(now);
+  requestAnimationFrame(loop);
 }
 
-function loop(ts){
-  if(lastTS===null)lastTS=ts;
-  const dt=Math.min((ts-lastTS)/1000,.05);lastTS=ts;
-  if(running)simT+=dt*asp;
-  frame();requestAnimationFrame(loop);
-}
-
-function upd(){
-  const lam=spd/freq,p=1000/freq;
-  document.getElementById('dspd').textContent=spd;
-  document.getElementById('dfrq').textContent=freq;
-  document.getElementById('dlam').textContent=fmtDk(lam,2);
-  document.getElementById('dper').textContent=fmtDk(p,2);
-}
-
-// ---- audio ----
-function initAudio(){
-  if(audioCtx)return;
-  try{
-    audioCtx=new (window.AudioContext||window.webkitAudioContext)();
-    audioOsc=audioCtx.createOscillator();
-    audioOsc.type='sine';
-    audioOsc.frequency.value=freq;
-    audioGain=audioCtx.createGain();
-    audioGain.gain.value=0;
-    audioOsc.connect(audioGain);audioGain.connect(audioCtx.destination);
-    audioOsc.start();
-  }catch(e){audioCtx=null;}
-}
-function applyAudio(){
-  if(!audioCtx)return;
-  audioOsc.frequency.setTargetAtTime(freq,audioCtx.currentTime,0.02);
-  const target=(soundOn&&mode==='cont'&&amp>0)?0.08*(amp/AMP_REF):0;
-  audioGain.gain.setTargetAtTime(target,audioCtx.currentTime,0.05);
-}
-
-// ---- gas selector ----
-const GAS_V={he:1007,air:340,co2:267};
-function setGas(g){
-  const v=GAS_V[g];
-  spd=v;
-  const slv=document.getElementById('slv');
-  slv.min=v-20;slv.max=v+20;slv.value=v;
-  document.getElementById('svo').textContent=v;
-  ['he','air','co2'].forEach(function(x){
-    document.getElementById('gas-'+x).classList.toggle('active',x===g);
-  });
-  upd();
-}
-
-// ---- mode + pulse ----
-function setMode(m){
-  mode=m;
-  document.getElementById('bmodec').classList.toggle('active',m==='cont');
-  document.getElementById('bmodep').classList.toggle('active',m==='puls');
-  document.getElementById('bpuls').disabled=(m!=='puls');
-  if(m==='cont')pulseParams=null;
-  applyAudio();
-}
-
-function sendPulse(){
-  if(mode!=='puls')return;
-  const lam=spd/freq;
-  const lp=Math.max(38,Math.min(320,50+(lam-.1)/1.9*250));
-  const omega=2*Math.PI*VIS_SPEED/lp;
-  pulseParams={startT:simT,lp:lp,omega:omega,amp:amp,duration:N_CYCLES_PULSE*lp/VIS_SPEED};
-}
-
-// ---- input handlers ----
-document.getElementById('slv').oninput=function(){spd=+this.value;document.getElementById('svo').textContent=spd;upd();applyAudio();};
-document.getElementById('slf').oninput=function(){freq=+this.value;document.getElementById('sfo').textContent=freq;upd();applyAudio();};
-document.getElementById('slamp').oninput=function(){amp=+this.value;document.getElementById('samp').textContent=amp;applyAudio();};
-document.getElementById('slt').oninput=function(){therm=+this.value;document.getElementById('sto').textContent=therm+' %';};
-document.getElementById('sla').oninput=function(){asp=+this.value;document.getElementById('sao').textContent=fmtAsp(asp);};
-document.getElementById('gas-he').onclick=function(){setGas('he');};
-document.getElementById('gas-air').onclick=function(){setGas('air');};
-document.getElementById('gas-co2').onclick=function(){setGas('co2');};
-document.getElementById('bmodec').onclick=function(){setMode('cont');};
-document.getElementById('bmodep').onclick=function(){setMode('puls');};
-document.getElementById('bpuls').onclick=function(){sendPulse();};
-document.getElementById('bplay').onclick=function(){running=!running;this.textContent=running?'\u23f8 Pause':'\u25b6 Afspil';if(running)lastTS=null;};
-document.getElementById('breset').onclick=function(){
-  simT=0;lastTS=null;oscBuf.fill(0);oscHead=0;trailX.fill(NaN);trailY.fill(NaN);trailHead=0;
-  for(let r=0;r<ROWS.length;r++){thermalX[r].fill(0);thermalY[r].fill(0);}
-  pulseParams=null;
-  if(!running)frame();
-};
-document.getElementById('btn-th').onclick=function(){darkMode=!darkMode;applyTheme();};
-document.getElementById('bsnd').onclick=function(){
-  soundOn=!soundOn;
-  if(soundOn){initAudio();if(audioCtx&&audioCtx.state==='suspended')audioCtx.resume();}
-  applyAudio();
-  this.textContent=soundOn?'\u266a Lyd til':'\u266a Lyd fra';
-  this.classList.toggle('active',soundOn);
-};
-document.getElementById('bcopy').onclick=async function(){
-  const b=this,h=document.documentElement.outerHTML;
-  try{await navigator.clipboard.writeText(h);}
-  catch(e){const t=document.createElement('textarea');t.value=h;document.body.appendChild(t);t.select();document.execCommand('copy');t.remove();}
-  b.textContent='\u229e Kopieret!';setTimeout(function(){b.textContent='\u229e Kopier kode';},2000);
-};
-
-applyTheme();upd();requestAnimationFrame(loop);
-})();
+resetGas();
+updateSlowRo();
+refreshLydBtn();
+requestAnimationFrame(loop);
 </script>
-</div>
-</div>
 </body>
 </html>
