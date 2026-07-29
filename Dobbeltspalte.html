@@ -3,306 +3,583 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>Dobbeltspalteeksperiment</title>
-<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@300;500;600&display=swap" rel="stylesheet">
+<title>Dobbeltspalte &amp; gitter</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700&family=Share+Tech+Mono&family=Exo+2:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
-  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
-  body {
-    background: #07090f;
-    color: #8fb8cc;
-    font-family: 'Rajdhani', sans-serif;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    min-height: 100vh;
-    padding: 20px 16px 28px;
-    gap: 14px;
-  }
-  header { text-align: center; }
-  h1 {
-    font-size: 1.5rem;
-    font-weight: 300;
-    letter-spacing: 0.2em;
-    color: #36b4d4;
-    text-transform: uppercase;
-    text-shadow: 0 0 18px rgba(54,180,212,0.35);
-  }
-  .formula-top {
-    font-family: 'Share Tech Mono', monospace;
-    font-size: 0.7rem;
-    color: #2a5570;
-    margin-top: 5px;
-    letter-spacing: 0.08em;
-  }
-  .canvas-wrap {
-    border: 1px solid #0e1f30;
-    border-radius: 3px;
-    overflow: hidden;
-    box-shadow: 0 0 60px rgba(0,80,180,0.1), 0 0 0 1px #09131e;
-    width: 100%;
-    max-width: 940px;
-  }
-  canvas { display: block; width: 100%; height: auto; }
+:root {
+  --bg0: #030810;
+  --bg1: #060e18;
+  --bg2: #0a1622;
+  --bg3: #0f1e2d;
+  --border: #1a3a52;
+  --green:  #00ff9f;
+  --cyan:   #00cfff;
+  --yellow: #ffd93d;
+  --text: #d0eef5;
+  --dim:  #8ec8d8;
+  --mono: 'Courier New', 'Lucida Console', monospace;
+  --ui: 'Share Tech Mono', monospace;
+  --body: 'Exo 2', sans-serif;
+  --tr: 0.15s ease;
+}
+[data-theme="light"] {
+  --bg0: #e8e0d2;
+  --bg1: #f4eee3;
+  --bg2: #fdfaf4;
+  --bg3: #fdfaf4;
+  --border: #c8c0b0;
+  --green:  #1D9E75;
+  --cyan:   #378ADD;
+  --yellow: #c07800;
+  --text: #1a1a1a;
+  --dim:  #333333;
+}
 
-  /* ── Main layout: canvas left, controls right ── */
-  .main-area {
-    display: flex;
-    flex-direction: row;
-    gap: 16px;
-    align-items: stretch;
-    width: 100%;
-    max-width: 1240px;
-    justify-content: center;
-  }
-  .main-area .canvas-wrap { flex: 1 1 auto; max-width: 940px; }
-  .side-controls {
-    flex: 0 0 260px;
-    display: flex;
-    flex-direction: column;
-    gap: 14px;
-    align-items: stretch;
-    justify-content: center;
-    background: #09101a;
-    border: 1px solid #0e1f30;
-    border-radius: 4px;
-    padding: 18px 18px;
-  }
-  .side-controls .ctrl { width: 100%; }
-  .side-controls .ctrl input[type="range"] { width: 100%; }
-  .side-controls .sep { width: 100%; height: 1px; }
-  @media (max-width: 920px) {
-    .main-area { flex-direction: column; align-items: center; }
-    .side-controls { flex: 0 0 auto; width: 100%; max-width: 940px; }
-  }
+* { margin: 0; padding: 0; box-sizing: border-box; }
 
-  /* ── toolbar rows ── */
-  .toolbar {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px 10px;
-    align-items: center;
-    justify-content: center;
-  }
-  .btn {
-    font-family: 'Share Tech Mono', monospace;
-    font-size: 0.72rem;
-    letter-spacing: 0.08em;
-    color: #7ac8e0;
-    background: #09101a;
-    border: 1px solid #1a3a50;
-    border-radius: 4px;
-    padding: 7px 18px;
-    cursor: pointer;
-    transition: background 0.15s, color 0.15s, border-color 0.15s;
-    display: flex;
-    align-items: center;
-    gap: 7px;
-    white-space: nowrap;
-  }
-  .btn:hover { background: #0e1e2e; border-color: #36b4d4; color: #b8eaf8; }
-  .btn.active { background: #0a1e30; border-color: #36b4d4; color: #36b4d4; }
-  .btn svg { flex-shrink: 0; }
+body {
+  background: var(--bg0);
+  color: var(--text);
+  font-family: var(--body);
+  padding: 10px 14px 22px;
+  min-height: 100vh;
+}
 
-  .speed-wrap {
-    display: flex;
-    align-items: center;
-    gap: 9px;
-    background: #09101a;
-    border: 1px solid #1a3a50;
-    border-radius: 4px;
-    padding: 7px 14px;
-  }
-  .speed-lbl {
-    font-family: 'Share Tech Mono', monospace;
-    font-size: 0.68rem;
-    color: #305565;
-    white-space: nowrap;
-  }
-  .speed-val {
-    font-family: 'Share Tech Mono', monospace;
-    font-size: 0.82rem;
-    color: #36b4d4;
-    min-width: 3.2em;
-    text-align: right;
-  }
-  input[type="range"].speed-slider {
-    -webkit-appearance: none;
-    appearance: none;
-    width: 120px;
-    height: 3px;
-    background: #0e2535;
-    border-radius: 2px;
-    outline: none;
-    cursor: pointer;
-  }
-  input[type="range"].speed-slider::-webkit-slider-thumb {
-    -webkit-appearance: none;
-    width: 12px; height: 12px;
-    background: #36b4d4;
-    border-radius: 50%;
-    border: 2px solid #07090f;
-    box-shadow: 0 0 6px rgba(54,180,212,0.5);
-  }
-  input[type="range"].speed-slider::-moz-range-thumb {
-    width: 12px; height: 12px;
-    background: #36b4d4;
-    border-radius: 50%;
-    border: 2px solid #07090f;
-  }
+.wrap { max-width: 1280px; margin: 0 auto; }
 
-  .controls {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 20px 32px;
-    align-items: center;
-    justify-content: center;
-    background: #09101a;
-    border: 1px solid #0e1f30;
-    border-radius: 4px;
-    padding: 14px 30px;
-  }
-  .ctrl { display: flex; flex-direction: column; align-items: center; gap: 6px; }
-  .ctrl-lbl {
-    font-family: 'Share Tech Mono', monospace;
-    font-size: 0.68rem;
-    color: #305565;
-    letter-spacing: 0.1em;
-  }
-  .ctrl-val {
-    font-family: 'Share Tech Mono', monospace;
-    font-size: 1rem;
-    color: #36b4d4;
-  }
-  input[type="range"] {
-    -webkit-appearance: none;
-    appearance: none;
-    width: 180px;
-    height: 3px;
-    background: #0e2535;
-    border-radius: 2px;
-    outline: none;
-    cursor: pointer;
-    touch-action: none;
-  }
-  input[type="range"]::-webkit-slider-thumb {
-    -webkit-appearance: none;
-    width: 13px; height: 13px;
-    background: #36b4d4;
-    border-radius: 50%;
-    border: 2px solid #07090f;
-    box-shadow: 0 0 7px rgba(54,180,212,0.5);
-  }
-  input[type="range"]::-moz-range-thumb {
-    width: 13px; height: 13px;
-    background: #36b4d4;
-    border-radius: 50%;
-    border: 2px solid #07090f;
-  }
-  input[type="range"]:disabled {
-    opacity: 0.35;
-    cursor: not-allowed;
-  }
-  input[type="range"]:disabled::-webkit-slider-thumb { background: #305565; box-shadow: none; }
-  input[type="range"]:disabled::-moz-range-thumb { background: #305565; }
-  .ctrl.disabled .ctrl-lbl,
-  .ctrl.disabled .ctrl-val { opacity: 0.4; }
-  .sep { width: 1px; height: 48px; background: #0e1f30; }
-  .order-bar {
-    font-family: 'Share Tech Mono', monospace;
-    font-size: 0.68rem;
-    color: #1e4a60;
-    text-align: center;
-    min-height: 1.4em;
-    letter-spacing: 0.05em;
-  }
+/* ---------- Kompakt topbjaelke ---------- */
+header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  border: 1px solid var(--border);
+  background: var(--bg1);
+  padding: 8px 12px;
+  margin-bottom: 10px;
+}
+[data-theme="light"] header { background: #fdfaf4; }
+.title-group { display: flex; align-items: center; gap: 10px; }
+h1 {
+  font-family: 'Orbitron', sans-serif;
+  font-weight: 700;
+  font-size: 16px;
+  letter-spacing: .16em;
+  color: var(--green);
+  text-transform: uppercase;
+}
+html:not([data-theme="light"]) h1 { text-shadow: 0 0 10px rgba(0,255,159,.4); }
+
+/* Blinkende spalte-ikon */
+.icon-em { width: 26px; height: 26px; display: block; }
+.icon-em .mast { stroke: var(--green); }
+.icon-em .dot { fill: var(--green); }
+.icon-em .arc { stroke: var(--green); fill: none; }
+.icon-em .arc.a1 { animation: pulseArc 1.6s ease-in-out infinite; }
+.icon-em .arc.a2 { animation: pulseArc 1.6s ease-in-out infinite .5s; }
+@keyframes pulseArc {
+  0%, 100% { opacity: .15; }
+  40%      { opacity: 1; }
+}
+html:not([data-theme="light"]) .icon-em { filter: drop-shadow(0 0 4px rgba(0,255,159,.6)); }
+
+.hdr-btns { display: flex; gap: 7px; flex-wrap: wrap; }
+.btn-hdr {
+  font-family: var(--ui);
+  font-size: 12px;
+  letter-spacing: .08em;
+  border: 1px solid var(--border);
+  background: var(--bg3);
+  color: var(--text);
+  padding: 6px 13px;
+  cursor: pointer;
+  text-transform: uppercase;
+  transition: var(--tr);
+  user-select: none;
+}
+.btn-hdr:hover { border-color: var(--green); color: var(--green); }
+html:not([data-theme="light"]) .btn-hdr:hover { box-shadow: 0 0 10px rgba(0,255,159,.35); }
+[data-theme="light"] .btn-hdr { font-weight: 700; }
+
+/* ---------- Hovedlayout: sidebar + canvas ---------- */
+.main-grid {
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  gap: 10px;
+  align-items: start;
+}
+@media (max-width: 880px) {
+  .main-grid { grid-template-columns: 1fr; }
+}
+
+.panel {
+  background: var(--bg1);
+  border: 1px solid var(--border);
+  padding: 11px 12px;
+}
+[data-theme="light"] .panel { background: #fdfaf4; }
+.panel + .panel { margin-top: 10px; }
+
+canvas#c {
+  display: block;
+  width: 100%;
+  height: auto;
+  background: #0a1622;
+  border: 1px solid var(--border);
+}
+
+.formula-caption {
+  font-family: var(--ui);
+  font-size: 12px;
+  letter-spacing: .06em;
+  color: var(--dim);
+  margin-top: 9px;
+  text-align: center;
+}
+.formula-caption .sym { color: var(--cyan); }
+
+.sec-title {
+  font-family: var(--ui);
+  font-size: 11px;
+  letter-spacing: .22em;
+  color: var(--green);
+  text-transform: uppercase;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 5px;
+  margin-bottom: 10px;
+}
+[data-theme="light"] .sec-title { font-weight: 700; }
+
+/* symboler maa aldrig uppercases */
+.sym { text-transform: none; }
+
+/* ---------- Slidere ---------- */
+.ctl-row { margin-bottom: 13px; }
+.ctl-label {
+  font-family: var(--ui);
+  font-size: 12px;
+  letter-spacing: .08em;
+  color: var(--text);
+  text-transform: uppercase;
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+[data-theme="light"] .ctl-label { font-weight: 700; }
+.ctl-label .val {
+  font-family: var(--mono);
+  font-weight: 700;
+  color: var(--cyan);
+  text-transform: none;
+  white-space: nowrap;
+}
+.ctl-row.disabled .ctl-label,
+.ctl-row.disabled .ctl-label .val { opacity: .4; }
+
+input[type="range"] {
+  width: 100%;
+  -webkit-appearance: none;
+  appearance: none;
+  height: 6px;
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  outline: none;
+  cursor: pointer;
+  touch-action: none;
+}
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 18px;
+  height: 18px;
+  background: var(--green);
+  border: 2px solid var(--bg0);
+  border-radius: 50%;
+  cursor: pointer;
+}
+input[type="range"]::-moz-range-thumb {
+  width: 16px;
+  height: 16px;
+  background: var(--green);
+  border: 2px solid var(--bg0);
+  border-radius: 50%;
+  cursor: pointer;
+}
+input[type="range"]:disabled { opacity: .4; cursor: not-allowed; }
+input[type="range"]:disabled::-webkit-slider-thumb { background: var(--dim); }
+input[type="range"]:disabled::-moz-range-thumb { background: var(--dim); }
+
+.slider-ends {
+  display: flex;
+  justify-content: space-between;
+  font-family: var(--mono);
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--dim);
+  margin-top: 4px;
+}
+
+/* ---------- Knapper ---------- */
+.btn-row { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 2px; }
+.btn {
+  font-family: var(--ui);
+  font-size: 12px;
+  letter-spacing: .1em;
+  border: 1px solid var(--green);
+  background: var(--bg3);
+  color: var(--green);
+  padding: 8px 18px;
+  cursor: pointer;
+  text-transform: uppercase;
+  transition: var(--tr);
+  user-select: none;
+  flex: 1 1 auto;
+}
+[data-theme="light"] .btn { font-weight: 700; }
+.btn:hover { background: rgba(0,255,159,.09); }
+html:not([data-theme="light"]) .btn:hover { box-shadow: 0 0 10px rgba(0,255,159,.4); }
+[data-theme="light"] .btn:hover { background: rgba(29,158,117,.10); }
+.btn.sec { border-color: var(--cyan); color: var(--cyan); }
+.btn.sec:hover { background: rgba(0,207,255,.09); }
+[data-theme="light"] .btn.sec:hover { background: rgba(55,138,221,.10); }
+.btn.sec.active { background: rgba(0,207,255,.16); }
+[data-theme="light"] .btn.sec.active { background: rgba(55,138,221,.16); }
+
+.sep-line { height: 1px; background: var(--border); margin: 13px 0; }
+
+/* ---------- Aflaesninger ---------- */
+.readouts { display: flex; flex-direction: column; gap: 8px; }
+.ro {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  padding: 8px 11px;
+}
+[data-theme="light"] .ro { background: #ffffff; }
+.ro.clickable { cursor: pointer; transition: var(--tr); }
+.ro.clickable:hover { border-color: var(--yellow); }
+.ro .k {
+  font-family: var(--ui);
+  font-size: 12px;
+  letter-spacing: .08em;
+  color: var(--text);
+  display: block;
+  margin-bottom: 3px;
+}
+[data-theme="light"] .ro .k { font-weight: 700; }
+.ro .k .hint { color: var(--dim); font-size: 10px; float: right; text-transform: none; letter-spacing: 0; }
+.ro .v {
+  font-family: var(--mono);
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--cyan);
+  display: block;
+}
+.ro .v.grn { color: var(--green); }
+.ro .v.yel { color: var(--yellow); }
+
+/* ---------- Modaler ---------- */
+.modal-bg {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.65);
+  z-index: 50;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+.modal-bg.open { display: flex; }
+.modal {
+  background: var(--bg1);
+  border: 1px solid var(--green);
+  max-width: 720px;
+  width: 100%;
+  max-height: 84vh;
+  overflow-y: auto;
+  padding: 20px 24px;
+}
+[data-theme="light"] .modal { background: #fdfaf4; border-color: #1D9E75; }
+.modal h2 {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 15px;
+  letter-spacing: .1em;
+  color: var(--green);
+  text-transform: uppercase;
+  margin-bottom: 14px;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 8px;
+}
+.modal h3 {
+  font-family: var(--ui);
+  font-size: 13px;
+  letter-spacing: .1em;
+  color: var(--cyan);
+  text-transform: uppercase;
+  margin: 16px 0 8px;
+}
+.modal p, .modal li {
+  font-size: 14.5px;
+  line-height: 1.7;
+  color: var(--text);
+  margin-bottom: 10px;
+}
+.modal ol, .modal ul { margin: 0 0 10px 22px; }
+.modal ol ol { list-style: lower-alpha; margin: 6px 0 6px 22px; }
+.modal .acc { color: var(--cyan); font-weight: 600; }
+.modal .acc-g { color: var(--green); font-weight: 600; }
+.modal .acc-y { color: var(--yellow); font-weight: 600; }
+[data-theme="light"] .modal .acc-y { color: #c07800; }
+.modal .eq {
+  font-family: var(--mono);
+  font-size: 15px;
+  color: var(--cyan);
+  text-align: center;
+  margin: 12px 0;
+  font-weight: 700;
+}
+.modal-close-row { text-align: right; margin-top: 12px; }
+
+.toast {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--bg3);
+  border: 1px solid var(--green);
+  color: var(--green);
+  font-family: var(--ui);
+  font-size: 13px;
+  letter-spacing: .08em;
+  padding: 10px 22px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .3s;
+  z-index: 99;
+}
+.toast.show { opacity: 1; }
 </style>
 </head>
 <body>
+<div class="wrap">
 
-<header>
-  <h1>Dobbeltspalteeksperimentet</h1>
-  <div class="formula-top">Konstruktiv interferens: d &middot; sin &theta;<sub style="font-size:0.75em">m</sub> = m &middot; &lambda; &nbsp;|&nbsp; Young's eksperiment (1801)</div>
-</header>
+  <header>
+    <div class="title-group">
+      <svg class="icon-em" viewBox="0 0 26 26" aria-hidden="true">
+        <line class="mast" x1="7" y1="2.5" x2="7" y2="23.5" stroke-width="2.4" stroke-linecap="round"/>
+        <circle class="dot" cx="7" cy="9.5" r="1.5"/>
+        <circle class="dot" cx="7" cy="16.5" r="1.5"/>
+        <path class="arc a1" d="M 10.5 6 A 4.5 4.5 0 0 1 10.5 13" stroke-width="1.8" stroke-linecap="round"/>
+        <path class="arc a2" d="M 10.5 13 A 4.5 4.5 0 0 1 10.5 20" stroke-width="1.8" stroke-linecap="round"/>
+      </svg>
+      <h1>Dobbeltspalte &amp; gitter</h1>
+    </div>
+    <div class="hdr-btns">
+      <button class="btn-hdr" id="btnForklaring">Forklaring</button>
+      <button class="btn-hdr" id="btnOpgave">Opgave</button>
+      <button class="btn-hdr" id="btnKopier">Kopier kode</button>
+      <button class="btn-hdr" id="btnTema">Lyst tema</button>
+    </div>
+  </header>
 
-<div class="main-area">
-  <div class="canvas-wrap">
-    <canvas id="c" width="940" height="530"></canvas>
+  <div class="main-grid">
+
+    <div class="sidebar">
+      <div class="panel">
+        <div class="sec-title">Kontrol</div>
+
+        <div class="ctl-row" id="ctlLam">
+          <div class="ctl-label">
+            <span>B&oslash;lgel&aelig;ngde <span class="sym">&lambda;</span></span>
+            <span class="val" id="lamVal">530 nm</span>
+          </div>
+          <input type="range" id="sLam" min="400" max="700" value="530" step="5">
+          <div class="slider-ends"><span>400 nm</span><span>700 nm</span></div>
+        </div>
+
+        <div class="ctl-row">
+          <div class="ctl-label">
+            <span>Gitterkonstant <span class="sym">d</span></span>
+            <span class="val" id="dVal">1500 nm</span>
+          </div>
+          <input type="range" id="sD" min="800" max="3000" value="1500" step="25">
+          <div class="slider-ends"><span>800 nm</span><span>3000 nm</span></div>
+        </div>
+
+        <div class="ctl-row">
+          <div class="ctl-label">
+            <span>Antal spalter <span class="sym">N</span></span>
+            <span class="val" id="nVal">2</span>
+          </div>
+          <input type="range" id="sN" min="2" max="8" value="2" step="1">
+          <div class="slider-ends"><span>2</span><span>8</span></div>
+        </div>
+
+        <div class="ctl-row">
+          <div class="ctl-label">
+            <span>Animationshastighed</span>
+            <span class="val" id="spdVal">1,0&times;</span>
+          </div>
+          <input type="range" id="sSpeed" min="1" max="10" value="5" step="1">
+        </div>
+
+        <div class="btn-row">
+          <button class="btn" id="btnPause">Pause</button>
+          <button class="btn sec" id="btnReset">Nulstil</button>
+        </div>
+        <div class="btn-row">
+          <button class="btn sec" id="btnWhite">Hvidt lys</button>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="sec-title">Afl&aelig;sninger</div>
+        <div class="readouts">
+          <div class="ro"><span class="k">1. ordens vinkel <span class="sym">&phi;<sub>1</sub></span></span><span class="v grn" id="roPhi">&ndash;</span></div>
+          <div class="ro clickable" id="roMmaxBox"><span class="k">Maks. antal ordner <span class="sym">m<sub>maks</sub></span><span class="hint">klik &#9432;</span></span><span class="v yel" id="roMmax">&ndash;</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="content-col">
+      <div class="panel">
+        <canvas id="c" width="940" height="530"></canvas>
+        <div class="formula-caption">Gitterligningen: <span class="sym">m &middot; &lambda; = d &middot; sin &phi;<sub>m</sub></span> &nbsp;&middot;&nbsp; Youngs eksperiment (1801)</div>
+      </div>
+    </div>
+
   </div>
 
-  <!-- Physics sliders (vertical, right side) -->
-  <div class="controls side-controls">
-    <div class="ctrl" id="ctrlLam">
-      <div class="ctrl-lbl">B&Oslash;LGEL&AElig;NGDE &lambda;</div>
-      <input type="range" id="sLam" min="400" max="700" value="530" step="5">
-      <div class="ctrl-val" id="vLam">&lambda; = 530 nm</div>
-    </div>
-    <div class="sep"></div>
-    <div class="ctrl">
-      <div class="ctrl-lbl">GITTERKONSTANT d</div>
-      <input type="range" id="sD" min="800" max="3000" value="1500" step="25">
-      <div class="ctrl-val" id="vD">d = 1500 nm</div>
-    </div>
-    <div class="sep"></div>
-    <div class="ctrl">
-      <div class="ctrl-lbl">ANTAL SPALTER N</div>
-      <input type="range" id="sN" min="2" max="8" value="2" step="1">
-      <div class="ctrl-val" id="vN">N = 2</div>
-    </div>
-    <div class="sep"></div>
-    <div class="ctrl">
-      <div class="ctrl-lbl">ANTAL ORDNER (m<sub style="font-size:0.8em">max</sub>)</div>
-      <div class="ctrl-val" id="nOrders" style="font-size:1.4rem;">&ndash;</div>
-    </div>
+</div>
+
+<!-- Modaler SKAL ligge foer script-tagget -->
+<div class="modal-bg" id="modalForklaring">
+  <div class="modal">
+    <h2>Forklaring</h2>
+    <p>Simuleringen viser en <span class="acc-g">plan lysb&oslash;lge</span>, der falder ind mod en v&aelig;g med <span class="acc-g">N spalter</span>. Efter hver spalte spreder lyset sig som cirkelb&oslash;lger, og p&aring; sk&aelig;rmen til h&oslash;jre m&oslash;des b&oslash;lgerne fra de forskellige spalter og <em>interfererer</em>.</p>
+    <p>I nogle retninger er b&oslash;lgerne <span class="acc-g">i fase</span> og forst&aelig;rker hinanden (konstruktiv interferens &mdash; en lys stribe). I andre retninger er de i <span class="acc">modfase</span> og udslukker hinanden (destruktiv interferens &mdash; m&oslash;rke). De lyse striber kaldes <em>ordner</em> og nummereres med <span class="sym">m</span> = 0, 1, 2, &hellip; ud fra midten.</p>
+    <p>Konstruktiv interferens opst&aring;r, n&aring;r vejforskellen mellem nabospalter er et helt antal b&oslash;lgel&aelig;ngder. Det giver <span class="acc">gitterligningen</span>:</p>
+    <p class="eq"><span class="sym">m &middot; &lambda; = d &middot; sin &phi;<sub>m</sub></span></p>
+    <p>hvor <span class="sym">d</span> er <span class="acc">gitterkonstanten</span> (afstanden mellem to nabospalter) og <span class="sym">&phi;<sub>m</sub></span> er afb&oslash;jningsvinklen til <span class="sym">m</span>'te orden. Midten (<span class="sym">m</span> = 0) ligger altid ligeud, uanset <span class="sym">&lambda;</span> og <span class="sym">d</span>.</p>
+    <h3>Hvad sker der, n&aring;r du &aelig;ndrer p&aring; tingene?</h3>
+    <p><span class="acc-g">St&oslash;rre <span class="sym">&lambda;</span></span> (mere r&oslash;dt) &rarr; st&oslash;rre <span class="sym">sin &phi;<sub>m</sub></span> &rarr; ordnerne spredes l&aelig;ngere ud. <span class="acc-g">St&oslash;rre <span class="sym">d</span></span> &rarr; mindre <span class="sym">sin &phi;<sub>m</sub></span> &rarr; ordnerne r&aelig;kker t&aelig;ttere sammen.</p>
+    <p><span class="acc-g">Flere spalter (<span class="sym">N</span>)</span> &aelig;ndrer ikke, <em>hvor</em> ordnerne ligger &mdash; kun <em>hvor skarpe</em> de er. Med mange spalter bliver hver orden en smal, skarp linje. Derfor bruger et rigtigt optisk gitter tusinder af spalter: skarpe linjer giver pr&aelig;cise m&aring;linger af b&oslash;lgel&aelig;ngden.</p>
+    <p><span class="acc-y">Hvidt lys</span> indeholder alle b&oslash;lgel&aelig;ngder. Da hver farve afb&oslash;jes forskelligt (violet mindst, r&oslash;dt mest), splittes hver orden op i et lille spektrum &mdash; kun midten (<span class="sym">m</span> = 0) forbliver hvid.</p>
+    <p><em>Bem&aelig;rk om skalaen:</em> B&oslash;lgel&aelig;ngden er tegnet meget st&oslash;rre end i virkeligheden, s&aring; b&oslash;lgetoppene kan ses. Vinklerne <span class="sym">&phi;<sub>m</sub></span> og forholdet mellem ordnerne f&oslash;lger derimod gitterligningen korrekt for de viste <span class="sym">&lambda;</span>- og <span class="sym">d</span>-v&aelig;rdier.</p>
+    <div class="modal-close-row"><button class="btn" data-close="modalForklaring">Luk</button></div>
   </div>
 </div>
 
-<!-- Playback toolbar -->
-<div class="toolbar">
-  <button class="btn active" id="btnPlay">
-    <!-- pause icon shown when playing -->
-    <svg id="icoPlay" width="13" height="14" viewBox="0 0 13 14" fill="currentColor">
-      <rect x="0" y="0" width="4" height="14" rx="1"/>
-      <rect x="9" y="0" width="4" height="14" rx="1"/>
-    </svg>
-    <span id="lblPlay">PAUSE</span>
-  </button>
+<div class="modal-bg" id="modalOpgave">
+  <div class="modal">
+    <h2>Opgave &mdash; Dobbeltspalte og gitter</h2>
 
-  <button class="btn" id="btnReset">
-    <svg width="13" height="13" viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
-      <path d="M11.5 2A6.5 6.5 0 1 0 12.5 6.5"/>
-      <polyline points="9,0 12.5,2 10,5"/>
-    </svg>
-    NULSTIL
-  </button>
+    <h3>1. Variation af b&oslash;lgel&aelig;ngden</h3>
+    <p>Afspil simuleringen med <span class="sym">&lambda;</span> = 530 nm og <span class="sym">d</span> = 1500 nm.</p>
+    <ol type="a">
+      <li>Verific&eacute;r ved beregning, at afb&oslash;jningsvinklen til 1. orden er som angivet i simuleringen.</li>
+      <li>Nulstil og k&oslash;r simuleringen med <span class="sym">&lambda;</span> = 400 nm. Forklar, med udgangspunkt i gitterligningen, den &aelig;ndring du ser.</li>
+      <li>Nulstil og k&oslash;r simuleringen med <span class="sym">&lambda;</span> = 700 nm. Forklar, med udgangspunkt i gitterligningen, den &aelig;ndring du ser.</li>
+    </ol>
 
-  <button class="btn" id="btnWhite" title="Skift mellem monokromatisk og hvidt lys">
-    <svg width="13" height="13" viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="1.5">
-      <circle cx="6.5" cy="6.5" r="5"/>
-      <path d="M6.5 1.5 V11.5 M1.5 6.5 H11.5" stroke-width="1"/>
-    </svg>
-    <span id="lblWhite">HVIDT LYS</span>
-  </button>
+    <h3>2. Variation af gitterkonstanten</h3>
+    <p>G&aring; tilbage til 530 nm.</p>
+    <ol type="a">
+      <li>Nulstil og k&oslash;r simuleringen med <span class="sym">d</span> = 800 nm. Forklar, med udgangspunkt i gitterligningen, den &aelig;ndring du ser.</li>
+      <li>Nulstil og k&oslash;r simuleringen med <span class="sym">d</span> = 3000 nm. Forklar, med udgangspunkt i gitterligningen, den &aelig;ndring du ser.</li>
+    </ol>
 
-  <button class="btn" id="btnCopy">
-    <svg width="13" height="14" viewBox="0 0 13 14" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
-      <rect x="4" y="4" width="8" height="9" rx="1.5"/>
-      <path d="M2 10V2a1 1 0 0 1 1-1h7"/>
-    </svg>
-    <span id="lblCopy">KOPIER KODE</span>
-  </button>
+    <h3>3. Maksimalt antal ordner</h3>
+    <p>I simuleringen er der en info-boks om maksimalt antal ordner (klik p&aring; <span class="sym">m<sub>maks</sub></span> i afl&aelig;sningerne). Forklar hvordan man kommer frem til tallet.</p>
 
-  <div class="speed-wrap">
-    <span class="speed-lbl">HASTIGHED</span>
-    <input type="range" class="speed-slider" id="sSpeed" min="1" max="10" value="4" step="1">
-    <span class="speed-val" id="vSpeed">×1.0</span>
+    <h3>4. Flere spalter</h3>
+    <p>Et optisk gitter indeholder typisk nogle tusind spalter pr. mm. Det er lidt sv&aelig;rt at simulere, men pr&oslash;v fx at s&aelig;tte antal spalter til <span class="sym">N</span> = 4 og s&aring; <span class="sym">N</span> = 6. Kan du se en &aelig;ndring i lyset p&aring; sk&aelig;rmen, n&aring;r antal spalter &oslash;ges? Hvorfor er det bedre at bruge mange spalter ved fors&oslash;g?</p>
+
+    <h3>5. Hvidt lys</h3>
+    <p>Klik p&aring; hvidt lys, og k&oslash;r simuleringen. Passer den r&aelig;kkef&oslash;lge, farverne kommer i, med gitterligningen?</p>
+    <div class="modal-close-row"><button class="btn" data-close="modalOpgave">Luk</button></div>
   </div>
 </div>
 
-<!-- order-bar removed -->
-<div id="orderBar" style="display:none"></div>
+<div class="modal-bg" id="modalOrdner">
+  <div class="modal">
+    <h2>Maksimalt antal ordner</h2>
+    <p>Gitterligningen er <span class="eq" style="display:inline;margin:0"><span class="sym">m &middot; &lambda; = d &middot; sin &phi;<sub>m</sub></span></span>. Isoleres <span class="sym">sin &phi;<sub>m</sub></span> f&aring;s:</p>
+    <p class="eq"><span class="sym">sin &phi;<sub>m</sub> = m &middot; &lambda; / d</span></p>
+    <p>En sinus kan aldrig blive st&oslash;rre end 1 (det svarer til <span class="sym">&phi;</span> = 90&deg; &mdash; lyset ville g&aring; langs v&aelig;ggen). Derfor m&aring; der g&aelig;lde:</p>
+    <p class="eq"><span class="sym">m &middot; &lambda; / d &le; 1</span> &nbsp;&rArr;&nbsp; <span class="sym">m &le; d / &lambda;</span></p>
+    <p>Det st&oslash;rste hele tal <span class="sym">m</span>, der overholder dette, er det maksimale ordenstal:</p>
+    <p class="eq"><span class="sym">m<sub>maks</sub> = &lfloor; d / &lambda; &rfloor;</span></p>
+    <p>hvor <span class="sym">&lfloor; &rfloor;</span> betyder nedrunding til n&aelig;rmeste hele tal. Er <span class="sym">d/&lambda;</span> selv et helt tal, ville den orden ligge pr&aelig;cis ved 90&deg; og kan ikke ses &mdash; s&aring; t&aelig;ller den ikke med.</p>
+    <p id="ordnerNow" class="acc-y"></p>
+    <p>For <span class="acc-y">hvidt lys</span> bruges den korteste b&oslash;lgel&aelig;ngde (violet), fordi lille <span class="sym">&lambda;</span> giver flest ordner.</p>
+    <div class="modal-close-row"><button class="btn" data-close="modalOrdner">Luk</button></div>
+  </div>
+</div>
+
+<div class="toast" id="toast">Kode kopieret til udklipsholderen</div>
 
 <script>
-/* ── roundRect polyfill for older Safari/iOS ────────────────────── */
+'use strict';
+
+/* ================= Tema ================= */
+const htmlEl = document.documentElement;
+const btnTema = document.getElementById('btnTema');
+function isLight() { return htmlEl.getAttribute('data-theme') === 'light'; }
+btnTema.addEventListener('click', () => {
+  if (isLight()) { htmlEl.removeAttribute('data-theme'); btnTema.textContent = 'Lyst tema'; }
+  else { htmlEl.setAttribute('data-theme', 'light'); btnTema.textContent = 'Mørkt tema'; }
+});
+
+/* ================= Modaler ================= */
+function bindModal(btnId, modalId) {
+  document.getElementById(btnId).addEventListener('click', () =>
+    document.getElementById(modalId).classList.add('open'));
+}
+bindModal('btnForklaring', 'modalForklaring');
+bindModal('btnOpgave', 'modalOpgave');
+document.getElementById('roMmaxBox').addEventListener('click', () => {
+  updateOrdnerModal();
+  document.getElementById('modalOrdner').classList.add('open');
+});
+document.querySelectorAll('[data-close]').forEach(b =>
+  b.addEventListener('click', () => document.getElementById(b.dataset.close).classList.remove('open')));
+document.querySelectorAll('.modal-bg').forEach(m =>
+  m.addEventListener('click', e => { if (e.target === m) m.classList.remove('open'); }));
+
+/* ================= Kopier kode ================= */
+document.getElementById('btnKopier').addEventListener('click', () => {
+  const code = '<!DOCTYPE html>\n' + document.documentElement.outerHTML;
+  const done = () => {
+    const t = document.getElementById('toast');
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 2200);
+  };
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(code).then(done).catch(() => fallbackCopy(code, done));
+  } else { fallbackCopy(code, done); }
+});
+function fallbackCopy(text, done) {
+  const ta = document.createElement('textarea');
+  ta.value = text;
+  ta.style.cssText = 'position:fixed;opacity:0;top:0;left:0';
+  document.body.appendChild(ta);
+  ta.select();
+  try { document.execCommand('copy'); } catch (e) {}
+  document.body.removeChild(ta);
+  done();
+}
+
+/* ================= Dansk talformatering ================= */
+function daNum(x, digits) {
+  return x.toLocaleString('da-DK', { minimumFractionDigits: digits, maximumFractionDigits: digits });
+}
+
+/* ================= roundRect polyfill (aeldre Safari/iOS) ============ */
 if (!CanvasRenderingContext2D.prototype.roundRect) {
   CanvasRenderingContext2D.prototype.roundRect = function(x, y, w, h, r) {
     if (w < 2*r) r = w/2;
@@ -320,6 +597,8 @@ if (!CanvasRenderingContext2D.prototype.roundRect) {
   };
 }
 
+const SCENE_BG = '#0a1622';
+
 const cvs = document.getElementById('c');
 const ctx  = cvs.getContext('2d');
 const W = cvs.width, H = cvs.height;
@@ -336,9 +615,6 @@ let lam = lam_nm * NM_TO_PX;
 let d   = d_nm   * NM_TO_PX;
 let whiteMode = false;
 
-// Maximum N that fits on the wall depends on d. Conversely, for a given N we
-// clamp d's slider max so all slits fit between margins. SO=9 is the slit
-// opening half-height (see drawWall), plus a small visual padding.
 const WALL_MARGIN_PX = 18;
 function maxDPxForN(n) {
   if (n <= 1) return Infinity;
@@ -348,29 +624,30 @@ function maxDnmForN(n) {
   return Math.min(3000, Math.floor(maxDPxForN(n) / NM_TO_PX));
 }
 
-// Slit y-positions, symmetric around CY with spacing d (in px)
 function slitYs() {
   const out = new Array(N);
   for (let k = 0; k < N; k++) out[k] = CY + (k - (N - 1) / 2) * d;
   return out;
 }
 
-// Speed: index 1-10 → actual multiplier
+// Speed: index 0-9 -> multiplier
 const SPEED_TABLE = [0.15, 0.3, 0.5, 0.75, 1.0, 1.5, 2.0, 3.0, 4.5, 6.0];
-let speedIdx = 3; // default index 4 (0-based 3) → ×0.75… let's use index 4 → ×1.0
-speedIdx = 4;
+let speedIdx = 4; // -> x1.0
 function getSpeed() { return SPEED_TABLE[speedIdx]; }
 
 // Simulation state
 let playing    = true;
-let phaseTime  = 0;       // accumulated "virtual time" for wave phase
-let waveHead   = 0;       // x-position of the leading wavefront (reset animation)
-let settled    = false;   // true once waveHead has passed SCR and pattern is fully built
+let phaseTime  = 0;
+let waveHead   = 0;
+let settled    = false;
 let dirty      = true;
 let waveRGB    = [0, 220, 120];
 let raf        = null;
 
-/* ── Colour ────────────────────────────────────────────────────── */
+/* == Canvas-farver (scene altid moerk; label-tekst foelger tema) ===== */
+function colSceneText() { return '#8ec8d8'; }
+
+/* ================= Farve ================= */
 function wavelengthToRGB(nm) {
   let r, g, b;
   if      (nm < 380) { r=0.5; g=0;   b=0.5; }
@@ -387,42 +664,35 @@ function wavelengthToRGB(nm) {
 function refreshColor() { waveRGB = wavelengthToRGB(lam_nm); }
 refreshColor();
 
-/* ── White light spectrum (precomputed) ──────────────────────────── */
-// 8 wavelengths sampling the visible range. Each entry: { lam_nm, lam, rgb }
+/* ================= Hvidt lys spektrum ================= */
 const WHITE_SAMPLES_NM = [410, 450, 490, 525, 560, 595, 635, 680];
 const WHITE_SPECTRUM = WHITE_SAMPLES_NM.map(nm => ({
   lam_nm: nm,
   lam: nm * NM_TO_PX,
   rgb: wavelengthToRGB(nm)
 }));
-// Active spectrum used in physics functions
 function activeSpectrum() {
   return whiteMode
     ? WHITE_SPECTRUM
     : [{ lam_nm, lam, rgb: waveRGB }];
 }
-// Effective display RGB for the plane wave / arrow in current mode
 function displayRGB() {
   return whiteMode ? [220, 225, 235] : waveRGB;
 }
 
-/* ── Offscreen intensity map ────────────────────────────────────── */
+/* ================= Offscreen intensitetskort ================= */
 const off = document.createElement('canvas');
 off.width = W; off.height = H;
 const oCtx = off.getContext('2d');
 
-/* ── Far-field N-slit intensity ─────────────────────────────────── */
-// I(sinθ) = [sin(N π δ) / (N sin(π δ))]²,  δ = d sinθ / λ
-// At principal maxima (δ integer) the limit is 1.
 function farFieldI(sinTheta, lamLocal) {
   const phi = Math.PI * d * sinTheta / lamLocal;
   const sphi = Math.sin(phi);
-  if (Math.abs(sphi) < 1e-8) return 1;            // δ ≈ integer → principal max
+  if (Math.abs(sphi) < 1e-8) return 1;
   const ratio = Math.sin(N * phi) / (N * sphi);
   return ratio * ratio;
 }
 
-/* ── Offscreen intensity map (far-field, supports N + spectrum) ──── */
 function buildMap() {
   const img = oCtx.createImageData(W, H);
   const px  = img.data;
@@ -446,7 +716,6 @@ function buildMap() {
         Isum += I;
       }
       const Iavg = Isum / nL;
-      // Brightness scaling: keep similar feel to the old map (×0.65)
       const scale = whiteMode ? (0.65 / nL) : 0.65;
 
       const i = (row*W + col)*4;
@@ -461,15 +730,9 @@ function buildMap() {
   dirty = false;
 }
 
-/* ── Maxima ─────────────────────────────────────────────────────── */
-// All physically possible principal-maxima orders (|sinθ| < 1).
-// In white mode we tag each order with the angle range from λ_min..λ_max
-// (clamped where m·λ/d would exceed 1).
+/* ================= Maksima ================= */
 function getAllMaxima() {
   const out = [];
-  // Reference λ for counting orders / drawing primary line:
-  //   - mono: the actual λ
-  //   - white: shortest λ (gives the most orders)
   const lamRef = whiteMode ? WHITE_SPECTRUM[0].lam : lam;
   for (let m = -20; m <= 20; m++) {
     const sinT = m * lamRef / d;
@@ -479,13 +742,13 @@ function getAllMaxima() {
     const onScreen = (ys >= 4 && ys <= H - 4);
     const entry = { m, theta, ys, onScreen };
     if (whiteMode && m !== 0) {
-      const lamMin = WHITE_SPECTRUM[0].lam;          // shortest λ → smallest |θ|
+      const lamMin = WHITE_SPECTRUM[0].lam;
       const lamMaxAvail = Math.min(WHITE_SPECTRUM[WHITE_SPECTRUM.length-1].lam,
                                    d / Math.abs(m) * 0.999);
-      const sinMin = m * lamMin / d;                 // signed (matches m's sign)
-      const sinMax = m * lamMaxAvail / d;            // signed (matches m's sign)
-      const thMin = Math.asin(sinMin);                  // closer to axis (violet)
-      const thMax = Math.asin(sinMax);                  // farther from axis (red)
+      const sinMin = m * lamMin / d;
+      const sinMax = m * lamMaxAvail / d;
+      const thMin = Math.asin(sinMin);
+      const thMax = Math.asin(sinMax);
       entry.range = { thMin, thMax,
                       yMin: CY + D*Math.tan(thMin),
                       yMax: CY + D*Math.tan(thMax) };
@@ -495,25 +758,25 @@ function getAllMaxima() {
   return out;
 }
 function getVisibleMaxima() { return getAllMaxima().filter(mv => mv.onScreen); }
-function getMaxima() { return getVisibleMaxima(); } // legacy alias
+function getMaxima() { return getVisibleMaxima(); }
 
-/* ── Draw: background ───────────────────────────────────────────── */
+/* ================= Baggrund ================= */
 function drawBG() {
-  ctx.fillStyle = '#07090f';
+  ctx.fillStyle = SCENE_BG;
   ctx.fillRect(0, 0, W, H);
-  ctx.fillStyle = 'rgba(18,45,70,0.55)';
+  ctx.fillStyle = 'rgba(30,70,100,0.45)';
   for (let x=40; x<W; x+=40)
     for (let y=40; y<H; y+=40)
       ctx.fillRect(x-0.5, y-0.5, 1, 1);
 }
 
-/* ── Draw: plane wave (lines, clipped to waveHead) ──────────────── */
+/* ================= Plan boelge ================= */
 function drawPlaneWave() {
-  ctx.fillStyle = '#060a10';
+  ctx.fillStyle = '#08111c';
   ctx.fillRect(0, 0, WALL, H);
 
   const [cr,cg,cb] = displayRGB();
-  const clipX = Math.min(waveHead, WALL);  // plane wave never crosses wall
+  const clipX = Math.min(waveHead, WALL);
   const phase  = phaseTime % lam;
 
   ctx.save();
@@ -535,14 +798,12 @@ function drawPlaneWave() {
   }
   ctx.restore();
 
-  // Leading wavefront highlight when not yet settled
   if (!settled && waveHead < WALL) {
     ctx.beginPath();
     ctx.strokeStyle = `rgba(${cr},${cg},${cb},0.55)`;
     ctx.lineWidth = 2;
     ctx.moveTo(waveHead, 0); ctx.lineTo(waveHead, H);
     ctx.stroke();
-    // glow
     ctx.beginPath();
     ctx.strokeStyle = `rgba(${cr},${cg},${cb},0.18)`;
     ctx.lineWidth = 12;
@@ -550,7 +811,6 @@ function drawPlaneWave() {
     ctx.stroke();
   }
 
-  // Arrow + label
   const ay = H-22;
   ctx.beginPath();
   ctx.strokeStyle = `rgba(${cr},${cg},${cb},0.32)`;
@@ -562,18 +822,17 @@ function drawPlaneWave() {
   const ax = Math.min(waveHead, WALL)-13;
   ctx.moveTo(ax, ay); ctx.lineTo(ax-9, ay-4); ctx.lineTo(ax-9, ay+4);
   ctx.closePath(); ctx.fill();
-  ctx.font = '10px "Share Tech Mono",monospace';
-  ctx.fillStyle = `rgba(${cr},${cg},${cb},0.38)`;
+  ctx.font = '11px "Share Tech Mono",monospace';
+  ctx.fillStyle = `rgba(${cr},${cg},${cb},0.5)`;
   ctx.textAlign = 'center';
-  ctx.fillText('PLAN B\u00d8LGE  \u2192', WALL/2, H-8);
+  ctx.fillText('PLAN BØLGE  →', WALL/2, H-8);
 }
 
-/* ── Draw: wall (N slits) ───────────────────────────────────────── */
+/* ================= Vaeg (N spalter) ================= */
 function drawWall() {
-  const SO=9, wx=WALL-10, ww=20;  // SO = slit half-opening
+  const SO=9, wx=WALL-10, ww=20;
   const slits = slitYs().sort((a,b)=>a-b);
 
-  // Build segments of solid wall between (and outside) slit gaps
   const segments = [];
   let cursor = 0;
   for (const sy of slits) {
@@ -583,73 +842,65 @@ function drawWall() {
   }
   if (cursor < H) segments.push([cursor, H]);
 
-  // Wall body
   ctx.fillStyle = '#1e3248';
   for (const [a,b] of segments) ctx.fillRect(wx, a, ww, b-a);
 
-  // Bright edge highlight on right face
   ctx.fillStyle = '#3a6080';
   for (const [a,b] of segments) ctx.fillRect(wx+ww-2, a, 2, b-a);
 
-  // Dark slit interiors
-  ctx.fillStyle = '#07090f';
+  ctx.fillStyle = SCENE_BG;
   for (const sy of slits) ctx.fillRect(wx, sy-SO, ww, SO*2);
 
-  // Outer border
   ctx.strokeStyle='#2a4a62'; ctx.lineWidth=1;
   ctx.strokeRect(wx, 0, ww, H);
 
-  // d-bracket between first two slits (showing the lattice constant)
   if (slits.length >= 2) {
     const sy1 = slits[0], sy2 = slits[1];
     const bx = wx - 20;
-    ctx.strokeStyle='rgba(55,125,165,0.6)'; ctx.lineWidth=1;
+    ctx.strokeStyle='rgba(0,207,255,0.55)'; ctx.lineWidth=1;
     ctx.setLineDash([3,3]);
     ctx.beginPath(); ctx.moveTo(bx, sy1); ctx.lineTo(bx, sy2); ctx.stroke();
     ctx.setLineDash([]);
     [[bx,sy1],[bx,sy2]].forEach(([x,y])=>{
       ctx.beginPath(); ctx.moveTo(x-3,y); ctx.lineTo(x+3,y); ctx.stroke();
     });
-    ctx.fillStyle='rgba(65,135,175,0.85)';
-    ctx.font='bold 13px "Rajdhani",sans-serif';
+    ctx.fillStyle='rgba(0,207,255,0.9)';
+    ctx.font='bold 14px "Exo 2",sans-serif';
     ctx.textAlign='right';
     ctx.fillText('d', bx-6, (sy1+sy2)/2 + 5);
   }
 
-  // Slit labels S₁, S₂, … on the wall's left face (only when N ≤ 5 to avoid clutter)
   if (slits.length <= 5) {
     ctx.font='11px "Share Tech Mono",monospace';
-    ctx.fillStyle='#286080';
+    ctx.fillStyle='#3a8fb0';
     ctx.textAlign='right';
-    const subs = ['\u2081','\u2082','\u2083','\u2084','\u2085'];
+    const subs = ['₁','₂','₃','₄','₅'];
     for (let k=0; k<slits.length; k++) {
       ctx.fillText('S'+subs[k], wx-2, slits[k]+4);
     }
   }
 }
 
-/* ── Draw: ring waves (only after wave reaches wall, mono mode only) */
+/* ================= Ringboelger ================= */
 function drawRings() {
-  if (waveHead < WALL) return;       // plane wave hasn't arrived yet
-  if (whiteMode) return;              // would overlap chaotically in white mode
+  if (waveHead < WALL) return;
+  if (whiteMode) return;
 
-  const ringAge  = waveHead - WALL;   // how far rings have expanded
+  const ringAge  = waveHead - WALL;
   const slits = slitYs();
   const maxR = Math.hypot(D, H) + lam*2;
   const phase = phaseTime % lam;
   const [cr,cg,cb] = waveRGB;
-  // Dim the rings a bit as N grows so the canvas doesn't get visually crowded
   const dim = Math.max(0.35, 1 - 0.08 * (N - 2));
 
   ctx.save();
-  // Clip strictly between wall and screen (SCR is the left edge of the screen bar)
   ctx.beginPath(); ctx.rect(WALL, 0, SCR - WALL, H); ctx.clip();
 
   slits.forEach(sy => {
     for (let k = 0; phase + k*lam < maxR; k++) {
       const r = phase + k*lam;
       if (r < 1) continue;
-      if (r > ringAge) continue;          // don't draw rings beyond wavefront
+      if (r > ringAge) continue;
 
       const fade = Math.max(0, 1 - r/maxR) * dim;
       ctx.beginPath();
@@ -667,16 +918,14 @@ function drawRings() {
   ctx.restore();
 }
 
-/* ── Draw: screen (far-field N-slit, supports white spectrum) ────── */
+/* ================= Skaerm (fjernfelt) ================= */
 function drawScreen() {
-  // Fade in only after wave actually reaches the screen
   const fadeIn = Math.min(1, Math.max(0, waveHead - SCR) / (lam * 6));
 
   const dx = SCR - WALL;
   const spec = activeSpectrum();
   const nL = spec.length;
 
-  // Screen substrate
   ctx.fillStyle='#080c15';
   ctx.fillRect(SCR, 0, SCR_W, H);
   ctx.strokeStyle='#182a3e'; ctx.lineWidth=1;
@@ -704,16 +953,15 @@ function drawScreen() {
   ctx.save();
   ctx.translate(SCR+SCR_W+12, CY);
   ctx.rotate(Math.PI/2);
-  ctx.font='9px "Share Tech Mono",monospace';
-  ctx.fillStyle='#28485e';
+  ctx.font='10px "Share Tech Mono",monospace';
+  ctx.fillStyle='#3a8fb0';
   ctx.textAlign='center';
-  ctx.fillText('SK\u00c6RM', 0, 0);
+  ctx.fillText('SKÆRM', 0, 0);
   ctx.restore();
 }
 
-/* ── Draw: interference maxima (only after wave reaches screen) ─── */
+/* ================= Interferens-maksima ================= */
 function drawMaxima(allMaxima) {
-  // Only begin fading in once the wave front has actually hit the screen
   const pastScreen = Math.max(0, waveHead - SCR);
   const fadeIn = Math.min(1, pastScreen / (lam * 6));
   if (fadeIn < 0.02) return;
@@ -721,7 +969,6 @@ function drawMaxima(allMaxima) {
   const [cr,cg,cb] = displayRGB();
   const dr=Math.min(255,cr+90), dg=Math.min(255,cg+90), db=Math.min(255,cb+90);
 
-  // Central axis hint
   ctx.beginPath();
   ctx.setLineDash([6,5]);
   ctx.strokeStyle=`rgba(${dr},${dg},${db},${0.12*fadeIn})`;
@@ -733,11 +980,9 @@ function drawMaxima(allMaxima) {
     const isC=m===0, absM=Math.abs(m);
     const la=(isC?0.14:Math.max(0.05,0.12-absM*0.015))*fadeIn;
 
-    // For off-screen orders, clamp ys to canvas edge for drawing the hint line endpoint
     const lineEndY = Math.max(2, Math.min(H-2, ys));
 
     if (whiteMode && range && !isC) {
-      // Two boundary lines for violet (closer to axis) and red (farther)
       const drawBoundary = (yEnd, lamSample) => {
         const rgb = wavelengthToRGB(lamSample);
         const clipY = Math.max(2, Math.min(H-2, yEnd));
@@ -750,11 +995,9 @@ function drawMaxima(allMaxima) {
         ctx.moveTo(WALL,CY); ctx.lineTo(xEnd, clipY);
         ctx.stroke(); ctx.setLineDash([]);
       };
-      // yMin corresponds to lamMin (≈410 nm violet), yMax to longer λ (≈680 red)
       drawBoundary(range.yMin, WHITE_SAMPLES_NM[0]);
       drawBoundary(range.yMax, WHITE_SAMPLES_NM[WHITE_SAMPLES_NM.length-1]);
     } else {
-      // Single direction hint line (mono mode or central max)
       ctx.beginPath();
       ctx.setLineDash([5,7]);
       ctx.strokeStyle=`rgba(${dr},${dg},${db},${la})`;
@@ -764,7 +1007,6 @@ function drawMaxima(allMaxima) {
       ctx.stroke(); ctx.setLineDash([]);
     }
 
-    // Small angle arc at wall
     if (!isC) {
       const arcR=28+absM*6;
       const a1 = (whiteMode && range)
@@ -777,19 +1019,17 @@ function drawMaxima(allMaxima) {
       ctx.stroke();
     }
 
-    // ── Angle label along the direction line ─────────────────
     let lblText;
     if (isC) {
-      lblText = '\u03b8\u2080 = 0\u00b0';
+      lblText = 'φ₀ = 0°';
     } else if (whiteMode && range) {
       const a = Math.abs(range.thMin * 180/Math.PI);
       const b = Math.abs(range.thMax * 180/Math.PI);
-      lblText = `\u03b8${absM} = ${a.toFixed(1)}\u00b0\u2013${b.toFixed(1)}\u00b0`;
+      lblText = `φ${absM} = ${a.toFixed(1)}°–${b.toFixed(1)}°`;
     } else {
       const tDeg=Math.abs(theta*180/Math.PI).toFixed(1);
-      lblText = `\u03b8${absM} = ${tDeg}\u00b0`;
+      lblText = `φ${absM} = ${tDeg}°`;
     }
-    // Place label at 44% of available line length toward screen
     const yForLabel = (whiteMode && range && !isC)
       ? (range.yMin + range.yMax) / 2
       : ys;
@@ -816,14 +1056,9 @@ function drawMaxima(allMaxima) {
       ctx.restore();
     }
 
-    // ── Marker on screen ─────────────────────────────────────
     if (whiteMode && range && !isC) {
-      // Parameterize by wavelength so the segment works correctly for both
-      // m>0 (below center) and m<0 (above center). For each λ in [lamMinNm, lamMaxNm]
-      // we plot a tiny rect at the y position where m·λ/d = sin θ.
       const xc = SCR + SCR_W/2;
       const lamMinNm = WHITE_SAMPLES_NM[0];
-      // Red end: clip at the largest visible λ for this order (where m·λ/d ≤ 1)
       const lamMaxCapped = Math.min(
         WHITE_SAMPLES_NM[WHITE_SAMPLES_NM.length-1],
         (d / (Math.abs(m) * NM_TO_PX)) * 0.999
@@ -855,7 +1090,6 @@ function drawMaxima(allMaxima) {
           }
           prevYClamped = yClamped;
         }
-        // Subtle outline + m-label centered on drawn segment
         if (drewAny && yHiSeen - yLoSeen > 1) {
           ctx.strokeStyle = `rgba(255,255,255,${0.18*fadeIn})`;
           ctx.lineWidth = 0.7;
@@ -867,7 +1101,6 @@ function drawMaxima(allMaxima) {
         }
       }
     } else if (onScreen) {
-      // Mono mode (or central max): single dot
       const dotR=isC?5.5:4.5;
       ctx.beginPath();
       ctx.arc(SCR+SCR_W/2, ys, dotR, 0, 2*Math.PI);
@@ -890,15 +1123,53 @@ function drawMaxima(allMaxima) {
   });
 }
 
-function updateOrderBar(allMaxima) {
-  // Count total orders (m >= 0)
-  const positiveOrders = allMaxima.filter(mv => mv.m >= 0);
-  const maxM = positiveOrders.length > 0 ? Math.max(...positiveOrders.map(mv=>mv.m)) : 0;
-  document.getElementById('nOrders').textContent = maxM;
-  // order-bar removed
+/* ================= Aflaesninger ================= */
+const roPhi = document.getElementById('roPhi');
+const roMmax = document.getElementById('roMmax');
+
+function mMaxValue() {
+  const lamRefNm = whiteMode ? WHITE_SAMPLES_NM[0] : lam_nm;
+  const ratio = d_nm / lamRefNm;
+  let m = Math.floor(ratio);
+  if (m === ratio) m -= 1;   // praecis 90 grader taeller ikke med
+  return m;
 }
 
-/* ── Reset ──────────────────────────────────────────────────────── */
+function refreshReadouts() {
+  const mmax = mMaxValue();
+  roMmax.textContent = mmax;
+
+  if (whiteMode) {
+    const lo = WHITE_SAMPLES_NM[0], hi = WHITE_SAMPLES_NM[WHITE_SAMPLES_NM.length-1];
+    const s1 = lo / d_nm, s2 = hi / d_nm;
+    if (s2 < 1) {
+      const p1 = Math.asin(s1) * 180/Math.PI;
+      const p2 = Math.asin(s2) * 180/Math.PI;
+      roPhi.textContent = daNum(p1,1) + '°–' + daNum(p2,1) + '°';
+    } else {
+      roPhi.textContent = '–';
+    }
+  } else {
+    const s = lam_nm / d_nm;
+    if (s < 1) {
+      roPhi.textContent = daNum(Math.asin(s) * 180/Math.PI, 1) + '°';
+    } else {
+      roPhi.textContent = 'ingen 1. orden';
+    }
+  }
+}
+
+function updateOrdnerModal() {
+  const el = document.getElementById('ordnerNow');
+  const lamRefNm = whiteMode ? WHITE_SAMPLES_NM[0] : lam_nm;
+  const ratio = d_nm / lamRefNm;
+  const mmax = mMaxValue();
+  const lamTxt = whiteMode ? (lamRefNm + ' nm (violet)') : (lam_nm + ' nm');
+  el.textContent = 'Lige nu: d/λ = ' + d_nm + ' nm / ' + lamTxt + ' = ' +
+    daNum(ratio, 2) + '  →  m_maks = ' + mmax + '.';
+}
+
+/* ================= Reset ================= */
 function reset() {
   phaseTime = 0;
   waveHead  = 0;
@@ -906,7 +1177,7 @@ function reset() {
   dirty     = true;
 }
 
-/* ── Main loop ──────────────────────────────────────────────────── */
+/* ================= Hovedloop ================= */
 let lastOBUpdate = 0;
 function frame(ts) {
   if (playing) {
@@ -922,8 +1193,6 @@ function frame(ts) {
   if (dirty) buildMap();
 
   drawBG();
-  // Only draw static interference map (the "rays") after wave has reached the screen
-  // Clip strictly to the region between wall and screen so nothing bleeds past the screen
   const mapFade = Math.min(1, Math.max(0, waveHead - SCR) / (lam * 6));
   if (mapFade > 0) {
     ctx.save();
@@ -934,149 +1203,102 @@ function frame(ts) {
   }
   drawPlaneWave();
   drawRings();
-  // Hard-blank everything from the screen leftward edge onwards — covers any ring/map bleed
-  ctx.fillStyle = '#07090f';
+  ctx.fillStyle = SCENE_BG;
   ctx.fillRect(SCR, 0, W - SCR, H);
   drawWall();
   drawScreen();
 
   const mx = getAllMaxima();
   drawMaxima(mx);
-  if (ts - lastOBUpdate > 500) { updateOrderBar(mx); lastOBUpdate = ts; }
+  if (ts - lastOBUpdate > 400) { refreshReadouts(); lastOBUpdate = ts; }
 
   raf = requestAnimationFrame(frame);
 }
 
-/* ── Controls ───────────────────────────────────────────────────── */
-document.getElementById('btnPlay').addEventListener('click', () => {
+/* ================= Kontrol ================= */
+const btnPause = document.getElementById('btnPause');
+btnPause.addEventListener('click', () => {
   playing = !playing;
-  const btn = document.getElementById('btnPlay');
-  const lbl = document.getElementById('lblPlay');
-  const ico = document.getElementById('icoPlay');
-  if (playing) {
-    btn.classList.add('active');
-    lbl.textContent = 'PAUSE';
-    // pause icon
-    ico.innerHTML = '<rect x="0" y="0" width="4" height="14" rx="1"/><rect x="9" y="0" width="4" height="14" rx="1"/>';
-  } else {
-    btn.classList.remove('active');
-    lbl.textContent = 'AFSPIL';
-    // play icon
-    ico.innerHTML = '<polygon points="1,0 13,7 1,14"/>';
-  }
+  btnPause.textContent = playing ? 'Pause' : 'Afspil';
 });
 
 document.getElementById('btnReset').addEventListener('click', () => {
   reset();
-  // After reset: pause the simulation so the user manually restarts playback
   if (playing) {
     playing = false;
-    document.getElementById('btnPlay').classList.remove('active');
-    document.getElementById('lblPlay').textContent = 'AFSPIL';
-    document.getElementById('icoPlay').innerHTML =
-      '<polygon points="1,0 13,7 1,14"/>';
+    btnPause.textContent = 'Afspil';
   }
 });
 
 document.getElementById('sSpeed').addEventListener('input', function() {
-  speedIdx = +this.value - 1;  // slider 1-10 → index 0-9
-  const spd = getSpeed();
-  document.getElementById('vSpeed').textContent =
-    spd < 1 ? `×${spd.toFixed(2)}` : `×${spd.toFixed(1)}`;
+  speedIdx = +this.value - 1;
+  document.getElementById('spdVal').textContent = daNum(getSpeed(), 1) + '×';
 });
-// set initial label
-(()=>{
-  const spd = getSpeed();
-  document.getElementById('vSpeed').textContent =
-    spd < 1 ? `×${spd.toFixed(2)}` : `×${spd.toFixed(1)}`;
-  document.getElementById('sSpeed').value = speedIdx + 1;
-})();
+document.getElementById('spdVal').textContent = daNum(getSpeed(), 1) + '×';
 
 document.getElementById('sLam').addEventListener('input', function() {
   lam_nm = +this.value;
   lam = lam_nm * NM_TO_PX;
-  document.getElementById('vLam').textContent = `\u03bb = ${lam_nm} nm`;
+  document.getElementById('lamVal').textContent = lam_nm + ' nm';
   refreshColor(); dirty = true;
+  refreshReadouts();
 });
 document.getElementById('sD').addEventListener('input', function() {
   d_nm = +this.value;
   d = d_nm * NM_TO_PX;
-  document.getElementById('vD').textContent = `d = ${d_nm} nm`;
+  document.getElementById('dVal').textContent = d_nm + ' nm';
   dirty = true;
+  refreshReadouts();
 });
 
-/* ── N (number of slits) slider ───────────────────────────────── */
+/* ================= N (antal spalter) ================= */
 const sN = document.getElementById('sN');
 function applyN(newN) {
   N = newN;
-  document.getElementById('vN').textContent = `N = ${N}`;
-  // Clamp d's max so all slits fit on wall
+  document.getElementById('nVal').textContent = N;
   const dMaxNm = maxDnmForN(N);
   const sD = document.getElementById('sD');
   sD.max = dMaxNm;
   if (d_nm > dMaxNm) {
-    // Round down to nearest step (25 nm)
     d_nm = Math.floor(dMaxNm / 25) * 25;
     sD.value = d_nm;
     d = d_nm * NM_TO_PX;
-    document.getElementById('vD').textContent = `d = ${d_nm} nm`;
+    document.getElementById('dVal').textContent = d_nm + ' nm';
   }
   dirty = true;
+  refreshReadouts();
 }
 sN.addEventListener('input', function() { applyN(+this.value); });
 
-/* ── White-light toggle ───────────────────────────────────────── */
+/* ================= Hvidt lys ================= */
 function applyWhiteMode(active) {
   whiteMode = active;
   const btn = document.getElementById('btnWhite');
-  const lbl = document.getElementById('lblWhite');
   const sLam = document.getElementById('sLam');
-  const ctrlLam = document.getElementById('ctrlLam');
+  const ctlLam = document.getElementById('ctlLam');
   if (active) {
     btn.classList.add('active');
-    lbl.textContent = 'MONOKROMATISK';
+    btn.textContent = 'Monokromatisk';
     sLam.disabled = true;
-    ctrlLam.classList.add('disabled');
-    document.getElementById('vLam').textContent = '\u03bb = hvidt lys';
+    ctlLam.classList.add('disabled');
+    document.getElementById('lamVal').textContent = 'hvidt lys';
   } else {
     btn.classList.remove('active');
-    lbl.textContent = 'HVIDT LYS';
+    btn.textContent = 'Hvidt lys';
     sLam.disabled = false;
-    ctrlLam.classList.remove('disabled');
-    document.getElementById('vLam').textContent = `\u03bb = ${lam_nm} nm`;
+    ctlLam.classList.remove('disabled');
+    document.getElementById('lamVal').textContent = lam_nm + ' nm';
   }
   dirty = true;
+  refreshReadouts();
 }
 document.getElementById('btnWhite').addEventListener('click', () => applyWhiteMode(!whiteMode));
 
-// Initial sync of N slider state
+/* ================= Init ================= */
 applyN(N);
-
+refreshReadouts();
 reset();
 raf = requestAnimationFrame(frame);
-
-/* ── Copy code button ───────────────────────────────────── */
-document.getElementById('btnCopy').addEventListener('click', async () => {
-  const lbl = document.getElementById('lblCopy');
-  const btn = document.getElementById('btnCopy');
-  try {
-    await navigator.clipboard.writeText(document.documentElement.outerHTML);
-  } catch (e) {
-    const ta = document.createElement('textarea');
-    ta.value = document.documentElement.outerHTML;
-    ta.style.cssText = 'position:fixed;opacity:0;top:0;left:0';
-    document.body.appendChild(ta);
-    ta.select();
-    document.execCommand('copy');
-    document.body.removeChild(ta);
-  }
-  lbl.textContent = 'KOPIERET ✓';
-  btn.classList.add('active');
-  setTimeout(() => {
-    lbl.textContent = 'KOPIER KODE';
-    btn.classList.remove('active');
-  }, 2500);
-});
 </script>
 </body>
 </html>
