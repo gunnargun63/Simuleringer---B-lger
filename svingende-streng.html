@@ -2,561 +2,1220 @@
 <html lang="da">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Svingende streng</title>
-<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700&family=Share+Tech+Mono&family=Exo+2:wght@300;400;600&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700&family=Share+Tech+Mono&family=Exo+2:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
-:root{
-  --bg:#0a0c14; --panel:#0f1320; --border:#1e2a3a; --canvas-bg:#06080f;
-  --accent:#00e5ff; --text:#c8d8e8; --dim:#8ab4cf; --muted:#4a6278;
-  --glow:0 0 10px rgba(0,229,255,0.45);
-  --readout-c:#a8ff3e; --readout-glow:0 0 8px rgba(168,255,62,.5);
-  --h1c:#00e5ff;--h2c:#7df9ff;--h3c:#a8ff3e;--h4c:#ffd93d;--h5c:#ff6b35;--h6c:#d45eff;
-  --string-rgb:0,229,255;
-  --node-fill:#1e2a3a;
+:root {
+  --bg0: #030810;
+  --bg1: #060e18;
+  --bg2: #0a1622;
+  --bg3: #0f1e2d;
+  --border: #1a3a52;
+  --green:  #00ff9f;
+  --cyan:   #00cfff;
+  --yellow: #ffd93d;
+  --text: #d0eef5;
+  --dim:  #8ec8d8;
+  --mono: 'Courier New', 'Lucida Console', monospace;
+  --ui: 'Share Tech Mono', monospace;
+  --body: 'Exo 2', sans-serif;
+  --tr: 0.15s ease;
+  --n1:#00ff9f; --n2:#00cfff; --n3:#ffd93d; --n4:#ff8a5c; --n5:#c77dff; --n6:#ff5c8a;
 }
-[data-theme="light"]{
-  --bg:#e8e0d2; --panel:#f4eee3; --border:#d6cbb8; --canvas-bg:#fdfaf4;
-  --accent:#2767a8; --text:#1a1a1a; --dim:#2a4060; --muted:#6a5b40;
-  --glow:none;
-  --readout-c:#1D9E75; --readout-glow:none;
-  --h1c:#1a5099;--h2c:#378ADD;--h3c:#1D9E75;--h4c:#9c5e00;--h5c:#c0306a;--h6c:#7a2da8;
-  --string-rgb:26,80,153;
-  --node-fill:#f4eee3;
+[data-theme="light"] {
+  --bg0: #e8e0d2;
+  --bg1: #f4eee3;
+  --bg2: #fdfaf4;
+  --bg3: #fdfaf4;
+  --border: #c8c0b0;
+  --green:  #1D9E75;
+  --cyan:   #378ADD;
+  --yellow: #c07800;
+  --text: #1a1a1a;
+  --dim:  #333333;
+  --n1:#1D9E75; --n2:#378ADD; --n3:#9c5e00; --n4:#c2410c; --n5:#7a2da8; --n6:#c0306a;
 }
-*{box-sizing:border-box;margin:0;padding:0;}
-html,body{height:100%;overflow:hidden;}
-body{background:var(--bg);color:var(--text);font-family:'Exo 2',sans-serif;font-weight:300;display:flex;flex-direction:column;}
-[data-theme="light"] body{font-weight:400;}
 
-header{flex:0 0 auto;padding:10px 18px 9px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px;background:var(--panel);}
-.wave-icon{width:19px;height:19px;color:var(--accent);display:inline-flex;flex-shrink:0;animation:wave-osc 1.8s ease-in-out infinite;transform-origin:center;opacity:.78;filter:drop-shadow(0 0 2px var(--accent));}
-[data-theme="light"] .wave-icon{filter:none;}
-.wave-icon svg{display:block;width:100%;height:100%;}
-@keyframes wave-osc{0%,100%{transform:scaleY(1);}50%{transform:scaleY(-1);}}
-header h1{font-family:'Orbitron','Share Tech Mono',monospace;font-weight:700;font-size:clamp(.78rem,1.9vw,1.0rem);color:var(--accent);text-shadow:var(--glow);letter-spacing:.20em;text-transform:uppercase;}
-[data-theme="light"] header h1{text-shadow:none;}
-header .subtitle{font-size:.72rem;color:var(--dim);font-family:'Share Tech Mono',monospace;letter-spacing:.06em;}
-[data-theme="light"] header .subtitle{font-weight:700;}
-.theme-btn{margin-left:auto;background:transparent;border:1px solid var(--border);color:var(--dim);font-family:'Share Tech Mono',monospace;font-size:.7rem;letter-spacing:.08em;padding:6px 14px;border-radius:3px;cursor:pointer;text-transform:uppercase;transition:all .15s;}
-.theme-btn:hover{border-color:var(--accent);color:var(--accent);}
-[data-theme="light"] .theme-btn{font-weight:700;}
+* { margin: 0; padding: 0; box-sizing: border-box; }
 
-.main{flex:1 1 0;display:grid;grid-template-columns:1fr 340px;min-height:0;gap:1px;background:var(--border);}
+html, body { height: 100%; overflow: hidden; }
+body {
+  background: var(--bg0);
+  color: var(--text);
+  font-family: var(--body);
+  padding: 8px 12px 10px;
+  display: flex;
+  flex-direction: column;
+}
 
-.left-col{display:flex;flex-direction:column;background:var(--bg);gap:1px;min-height:0;}
+.wrap {
+  max-width: 1600px;
+  width: 100%;
+  margin: 0 auto;
+  flex: 1 1 0;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
 
-.canvas-wrap{flex:1 1 0;min-height:0;max-height:42vh;position:relative;background:var(--canvas-bg);display:flex;align-items:stretch;}
-canvas{display:block;width:100%;height:100%;}
-.string-label{position:absolute;bottom:7px;left:50%;transform:translateX(-50%);font-family:'Share Tech Mono',monospace;font-size:.75rem;color:var(--dim);letter-spacing:.1em;pointer-events:none;}
-[data-theme="light"] .string-label{font-weight:700;}
+/* ---------- Kompakt topbjælke ---------- */
+header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  border: 1px solid var(--border);
+  background: var(--bg1);
+  padding: 6px 12px;
+  margin-bottom: 8px;
+  flex: 0 0 auto;
+}
+[data-theme="light"] header { background: #fdfaf4; }
+.title-group { display: flex; align-items: center; gap: 10px; }
+h1 {
+  font-family: 'Orbitron', sans-serif;
+  font-weight: 700;
+  font-size: 16px;
+  letter-spacing: .16em;
+  color: var(--green);
+  text-transform: uppercase;
+}
+html:not([data-theme="light"]) h1 { text-shadow: 0 0 10px rgba(0,255,159,.4); }
 
-.harmonics-bar{flex:0 0 auto;background:var(--panel);padding:10px 14px 8px;border-top:1px solid var(--border);}
-.panel-title{font-family:'Share Tech Mono',monospace;font-size:.7rem;letter-spacing:.18em;color:var(--dim);text-transform:uppercase;margin-bottom:8px;}
-[data-theme="light"] .panel-title{font-weight:700;color:#1a3a5c;}
+/* Streng-ikon med svingende bevægelse */
+.icon-str { width: 26px; height: 26px; display: block; }
+.icon-str .peg { fill: var(--green); }
+.icon-str .wv { stroke: var(--green); fill: none; transform-origin: 13px 13px; animation: strOsc 1.5s ease-in-out infinite; }
+@keyframes strOsc { 0%,100% { transform: scaleY(1); } 50% { transform: scaleY(-1); } }
+html:not([data-theme="light"]) .icon-str { filter: drop-shadow(0 0 4px rgba(0,255,159,.6)); }
 
-.harmonics-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:6px;}
-.harmonic-col{display:flex;flex-direction:column;align-items:center;gap:4px;}
-.harmonic-label{font-family:'Share Tech Mono',monospace;font-size:.82rem;font-weight:700;}
-.harmonic-freq{font-family:'Share Tech Mono',monospace;font-size:.66rem;color:var(--dim);}
-[data-theme="light"] .harmonic-freq{font-weight:700;}
-.amplitude-val{font-family:'Share Tech Mono',monospace;font-size:.7rem;color:var(--dim);}
-[data-theme="light"] .amplitude-val{font-weight:700;}
+.hdr-btns { display: flex; gap: 7px; flex-wrap: wrap; }
+.btn-hdr {
+  font-family: var(--ui);
+  font-size: 12px;
+  letter-spacing: .08em;
+  border: 1px solid var(--border);
+  background: var(--bg3);
+  color: var(--text);
+  padding: 6px 13px;
+  cursor: pointer;
+  text-transform: uppercase;
+  transition: var(--tr);
+  user-select: none;
+}
+.btn-hdr:hover { border-color: var(--green); color: var(--green); }
+html:not([data-theme="light"]) .btn-hdr:hover { box-shadow: 0 0 10px rgba(0,255,159,.35); }
+[data-theme="light"] .btn-hdr { font-weight: 700; }
 
-.v-slider-wrap{height:68px;display:flex;align-items:center;justify-content:center;}
-input[type=range].vertical{writing-mode:vertical-lr;direction:rtl;-webkit-appearance:slider-vertical;appearance:slider-vertical;width:28px;height:68px;cursor:pointer;background:transparent;outline:none;}
-input[type=range].vertical::-webkit-slider-runnable-track{width:4px;border-radius:2px;background:var(--border);}
-input[type=range].vertical::-moz-range-track{width:4px;border-radius:2px;background:var(--border);}
-input[type=range].vertical::-webkit-slider-thumb{-webkit-appearance:none;width:22px;height:22px;border-radius:50%;border:2px solid var(--bg);cursor:pointer;}
-input[type=range].vertical::-moz-range-thumb{width:22px;height:22px;border-radius:50%;border:2px solid var(--bg);cursor:pointer;}
-.h1c input::-webkit-slider-thumb,.h1c input::-moz-range-thumb{background:var(--h1c);box-shadow:0 0 7px var(--h1c);} .h1c .harmonic-label{color:var(--h1c);}
-.h2c input::-webkit-slider-thumb,.h2c input::-moz-range-thumb{background:var(--h2c);box-shadow:0 0 7px var(--h2c);} .h2c .harmonic-label{color:var(--h2c);}
-.h3c input::-webkit-slider-thumb,.h3c input::-moz-range-thumb{background:var(--h3c);box-shadow:0 0 7px var(--h3c);} .h3c .harmonic-label{color:var(--h3c);}
-.h4c input::-webkit-slider-thumb,.h4c input::-moz-range-thumb{background:var(--h4c);box-shadow:0 0 7px var(--h4c);} .h4c .harmonic-label{color:var(--h4c);}
-.h5c input::-webkit-slider-thumb,.h5c input::-moz-range-thumb{background:var(--h5c);box-shadow:0 0 7px var(--h5c);} .h5c .harmonic-label{color:var(--h5c);}
-.h6c input::-webkit-slider-thumb,.h6c input::-moz-range-thumb{background:var(--h6c);box-shadow:0 0 7px var(--h6c);} .h6c .harmonic-label{color:var(--h6c);}
-[data-theme="light"] input[type=range].vertical::-webkit-slider-thumb,
-[data-theme="light"] input[type=range].vertical::-moz-range-thumb{box-shadow:none;}
+/* ---------- Hovedlayout ---------- */
+.main-grid {
+  display: grid;
+  grid-template-columns: 268px 1fr;
+  gap: 8px;
+  flex: 1 1 0;
+  min-height: 0;
+}
 
-.presets-bar{flex:0 0 auto;display:flex;align-items:center;flex-wrap:wrap;gap:6px;padding:7px 14px 9px;background:var(--panel);border-top:1px solid var(--border);}
-.preset-btn{background:transparent;border:1px solid var(--border);color:var(--text);font-family:'Share Tech Mono',monospace;font-size:.72rem;padding:6px 12px;border-radius:3px;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:all .15s;}
-[data-theme="light"] .preset-btn{font-weight:700;}
-.preset-btn:hover,.preset-btn:active{border-color:var(--accent);color:var(--accent);background:rgba(0,229,255,.07);}
-[data-theme="light"] .preset-btn:hover,[data-theme="light"] .preset-btn:active{background:rgba(39,103,168,.08);}
-.action-btns{margin-left:auto;display:flex;gap:8px;flex-shrink:0;}
-.action-btn{background:transparent;border:1px solid var(--border);color:var(--accent);font-family:'Share Tech Mono',monospace;font-size:.72rem;padding:7px 16px;border-radius:6px;cursor:pointer;display:flex;align-items:center;gap:7px;letter-spacing:.07em;-webkit-tap-highlight-color:transparent;transition:all .15s;}
-[data-theme="light"] .action-btn{font-weight:700;}
-.action-btn:hover,.action-btn:active{background:rgba(0,229,255,.08);border-color:var(--accent);}
-[data-theme="light"] .action-btn:hover,[data-theme="light"] .action-btn:active{background:rgba(39,103,168,.08);}
-.action-icon{font-size:.9rem;line-height:1;}
+/* Sikkerhedsventil: bliver vinduet meget lavt, scroller kun kolonnen —
+   selve siden forbliver uden scroll. */
+.sidebar { display: flex; flex-direction: column; gap: 8px; min-height: 0; overflow-y: auto; }
+.content-col { display: flex; flex-direction: column; gap: 8px; min-height: 0; overflow-y: auto; }
 
-.right-col{background:var(--panel);display:flex;flex-direction:column;overflow-y:auto;padding:13px 15px;gap:12px;}
-.h-slider-row{display:flex;align-items:center;gap:8px;margin-bottom:9px;}
-.h-slider-row label{font-size:.82rem;color:var(--text);min-width:96px;flex-shrink:0;}
-[data-theme="light"] .h-slider-row label{font-weight:700;}
-input[type=range].horiz{flex:1;height:4px;-webkit-appearance:none;appearance:none;background:var(--border);border-radius:2px;outline:none;cursor:pointer;}
-input[type=range].horiz::-webkit-slider-thumb{-webkit-appearance:none;width:22px;height:22px;border-radius:50%;background:var(--accent);border:2px solid var(--bg);box-shadow:var(--glow);cursor:pointer;}
-input[type=range].horiz::-moz-range-thumb{width:22px;height:22px;border-radius:50%;background:var(--accent);border:2px solid var(--bg);cursor:pointer;}
-.slider-val{font-family:'Share Tech Mono',monospace;font-size:.82rem;color:var(--accent);min-width:78px;text-align:right;font-weight:700;}
+.panel {
+  background: var(--bg1);
+  border: 1px solid var(--border);
+  padding: 8px 11px;
+  flex: 0 0 auto;
+}
+[data-theme="light"] .panel { background: #fdfaf4; }
+.panel.grow { flex: 1 1 0; min-height: 0; display: flex; flex-direction: column; }
 
-.toggle-row{display:flex;align-items:center;gap:9px;margin-bottom:8px;font-size:.82rem;}
-[data-theme="light"] .toggle-row{font-weight:700;}
-.toggle{position:relative;width:36px;height:20px;flex-shrink:0;}
-.toggle input{opacity:0;width:0;height:0;}
-.toggle-slider{position:absolute;inset:0;background:var(--border);border-radius:20px;cursor:pointer;transition:.2s;}
-.toggle-slider:before{content:'';position:absolute;width:14px;height:14px;left:3px;top:3px;background:var(--muted);border-radius:50%;transition:.2s;}
-.toggle input:checked+.toggle-slider{background:rgba(0,229,255,.2);}
-[data-theme="light"] .toggle input:checked+.toggle-slider{background:rgba(39,103,168,.2);}
-.toggle input:checked+.toggle-slider:before{transform:translateX(16px);background:var(--accent);box-shadow:var(--glow);}
+.canvas-holder { flex: 1 1 0; min-height: 190px; position: relative; background: var(--bg2); border: 1px solid var(--border); }
+[data-theme="light"] .canvas-holder { background: #fdfaf4; }
+canvas#scene { display: block; width: 100%; height: 100%; cursor: crosshair; }
 
-.readouts{display:grid;grid-template-columns:1fr 1fr;gap:6px;}
-.readout{background:var(--canvas-bg);border:1px solid var(--border);border-radius:4px;padding:8px 10px;}
-.readout-label{font-size:.64rem;color:var(--dim);letter-spacing:.06em;margin-bottom:2px;}
-[data-theme="light"] .readout-label{font-weight:700;color:#1a3a5c;}
-.readout-value{font-family:'Courier New',monospace;font-size:1.15rem;color:var(--readout-c);text-shadow:var(--readout-glow);font-weight:700;}
-.readout-unit{font-size:.64rem;color:var(--dim);}
-[data-theme="light"] .readout-unit{font-weight:700;}
-.divider{height:1px;background:var(--border);}
-#freqList{font-family:'Courier New',monospace;font-size:.78rem;line-height:2;color:var(--dim);font-weight:700;}
+.sec-title {
+  font-family: var(--ui);
+  font-size: 11px;
+  letter-spacing: .22em;
+  color: var(--green);
+  text-transform: uppercase;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 4px;
+  margin-bottom: 8px;
+  flex: 0 0 auto;
+}
+[data-theme="light"] .sec-title { font-weight: 700; }
+.sym { text-transform: none; }
 
-@media(max-width:700px){
-  html,body{overflow:auto;}
-  .main{grid-template-columns:1fr;}
-  .canvas-wrap{height:40vw;flex:none;}
-  .right-col{max-height:none;}
-  .theme-btn{padding:5px 10px;}
+/* ---------- LaTeX-agtig matematik ---------- */
+.eq {
+  font-family: 'Cambria Math', 'STIX Two Math', 'Latin Modern Math', Georgia, 'Times New Roman', serif;
+  font-size: 1.08em;
+  white-space: nowrap;
+  text-transform: none;
+}
+.eq .v { font-style: italic; }
+.eq .o { padding: 0 .18em; font-style: normal; }
+.eq sub, .eq sup { font-size: .72em; }
+.sqrt { white-space: nowrap; font-style: normal; }
+.sqrt > .rad { font-size: 1.16em; }
+.sqrt > .rc { border-top: 1.3px solid currentColor; padding: 0 .22em 0 .04em; margin-left: -.05em; }
+.frac {
+  display: inline-flex; flex-direction: column; align-items: center;
+  vertical-align: middle; font-size: .82em; line-height: 1.05; margin: 0 .05em;
+}
+.frac > .num { border-bottom: 1.2px solid currentColor; padding: 0 .3em; }
+.frac > .den { padding: 0 .3em; }
+
+/* ---------- Slidere ---------- */
+.ctl-row { margin-bottom: 8px; }
+.ctl-row:last-child { margin-bottom: 0; }
+.ctl-label {
+  font-family: var(--ui);
+  font-size: 12px;
+  letter-spacing: .08em;
+  color: var(--text);
+  text-transform: uppercase;
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+[data-theme="light"] .ctl-label { font-weight: 700; }
+.ctl-label .val {
+  font-family: var(--mono);
+  font-weight: 700;
+  color: var(--cyan);
+  text-transform: none;
+  white-space: nowrap;
+}
+
+input[type="range"] {
+  width: 100%;
+  -webkit-appearance: none;
+  appearance: none;
+  height: 6px;
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  outline: none;
+  cursor: pointer;
+}
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none; appearance: none;
+  width: 18px; height: 18px;
+  background: var(--green);
+  border: 2px solid var(--bg0);
+  border-radius: 50%;
+  cursor: pointer;
+}
+input[type="range"]::-moz-range-thumb {
+  width: 16px; height: 16px;
+  background: var(--green);
+  border: 2px solid var(--bg0);
+  border-radius: 50%;
+  cursor: pointer;
+}
+.slider-ends {
+  display: flex; justify-content: space-between;
+  font-family: var(--mono); font-size: 10px; font-weight: 700;
+  color: var(--dim); margin-top: 2px;
+}
+.ctl-row.off { opacity: .35; pointer-events: none; }
+
+/* ---------- Knapper ---------- */
+.btn-row { display: flex; gap: 7px; flex-wrap: wrap; margin-top: 8px; }
+.btn-row + .btn-row { margin-top: 7px; }
+.btn {
+  font-family: var(--ui);
+  font-size: 12px;
+  letter-spacing: .1em;
+  border: 1px solid var(--green);
+  background: var(--bg3);
+  color: var(--green);
+  padding: 6px 12px;
+  cursor: pointer;
+  text-transform: uppercase;
+  transition: var(--tr);
+  user-select: none;
+}
+[data-theme="light"] .btn { font-weight: 700; }
+.btn:hover { background: rgba(0,255,159,.09); }
+html:not([data-theme="light"]) .btn:hover { box-shadow: 0 0 10px rgba(0,255,159,.4); }
+[data-theme="light"] .btn:hover { background: rgba(29,158,117,.10); }
+.btn.sec { border-color: var(--cyan); color: var(--cyan); }
+.btn.sec:hover { background: rgba(0,207,255,.09); }
+[data-theme="light"] .btn.sec:hover { background: rgba(55,138,221,.10); }
+
+/* ---------- Kontakter ---------- */
+.sw-row {
+  display: flex; align-items: center; gap: 9px;
+  font-family: var(--ui); font-size: 12px; letter-spacing: .08em;
+  text-transform: uppercase; margin-bottom: 8px; cursor: pointer; user-select: none;
+}
+[data-theme="light"] .sw-row { font-weight: 700; }
+.sw { position: relative; width: 34px; height: 18px; flex-shrink: 0; }
+.sw input { opacity: 0; width: 0; height: 0; }
+.sw i {
+  position: absolute; inset: 0; background: var(--bg3);
+  border: 1px solid var(--border); transition: var(--tr);
+}
+.sw i:before {
+  content: ''; position: absolute; width: 12px; height: 12px;
+  left: 2px; top: 2px; background: var(--dim); transition: var(--tr);
+}
+.sw input:checked + i { border-color: var(--green); }
+.sw input:checked + i:before { transform: translateX(16px); background: var(--green); }
+
+/* ---------- Aflæsninger ---------- */
+.readouts { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+.ro { background: var(--bg2); border: 1px solid var(--border); padding: 5px 9px; }
+[data-theme="light"] .ro { background: #ffffff; }
+.ro.wide { grid-column: 1 / -1; }
+.ro .k {
+  font-family: var(--ui); font-size: 11px; letter-spacing: .06em;
+  color: var(--text); display: block; margin-bottom: 1px;
+}
+[data-theme="light"] .ro .k { font-weight: 700; }
+.ro .v { font-family: var(--mono); font-size: 15px; font-weight: 700; color: var(--cyan); display: block; }
+.ro .v.grn { color: var(--green); }
+.ro .v.yel { color: var(--yellow); }
+
+/* ---------- Partialtone-mixer ---------- */
+.mixer { display: grid; grid-template-columns: repeat(6, 1fr); gap: 8px; }
+.mx-col { display: flex; flex-direction: column; align-items: center; gap: 3px; }
+.mx-n { font-family: var(--ui); font-size: 13px; font-weight: 700; letter-spacing: .04em; }
+.mx-f { font-family: var(--mono); font-size: 10.5px; font-weight: 700; color: var(--dim); }
+.mx-a { font-family: var(--mono); font-size: 11px; font-weight: 700; color: var(--dim); }
+.vwrap { height: 62px; display: flex; align-items: center; justify-content: center; }
+input[type="range"].vert {
+  writing-mode: vertical-lr; direction: rtl;
+  -webkit-appearance: slider-vertical; appearance: slider-vertical;
+  width: 22px; height: 62px; background: transparent; border: none;
+}
+input[type="range"].vert::-webkit-slider-runnable-track {
+  width: 5px; background: var(--bg3); border: 1px solid var(--border);
+}
+input[type="range"].vert::-moz-range-track {
+  width: 5px; background: var(--bg3); border: 1px solid var(--border);
+}
+.c1 input.vert::-webkit-slider-thumb { background: var(--n1); } .c1 input.vert::-moz-range-thumb { background: var(--n1); } .c1 .mx-n { color: var(--n1); }
+.c2 input.vert::-webkit-slider-thumb { background: var(--n2); } .c2 input.vert::-moz-range-thumb { background: var(--n2); } .c2 .mx-n { color: var(--n2); }
+.c3 input.vert::-webkit-slider-thumb { background: var(--n3); } .c3 input.vert::-moz-range-thumb { background: var(--n3); } .c3 .mx-n { color: var(--n3); }
+.c4 input.vert::-webkit-slider-thumb { background: var(--n4); } .c4 input.vert::-moz-range-thumb { background: var(--n4); } .c4 .mx-n { color: var(--n4); }
+.c5 input.vert::-webkit-slider-thumb { background: var(--n5); } .c5 input.vert::-moz-range-thumb { background: var(--n5); } .c5 .mx-n { color: var(--n5); }
+.c6 input.vert::-webkit-slider-thumb { background: var(--n6); } .c6 input.vert::-moz-range-thumb { background: var(--n6); } .c6 .mx-n { color: var(--n6); }
+
+.preset-row { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+.btn-sm {
+  font-family: var(--ui); font-size: 11.5px; letter-spacing: .06em;
+  border: 1px solid var(--border); background: var(--bg3); color: var(--text);
+  padding: 5px 10px; cursor: pointer; text-transform: uppercase;
+  transition: var(--tr); user-select: none;
+}
+.btn-sm:hover { border-color: var(--green); color: var(--green); }
+[data-theme="light"] .btn-sm { font-weight: 700; }
+
+/* ---------- Modaler ---------- */
+.modal-bg {
+  display: none; position: fixed; inset: 0;
+  background: rgba(0,0,0,.65); z-index: 50;
+  align-items: center; justify-content: center; padding: 20px;
+}
+.modal-bg.open { display: flex; }
+.modal {
+  background: var(--bg1); border: 1px solid var(--green);
+  max-width: 720px; width: 100%; max-height: 84vh;
+  overflow-y: auto; padding: 20px 24px;
+}
+[data-theme="light"] .modal { background: #fdfaf4; border-color: #1D9E75; }
+.modal h2 {
+  font-family: 'Orbitron', sans-serif; font-size: 15px; letter-spacing: .1em;
+  color: var(--green); text-transform: uppercase; margin-bottom: 14px;
+  border-bottom: 1px solid var(--border); padding-bottom: 8px;
+}
+.modal p, .modal li { font-size: 14.5px; line-height: 1.7; color: var(--text); margin-bottom: 10px; }
+.modal ol, .modal ul { margin: 0 0 10px 22px; }
+.modal .acc { color: var(--cyan); font-weight: 600; }
+.modal .acc-y { color: var(--yellow); font-weight: 600; }
+[data-theme="light"] .modal .acc-y { color: #c07800; }
+.modal-close-row { text-align: right; margin-top: 12px; }
+
+.toast {
+  position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
+  background: var(--bg3); border: 1px solid var(--green); color: var(--green);
+  font-family: var(--ui); font-size: 13px; letter-spacing: .08em;
+  padding: 10px 22px; opacity: 0; pointer-events: none;
+  transition: opacity .3s; z-index: 99;
+}
+.toast.show { opacity: 1; }
+
+@media (max-width: 980px) {
+  html, body { overflow: auto; height: auto; }
+  .main-grid { grid-template-columns: 1fr; }
+  .canvas-holder { height: 46vw; min-height: 220px; }
+  .panel.grow { flex: 0 0 auto; }
 }
 </style>
 </head>
 <body>
+<div class="wrap">
 
-<header>
-  <span class="wave-icon" aria-hidden="true">
-    <svg viewBox="0 0 24 24"><path d="M 1.5 12 Q 6.75 1 12 12 T 22.5 12" fill="none" stroke="currentColor" stroke-width="2.0" stroke-linecap="round" stroke-linejoin="round"/></svg>
-  </span>
-  <h1>Svingende streng</h1>
-  <span class="subtitle">St&#229;ende b&#248;lger &middot; Partialtonesimulering</span>
-  <button class="theme-btn" id="themeBtn">Lys tema</button>
-</header>
-
-<div class="main">
-  <div class="left-col">
-    <div class="canvas-wrap">
-      <canvas id="c"></canvas>
-      <div class="string-label">&#8592; L &#8594;</div>
+  <header>
+    <div class="title-group">
+      <svg class="icon-str" viewBox="0 0 26 26" aria-hidden="true">
+        <rect class="peg" x="2" y="5" width="3" height="16"/>
+        <rect class="peg" x="21" y="5" width="3" height="16"/>
+        <path class="wv" d="M5 13 Q 13 2 21 13" stroke-width="2" stroke-linecap="round"/>
+      </svg>
+      <h1>Svingende streng</h1>
     </div>
-
-    <div class="harmonics-bar">
-      <div class="panel-title">Partialtoner &#8212; Amplitude</div>
-      <div class="harmonics-grid" id="hGrid"></div>
+    <div class="hdr-btns">
+      <button class="btn-hdr" id="btnForklaring">Forklaring</button>
+      <button class="btn-hdr" id="btnOpgave">Opgaver</button>
+      <button class="btn-hdr" id="btnKopier">Kopier kode</button>
+      <button class="btn-hdr" id="btnTema">Lyst tema</button>
     </div>
+  </header>
 
-    <div class="presets-bar" id="presetsBar">
-      <div class="action-btns">
-        <button class="action-btn" id="pauseBtn"><span class="action-icon">&#9646;&#9646;</span> PAUSE</button>
-        <button class="action-btn" id="copyBtn"><span class="action-icon">&#10697;</span> KOPIER KODE</button>
+  <div class="main-grid">
+
+    <div class="sidebar">
+      <div class="panel">
+        <div class="sec-title">Kontrol</div>
+
+        <div class="ctl-row">
+          <div class="ctl-label">
+            <span>B&oslash;lgefart <span class="sym">v</span></span>
+            <span class="val" id="vVal">120 m/s</span>
+          </div>
+          <input type="range" id="vSlider" min="10" max="600" step="1" value="120">
+          <div class="slider-ends"><span>10 m/s</span><span>600 m/s</span></div>
+        </div>
+
+        <div class="ctl-row">
+          <div class="ctl-label">
+            <span>Strengl&aelig;ngde <span class="sym">L</span></span>
+            <span class="val" id="lVal">0,75 m</span>
+          </div>
+          <input type="range" id="lSlider" min="0.50" max="1.00" step="0.01" value="0.75">
+          <div class="slider-ends"><span>0,50 m</span><span>1,00 m</span></div>
+        </div>
+
+        <div class="ctl-row">
+          <div class="ctl-label">
+            <span>Slowmotion</span>
+            <span class="val" id="sVal">&times;600</span>
+          </div>
+          <input type="range" id="sSlider" min="50" max="1000" step="10" value="600">
+          <div class="slider-ends"><span>&times;50</span><span>&times;1000</span></div>
+        </div>
+
+        <div class="sw-row" style="margin-top:10px;">
+          <label class="sw"><input type="checkbox" id="dampChk"><i></i></label>
+          <span>D&aelig;mpning</span>
+        </div>
+        <div class="ctl-row off" id="dampRow">
+          <div class="ctl-label">
+            <span>D&aelig;mpning <span class="sym">&gamma;</span></span>
+            <span class="val" id="gVal">5,0 /s</span>
+          </div>
+          <input type="range" id="gSlider" min="0.5" max="50" step="0.5" value="5">
+          <div class="slider-ends"><span>0,5 /s</span><span>50 /s</span></div>
+        </div>
+
+        <div class="sw-row" style="margin-top:10px; margin-bottom:0;">
+          <label class="sw"><input type="checkbox" id="partChk" checked><i></i></label>
+          <span>Vis partialtoner</span>
+        </div>
+
+        <div class="btn-row">
+          <button class="btn" id="btnPause">Pause</button>
+          <button class="btn" id="btnAnslag">Ansl&aring;</button>
+        </div>
+        <div class="btn-row">
+          <button class="btn sec" id="btnLyd">Lyd til</button>
+          <button class="btn sec" id="btnNulstil">Nulstil</button>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="sec-title">Afl&aelig;sninger</div>
+        <div class="readouts">
+          <div class="ro"><span class="k">Grundfrekvens <span class="sym">f&#8321;</span></span><span class="v grn" id="roF1">&ndash;</span></div>
+          <div class="ro"><span class="k">B&oslash;lgel&aelig;ngde <span class="sym">&lambda;&#8321;</span></span><span class="v" id="roLam">&ndash;</span></div>
+          <div class="ro"><span class="k">Periode <span class="sym">T&#8321;</span></span><span class="v" id="roT1">&ndash;</span></div>
+          <div class="ro"><span class="k">Aktive toner</span><span class="v" id="roAct">&ndash;</span></div>
+          <div class="ro wide"><span class="k">Tone der spilles</span><span class="v" id="roTone">&ndash;</span></div>
+          <div class="ro wide"><span class="k">M&aring;ling p&aring; strengen <span class="sym">&Delta;x</span></span><span class="v yel" id="roDx">Klik to steder p&aring; strengen</span></div>
+        </div>
       </div>
     </div>
+
+    <div class="content-col">
+      <div class="panel grow">
+        <div class="canvas-holder">
+          <canvas id="scene"></canvas>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="sec-title">Partialtoner &mdash; amplitude <span class="sym">A<sub>n</sub></span></div>
+        <div class="mixer" id="mixer"></div>
+      </div>
+
+      <div class="panel">
+        <div class="preset-row" id="presetRow"></div>
+      </div>
+    </div>
+
   </div>
 
-  <div class="right-col">
-    <div>
-      <div class="panel-title">B&#248;lgeparametre</div>
-      <div class="h-slider-row">
-        <label>B&#248;lgehastighed</label>
-        <input type="range" class="horiz" id="speedSlider" min="10" max="600" value="120" step="1">
-        <span class="slider-val" id="speedVal">120 m/s</span>
-      </div>
-      <div class="h-slider-row">
-        <label>Strengl&#230;ngde L</label>
-        <input type="range" class="horiz" id="lengthSlider" min="0.5" max="1.0" value="0.75" step="0.01">
-        <span class="slider-val" id="lengthVal">0,75 m</span>
-      </div>
-      <div class="h-slider-row" style="margin-bottom:0;">
-        <label>Tidsskala</label>
-        <input type="range" class="horiz" id="tsSlider" min="-3" max="-1.7" value="-2.477" step="0.01">
-        <span class="slider-val" id="tsVal">1/300</span>
-      </div>
-    </div>
+</div>
 
-    <div class="divider"></div>
+<!-- Modaler SKAL ligge før script-tagget -->
+<div class="modal-bg" id="modalForklaring">
+  <div class="modal">
+    <h2>Forklaring</h2>
+    <p>Simuleringen viser en streng, der er <span class="acc">fastgjort i begge ender</span> — som en guitarstreng, eller som en streng, der sættes i svingning af en vibrator. Bølger på en streng er <em>tværbølger</em>: strengen bevæger sig på tværs af den retning, bølgen løber i.</p>
 
-    <div>
-      <div class="toggle-row">
-        <label class="toggle"><input type="checkbox" id="dampToggle"><span class="toggle-slider"></span></label>
-        <span>D&#230;mpning</span>
-      </div>
-      <div class="h-slider-row" id="dampRow" style="opacity:.3;pointer-events:none;margin-bottom:6px;">
-        <label>D&#230;mpning &#947;</label>
-        <input type="range" class="horiz" id="dampSlider" min="0.5" max="50" value="5" step="0.5">
-        <span class="slider-val" id="dampVal">5,0 /s</span>
-      </div>
-      <div class="toggle-row" style="margin-bottom:0;">
-        <label class="toggle"><input type="checkbox" id="showPartialsToggle" checked><span class="toggle-slider"></span></label>
-        <span>Vis partialtoner separat</span>
-      </div>
-    </div>
+    <p>Den stående bølge opstår ved <span class="acc">interferens</span>. En bølge løber ud ad strengen, rammer den faste ende og kan ikke komme videre. Da enden ikke kan svinge, sendes bølgen tilbage vendt på hovedet. Nu bevæger den udsendte og den reflekterede bølge sig mod hinanden, og de lægges sammen. Ved de fleste frekvenser bliver resultatet bare rod. Men rammer man præcis den rigtige frekvens, forstærker bølgerne hinanden de samme steder hver gang, og mønstret holder op med at flytte sig sidelæns — det står og svinger op og ned. Det er en <span class="acc">stående bølge</span>.</p>
 
-    <div class="divider"></div>
+    <p>De steder, hvor der hele tiden er konstruktiv interferens, kaldes <span class="acc">buge</span>: her er udsvinget størst. Midt imellem bugene er der hele tiden destruktiv interferens, og strengen står helt stille. De punkter kaldes <span class="acc">knuder</span>. Fordi strengen er spændt fast, kan den ikke bevæge sig i enderne — der er derfor <em>altid en knude i hver ende</em>.</p>
 
-    <div>
-      <div class="panel-title" style="margin-bottom:8px;">Afl&#230;sninger</div>
-      <div class="readouts">
-        <div class="readout">
-          <div class="readout-label">Grundfrekvens f&#8321;</div>
-          <div class="readout-value" id="f1Display">80,0</div>
-          <div class="readout-unit">Hz</div>
-        </div>
-        <div class="readout">
-          <div class="readout-label">B&#248;lgel&#230;ngde &#955;&#8321;</div>
-          <div class="readout-value" id="lambdaDisplay">1,50</div>
-          <div class="readout-unit">m</div>
-        </div>
-        <div class="readout">
-          <div class="readout-label">Aktive partialtoner</div>
-          <div class="readout-value" id="activeDisplay">1</div>
-          <div class="readout-unit">stk</div>
-        </div>
-        <div class="readout">
-          <div class="readout-label">Periode T&#8321;</div>
-          <div class="readout-value" id="periodDisplay">12,5</div>
-          <div class="readout-unit">ms</div>
-        </div>
-      </div>
-    </div>
+    <p>Afstanden mellem to nabo­knuder er en halv bølgelængde, og det samme gælder afstanden mellem to nabo­buge. Fra en knude til den nærmeste bug er der en kvart bølgelængde:</p>
+    <p style="text-align:center;"><span class="eq">|<span class="v">KK</span>|<span class="o">=</span>|<span class="v">BB</span>|<span class="o">=</span><span class="frac"><span class="num"><span class="v">&lambda;</span></span><span class="den">2</span></span></span>&nbsp;&nbsp;&nbsp;og&nbsp;&nbsp;&nbsp;<span class="eq">|<span class="v">BK</span>|<span class="o">=</span><span class="frac"><span class="num"><span class="v">&lambda;</span></span><span class="den">4</span></span></span></p>
+    <p>Det er værd at hæfte sig ved, for det er sådan, man aflæser bølgelængden direkte på strengen: mål afstanden mellem to knuder ved siden af hinanden, og gang med 2.</p>
 
-    <div class="divider"></div>
+    <p>Slå én partialtone til ad gangen og tæl <span class="acc">bugene</span>. Tallet kaldes <span class="eq"><span class="v">n</span></span> og er samtidig <em>tonenummeret</em>: <span class="eq"><span class="v">n</span><span class="o">=</span>1</span> er 1. partialtone, altså <span class="acc">grundtonen</span>, <span class="eq"><span class="v">n</span><span class="o">=</span>2</span> er 2. partialtone og så videre. Da der er en halv bølgelængde pr. bug, er der <span class="eq"><span class="v">n</span></span> halve bølgelængder på strengens længde:</p>
+    <p style="text-align:center;"><span class="eq"><span class="v">L</span><span class="o">=</span><span class="v">n</span><span class="o">&middot;</span><span class="frac"><span class="num"><span class="v">&lambda;</span><sub><span class="v">n</span></sub></span><span class="den">2</span></span></span>&nbsp;&nbsp;&nbsp;som isoleret giver&nbsp;&nbsp;&nbsp;<span class="eq"><span class="v">&lambda;</span><sub><span class="v">n</span></sub><span class="o">=</span><span class="frac"><span class="num">2<span class="o">&middot;</span><span class="v">L</span></span><span class="den"><span class="v">n</span></span></span></span></p>
 
-    <div>
-      <div class="panel-title" style="margin-bottom:5px;">Aktive frekvenser</div>
-      <div id="freqList"></div>
-    </div>
+    <p>Bølgefarten er den samme for alle partialtonerne, for den afhænger kun af selve strengen. Derfor kan vi sætte bølgelængderne ind i <span class="acc">bølgeformlen</span> <span class="eq"><span class="v">v</span><span class="o">=</span><span class="v">&lambda;</span><span class="o">&middot;</span><span class="v">f</span></span> og få frekvenserne:</p>
+    <p style="text-align:center;"><span class="eq"><span class="v">f</span><sub><span class="v">n</span></sub><span class="o">=</span><span class="frac"><span class="num"><span class="v">v</span></span><span class="den"><span class="v">&lambda;</span><sub><span class="v">n</span></sub></span></span><span class="o">=</span><span class="frac"><span class="num"><span class="v">v</span></span><span class="den">2<span class="o">&middot;</span><span class="v">L</span></span></span><span class="o">&middot;</span><span class="v">n</span></span></p>
+    <p>Disse frekvenser kaldes strengens <span class="acc">resonansfrekvenser</span>. De er ligefrem proportionale med tonenummeret <span class="eq"><span class="v">n</span></span>: 2. partialtone har den dobbelte frekvens af grundtonen, 3. partialtone den tredobbelte, og så videre. Aflæs selv rækken over skyderne — 82 Hz, 164 Hz, 246 Hz, 328 Hz … Det er forklaringen på, at en streng lyder som en <em>tone</em> og ikke som støj: alle de frekvenser, den overhovedet kan lave, passer sammen i simple talforhold. I musiklære taler man om <span class="acc">overtoner</span> om alt det, der ligger over grundtonen — 1. overtone er altså det samme som 2. partialtone.</p>
+
+    <p>Strengen behøver ikke nøjes med én partialtone. Når man knipser en guitarstreng, opstår der ikke en ren grundtone, men et sammensat bølgemønster med grundtonen og en række overtoner, hver med sin styrke. Det kan du efterligne her ved at skrue op for flere skydere på én gang. De svage farvede kurver er de enkelte partialtoner, og den kraftige kurve er strengen selv: i ethvert punkt er strengens udsving de farvede kurvers udsving <span class="acc">lagt sammen</span> — igen interferens.</p>
+
+    <p>Styrkeforholdet mellem partialtonerne er det, vi hører som <span class="acc">klangfarve</span>. Grundtonen afgør, hvilken tone det er; overtonerne afgør, om den lyder blød eller skarp. Slå <span class="eq"><span class="v">n</span><span class="o">=</span>1</span> og <span class="eq"><span class="v">n</span><span class="o">=</span>3</span> til samtidig og tryk <span class="acc">Lyd til</span>: tonehøjden er den samme som grundtonen alene, men klangen er en anden. Hvor på strengen man knipser, afgør netop dette styrkeforhold — og grundtonen er ikke nødvendigvis den kraftigste.</p>
+
+    <p><span class="acc-y">Bølgefarten</span> <span class="eq"><span class="v">v</span></span> er ikke en egenskab ved tonen, men ved strengen: den afhænger af, hvor stramt strengen er spændt op, og af strengens <em>masse pr. længde</em>. Jo mere masse pr. længde, jo langsommere bølge og jo dybere tone. Det er derfor, en guitars seks strenge kan have præcis samme længde og alligevel klinge vidt forskelligt — de er forskelligt tykke. At trække i <span class="eq"><span class="v">v</span></span>-slideren svarer altså til at stemme strengen op eller vælge en anden streng, mens <span class="eq"><span class="v">L</span></span>-slideren svarer til at trykke en finger ned på gribebrættet. Begge dele ændrer <span class="eq"><span class="v">f</span><sub>1</sub><span class="o">=</span><span class="v">v</span><span class="o">/</span>(2<span class="o">&middot;</span><span class="v">L</span>)</span> — men de ændrer <em>ikke</em> forholdet mellem partialtonerne, som altid forbliver 1 : 2 : 3 : 4 …</p>
+
+    <p><em>Knapperne:</em> <span class="acc">Nulstil</span> sætter alle indstillinger tilbage og lægger strengen i hvile. <span class="acc">Anslå</span> sætter den i svingning igen, som når man knipser den. Med <span class="acc">Dæmpning</span> slået til taber strengen energi undervejs og dør ud — tryk Anslå for at give den et nyt knips. <span class="acc">Pause</span> fryser billedet, så du kan måle i ro; lyden slukkes samtidig.</p>
+
+    <p><em>Om modellen:</em> Alt vises i kraftig slowmotion — faktoren står i kontrolpanelet. En streng med grundtonen 300 Hz svinger 300 gange i sekundet, hvilket øjet umuligt kan følge. Udsvinget er desuden voldsomt overdrevet: en rigtig guitarstreng bevæger sig brøkdele af en millimeter. Bredden på skærmen er proportional med <span class="eq"><span class="v">L</span></span>, så du kan se strengen blive kortere, når du flytter <span class="eq"><span class="v">L</span></span>-slideren. I modellen dæmpes alle partialtoner lige hurtigt; på en rigtig streng dør de høje overtoner hurtigst ud.</p>
+
+    <p><em>Om lyden:</em> Der spilles én ren tone pr. aktiv partialtone med præcis den styrke, skyderen er sat til. Er grundtonen under 200 Hz, transponeres <em>alle</em> tonerne op med samme faktor (×2, ×4, ×8 …), så forholdene 1 : 2 : 3 : 4 er helt uændrede — faktoren står på knappen og i aflæsningen <span class="acc">Tone der spilles</span>. Grunden er, at indbyggede højttalere i tablets og bærbare computere kun er få centimeter store og slet ikke kan gengive dybe toner. Sender man en ren tone på 82 Hz til en tablet og optager resultatet med en mikrofon, er de 82 Hz næsten væk, mens 246 Hz (<span class="eq">3<span class="o">&middot;</span>82 Hz</span>) er mange gange kraftigere. De ekstra toner kommer ikke fra signalet, men fra <em>højttalerens</em> forvrængning. Med optransponeringen hører du faktisk det, simuleringen udsender.</p>
+    <div class="modal-close-row"><button class="btn" data-close="modalForklaring">Luk</button></div>
   </div>
 </div>
 
+<div class="modal-bg" id="modalOpgave">
+  <div class="modal">
+    <h2>Opgaver</h2>
+    <ol>
+      <li>Tryk <span class="acc">Nulstil</span> og derefter <span class="acc">Anslå</span>. Der er nu kun 1. partialtone. Tæl buge og knuder. Mål afstanden mellem de to knuder, og brug <span class="eq">|<span class="v">KK</span>|<span class="o">=</span><span class="v">&lambda;</span><span class="o">/</span>2</span> til at finde <span class="eq"><span class="v">&lambda;</span><sub>1</sub></span>. Passer det med <span class="eq"><span class="v">&lambda;</span><sub>1</sub><span class="o">=</span>2<span class="o">&middot;</span><span class="v">L</span></span>? Kontrollér til sidst med bølgeformlen, at <span class="eq"><span class="v">v</span><span class="o">=</span><span class="v">&lambda;</span><sub>1</sub><span class="o">&middot;</span><span class="v">f</span><sub>1</sub></span> giver den indstillede bølgefart.</li>
+
+      <li>Skift til 2. og derefter 3. partialtone. Hvor mange buge og knuder er der hver gang? Mål <span class="eq">|<span class="v">KK</span>|</span> mellem to nabo­knuder, find <span class="eq"><span class="v">&lambda;</span><sub><span class="v">n</span></sub></span>, og sammenlign med aflæsningen af <span class="eq"><span class="v">f</span><sub><span class="v">n</span></sub></span>. Opstil ud fra dine målinger en formel for <span class="eq"><span class="v">&lambda;</span><sub><span class="v">n</span></sub></span> og for resonansfrekvenserne <span class="eq"><span class="v">f</span><sub><span class="v">n</span></sub></span> udtrykt ved <span class="eq"><span class="v">L</span></span>, <span class="eq"><span class="v">v</span></span> og <span class="eq"><span class="v">n</span></span>.</li>
+
+      <li>Fordobl bølgefarten fra 120 m/s til 240 m/s. Hvad sker der med <span class="eq"><span class="v">f</span><sub>1</sub></span>, og hvad sker der med <span class="eq"><span class="v">&lambda;</span><sub>1</sub></span>? Sæt farten tilbage og halvér i stedet <span class="eq"><span class="v">L</span></span>. En guitars seks strenge har alle samme længde og altså samme <span class="eq"><span class="v">&lambda;</span><sub>1</sub></span> — forklar ud fra <span class="eq"><span class="v">f</span><sub>1</sub><span class="o">=</span><span class="v">v</span><span class="o">/</span>(2<span class="o">&middot;</span><span class="v">L</span>)</span>, hvordan de så kan klinge forskelligt.</li>
+
+      <li>Slå 1. og 3. partialtone til samtidig med lige store amplituder. Beskriv den kraftige sumkurve — hvorfor ligner den ikke længere en pæn bølge? Hvor på strengen ligger knuderne nu? Tryk <span class="acc">Lyd til</span> og sammenlign med grundtonen alene: ændrer <em>tonehøjden</em> sig, eller kun <em>klangen</em>?</li>
+
+      <li>Slå <span class="acc">Dæmpning</span> til med <span class="eq"><span class="v">&gamma;</span><span class="o">=</span>20 /s</span>, tænd flere partialtoner og tryk <span class="acc">Anslå</span>. Hvor lang tid går der, før strengen er i hvile? Halvér <span class="eq"><span class="v">&gamma;</span></span> og anslå igen — hvad sker der med tiden? På en rigtig guitarstreng dør de høje overtoner hurtigst ud. Hvordan vil klangen af tonen derfor ændre sig fra anslaget, til den er væk?</li>
+    </ol>
+    <div class="modal-close-row"><button class="btn" data-close="modalOpgave">Luk</button></div>
+  </div>
+</div>
+
+<div class="toast" id="toast">Kode kopieret til udklipsholderen</div>
+
 <script>
-var N = 6;
-var COLORS_DARK  = ['#00e5ff','#7df9ff','#a8ff3e','#ffd93d','#ff6b35','#d45eff'];
-var COLORS_LIGHT = ['#1a5099','#378ADD','#1D9E75','#9c5e00','#c0306a','#7a2da8'];
-var NPTS = 500;
-var amps = [1,0,0,0,0,0];
-var speed = 120, L = 0.75;
-var timeScale = 1/300;
-var damping = false, gamma = 5.0, showParts = true, paused = false;
-var physT = 0, lastStamp = null;
-var freqLabels = [], ampValEls = [];
-var isDark = true;
+'use strict';
 
-function COLORS(){ return isDark ? COLORS_DARK : COLORS_LIGHT; }
-function D(d, l){ return isDark ? d : l; }
-function fmtDk(x, dec){ return x.toFixed(dec).replace('.', ','); }
+/* ================= Tema ================= */
+const htmlEl = document.documentElement;
+const btnTema = document.getElementById('btnTema');
+function isLight() { return htmlEl.getAttribute('data-theme') === 'light'; }
+function D(dark, light) { return isLight() ? light : dark; }
 
-var gridEl = document.getElementById('hGrid');
-for (var i = 0; i < N; i++){
-  (function(idx){
-    var col = document.createElement('div');
-    col.className = 'harmonic-col h' + (idx+1) + 'c';
-    var lbl = document.createElement('div');
-    lbl.className = 'harmonic-label';
-    lbl.textContent = 'n=' + (idx+1);
-    var fLbl = document.createElement('div');
-    fLbl.className = 'harmonic-freq';
-    fLbl.textContent = '--';
-    freqLabels.push(fLbl);
-    var wrap = document.createElement('div');
-    wrap.className = 'v-slider-wrap';
-    var inp = document.createElement('input');
-    inp.type = 'range';
-    inp.className = 'vertical';
-    inp.min = 0; inp.max = 1; inp.step = 0.01;
-    inp.value = amps[idx];
-    var aVal = document.createElement('div');
-    aVal.className = 'amplitude-val';
-    aVal.textContent = fmtDk(amps[idx], 2);
-    ampValEls.push(aVal);
-    inp.addEventListener('input', function(){
-      amps[idx] = parseFloat(this.value);
-      aVal.textContent = fmtDk(amps[idx], 2);
-      updateReadouts();
-    });
-    wrap.appendChild(inp);
-    col.appendChild(lbl);
-    col.appendChild(fLbl);
-    col.appendChild(wrap);
-    col.appendChild(aVal);
-    gridEl.appendChild(col);
-  })(i);
+btnTema.addEventListener('click', () => {
+  if (isLight()) { htmlEl.removeAttribute('data-theme'); btnTema.textContent = 'Lyst tema'; }
+  else { htmlEl.setAttribute('data-theme', 'light'); btnTema.textContent = 'Mørkt tema'; }
+  refreshFreqLabels();
+});
+
+/* ================= Modaler ================= */
+function bindModal(btnId, modalId) {
+  document.getElementById(btnId).addEventListener('click', () =>
+    document.getElementById(modalId).classList.add('open'));
+}
+bindModal('btnForklaring', 'modalForklaring');
+bindModal('btnOpgave', 'modalOpgave');
+document.querySelectorAll('[data-close]').forEach(b =>
+  b.addEventListener('click', () => document.getElementById(b.dataset.close).classList.remove('open')));
+document.querySelectorAll('.modal-bg').forEach(m =>
+  m.addEventListener('click', e => { if (e.target === m) m.classList.remove('open'); }));
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') document.querySelectorAll('.modal-bg.open').forEach(m => m.classList.remove('open'));
+});
+
+/* ================= Kopier kode ================= */
+document.getElementById('btnKopier').addEventListener('click', () => {
+  const code = '<!DOCTYPE html>\n' + document.documentElement.outerHTML;
+  navigator.clipboard.writeText(code).then(() => {
+    const t = document.getElementById('toast');
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 2200);
+  });
+});
+
+/* ================= Dansk talformatering ================= */
+/* Fysik-konvention: decimalkomma, men ALDRIG tusindtalsseparator */
+function daNum(x, digits) {
+  return x.toLocaleString('da-DK', {
+    minimumFractionDigits: digits, maximumFractionDigits: digits, useGrouping: false });
 }
 
-var PRESETS = [
-  {label:'Grundtone',  a:[1,0,0,0,0,0]},
-  {label:'2. partial', a:[0,1,0,0,0,0]},
-  {label:'3. partial', a:[0,0,1,0,0,0]},
-  {label:'4. partial', a:[0,0,0,1,0,0]},
-  {label:'5. partial', a:[0,0,0,0,1,0]},
-  {label:'6. partial', a:[0,0,0,0,0,1]},
-  {label:'Tilfaeldig', a:null},
-  {label:'Nulstil',    a:[0,0,0,0,0,0]}
-];
-var presetsBar = document.getElementById('presetsBar');
-var pauseBtn = document.getElementById('pauseBtn');
-PRESETS.forEach(function(p){
-  var btn = document.createElement('button');
-  btn.className = 'preset-btn';
-  btn.textContent = p.label;
-  btn.addEventListener('click', function(){
-    var raw = p.a ? p.a.slice() : [Math.random(),Math.random(),Math.random(),Math.random(),Math.random(),Math.random()];
-    var mx = 0;
-    for (var i = 0; i < N; i++) if (raw[i] > mx) mx = raw[i];
-    if (mx < 1e-6) mx = 1;
-    var inputs = gridEl.querySelectorAll('input[type=range]');
-    for (var i = 0; i < N; i++){
-      amps[i] = raw[i]/mx;
-      inputs[i].value = amps[i];
-      ampValEls[i].textContent = fmtDk(amps[i], 2);
-    }
+/* === FYSIK-KERNE START ===
+   Stående bølger på en streng, der er fastspændt i begge ender.
+   Randbetingelsen y(0)=y(L)=0 tillader kun bølgelængder lambda_n = 2L/n,
+   svarende til frekvenserne f_n = n*v/(2L) = n*f1.
+   Udsvinget er superpositionen
+       y(x,t) = sum_n A_n * sin(n*pi*x/L) * cos(w_n*t) * exp(-gamma*t)
+   hvor w_n = 2*pi*f_n. Bemærk at rumlig form og tidsafhængighed er
+   FAKTORISERET — det er præcis, hvad der kendetegner en stående bølge:
+   knuderne ligger fast, kun amplituden ånder op og ned.
+   Sektionen er DOM-fri. */
+
+const NH = 6;                                   /* antal partialtoner */
+const amps = [1, 0, 0, 0, 0, 0];
+const phys = {
+  v: 120,          /* bølgefart, m/s */
+  L: 0.75,         /* strenglængde, m */
+  slow: 600,       /* slowmotion-faktor: 1 fysisk s vises som "slow" sekunder */
+  damping: false,
+  gamma: 5.0,      /* 1/s */
+  t: 0,            /* fysisk tid i sekunder siden anslag */
+  atRest: false    /* strengen ligger stille — venter på et anslag */
+};
+
+function f1()      { return phys.v / (2 * phys.L); }        /* Hz */
+function fn(n)     { return n * f1(); }                     /* Hz */
+function lambda(n) { return 2 * phys.L / n; }               /* m */
+/* Fælles amplitudefaktor. En streng i hvile har udsvinget 0 overalt; med
+   dæmpning aftager udsvinget efter e^(-gamma*t) regnet fra anslaget. */
+function envelope() {
+  if (phys.atRest) return 0;
+  return phys.damping ? Math.exp(-phys.gamma * phys.t) : 1;
+}
+
+/* Udsving i punktet frac = x/L til tiden t (fysiske sekunder) */
+function yAt(frac, t) {
+  const w1 = 2 * Math.PI * f1();
+  let y = 0;
+  for (let n = 1; n <= NH; n++) {
+    const a = amps[n - 1];
+    if (a < 0.001) continue;
+    y += a * Math.sin(n * Math.PI * frac) * Math.cos(n * w1 * t);
+  }
+  return y * envelope();
+}
+
+/* Udsving fra ÉN partialtone alene */
+function yPartial(n, frac, t) {
+  const w1 = 2 * Math.PI * f1();
+  return amps[n - 1] * Math.sin(n * Math.PI * frac) * Math.cos(n * w1 * t) * envelope();
+}
+/* === FYSIK-KERNE SLUT === */
+
+/* ================= Farver ================= */
+const COL_DARK  = ['#00ff9f', '#00cfff', '#ffd93d', '#ff8a5c', '#c77dff', '#ff5c8a'];
+const COL_LIGHT = ['#1D9E75', '#378ADD', '#9c5e00', '#c2410c', '#7a2da8', '#c0306a'];
+function cols() { return isLight() ? COL_LIGHT : COL_DARK; }
+function colAxis() { return D('#3a5a72', '#8a8070'); }
+function colText() { return D('#d0eef5', '#1a1a1a'); }
+function colDim()  { return D('#8ec8d8', '#333333'); }
+function colGrn()  { return D('#00ff9f', '#1D9E75'); }
+function colStr()  { return D('#00cfff', '#1a5099'); }
+function colYel()  { return D('#ffd93d', '#c07800'); }
+
+/* ================= Partialtone-mixer ================= */
+const mixer = document.getElementById('mixer');
+const fLabels = [], aLabels = [], vSliders = [];
+for (let i = 0; i < NH; i++) {
+  const col = document.createElement('div');
+  col.className = 'mx-col c' + (i + 1);
+
+  const n = document.createElement('div');
+  n.className = 'mx-n';
+  n.textContent = 'n=' + (i + 1);
+
+  const f = document.createElement('div');
+  f.className = 'mx-f';
+  f.textContent = '--';
+  fLabels.push(f);
+
+  const wrap = document.createElement('div');
+  wrap.className = 'vwrap';
+  const inp = document.createElement('input');
+  inp.type = 'range';
+  inp.className = 'vert';
+  inp.min = 0; inp.max = 1; inp.step = 0.01;
+  inp.value = amps[i];
+  vSliders.push(inp);
+
+  const a = document.createElement('div');
+  a.className = 'mx-a';
+  a.textContent = daNum(amps[i], 2);
+  aLabels.push(a);
+
+  inp.addEventListener('input', () => {
+    amps[i] = +inp.value;
+    a.textContent = daNum(amps[i], 2);
+    phys.atRest = false;      /* at skrue op vækker strengen */
     updateReadouts();
+    updateAudio();
   });
-  presetsBar.insertBefore(btn, presetsBar.querySelector('.action-btns'));
-});
 
-function bindH(id, valId, cb){
-  var el = document.getElementById(id), vl = document.getElementById(valId);
-  el.addEventListener('input', function(){ cb(parseFloat(el.value), vl); });
+  wrap.appendChild(inp);
+  col.appendChild(n); col.appendChild(f); col.appendChild(wrap); col.appendChild(a);
+  mixer.appendChild(col);
 }
-bindH('speedSlider','speedVal', function(v, vl){
-  speed = v;
-  vl.textContent = v + ' m/s';
-  updateReadouts();
-});
-bindH('lengthSlider','lengthVal', function(v, vl){
-  L = v;
-  vl.textContent = fmtDk(v, 2) + ' m';
-  updateReadouts();
-});
-bindH('tsSlider','tsVal', function(v, vl){
-  timeScale = Math.pow(10, v);
-  var inv = Math.round(1/timeScale);
-  vl.textContent = '1/' + inv;
-});
-bindH('dampSlider','dampVal', function(v, vl){
-  gamma = v;
-  vl.textContent = fmtDk(v, 1) + ' /s';
-});
 
-document.getElementById('dampToggle').addEventListener('change', function(){
-  damping = this.checked;
-  var r = document.getElementById('dampRow');
-  r.style.opacity = damping ? '1' : '0.3';
-  r.style.pointerEvents = damping ? 'auto' : 'none';
-  if (damping) physT = 0;
-});
-document.getElementById('showPartialsToggle').addEventListener('change', function(){
-  showParts = this.checked;
-});
-pauseBtn.addEventListener('click', function(){
-  paused = !paused;
-  this.innerHTML = paused
-    ? '<span class="action-icon">&#9654;</span> AFSPIL'
-    : '<span class="action-icon">&#9646;&#9646;</span> PAUSE';
-  if (!paused) lastStamp = null;
-});
-document.getElementById('copyBtn').addEventListener('click', function(){
-  var html = document.documentElement.outerHTML;
-  navigator.clipboard.writeText(html).then(function(){
-    var btn = document.getElementById('copyBtn');
-    btn.innerHTML = '<span class="action-icon">&#10003;</span> KOPIERET!';
-    setTimeout(function(){
-      btn.innerHTML = '<span class="action-icon">&#10697;</span> KOPIER KODE';
-    }, 2000);
-  });
-});
-
-document.getElementById('themeBtn').addEventListener('click', function(){
-  isDark = !isDark;
-  if (isDark){
-    document.documentElement.removeAttribute('data-theme');
-    this.textContent = 'Lys tema';
-  } else {
-    document.documentElement.setAttribute('data-theme', 'light');
-    this.textContent = 'Moerkt tema';
+function setAmps(arr) {
+  for (let i = 0; i < NH; i++) {
+    amps[i] = arr[i];
+    vSliders[i].value = arr[i];
+    aLabels[i].textContent = daNum(arr[i], 2);
   }
+  /* at ændre amplituderne er i sig selv et nyt anslag */
+  phys.t = 0;
+  phys.atRest = false;
   updateReadouts();
-});
+  updateAudio();
+}
 
-function updateReadouts(){
-  var f1 = speed/(2*L);
-  document.getElementById('f1Display').textContent = fmtDk(f1, 1);
-  document.getElementById('lambdaDisplay').textContent = fmtDk(2*L, 2);
-  var cnt = 0;
-  for (var i = 0; i < N; i++) if (amps[i] > 0.005) cnt++;
-  document.getElementById('activeDisplay').textContent = cnt;
-  document.getElementById('periodDisplay').textContent = fmtDk(1000/f1, 1);
-  var cols = COLORS();
-  var html = '';
-  for (var i = 0; i < N; i++){
-    var fn = f1*(i+1);
-    freqLabels[i].textContent = fmtDk(fn, 1) + ' Hz';
-    if (amps[i] > 0.005){
-      html += '<span style="color:' + cols[i] + '">n=' + (i+1) + '</span>&nbsp;&nbsp;'
-            + fmtDk(fn, 1) + ' Hz&nbsp;&nbsp;A=' + fmtDk(amps[i], 2) + '<br>';
+/* ================= Forvalg ================= */
+const PRESETS = [
+  { label: 'Grundtone',  a: [1, 0, 0, 0, 0, 0] },
+  { label: '2. partial', a: [0, 1, 0, 0, 0, 0] },
+  { label: '3. partial', a: [0, 0, 1, 0, 0, 0] },
+  { label: '4. partial', a: [0, 0, 0, 1, 0, 0] },
+  { label: '5. partial', a: [0, 0, 0, 0, 1, 0] },
+  { label: '6. partial', a: [0, 0, 0, 0, 0, 1] },
+  { label: 'Tilfældig', a: null },
+  { label: 'Ryd',        a: [0, 0, 0, 0, 0, 0] }
+];
+const presetRow = document.getElementById('presetRow');
+PRESETS.forEach(p => {
+  const b = document.createElement('button');
+  b.className = 'btn-sm';
+  b.textContent = p.label;
+  b.addEventListener('click', () => {
+    let raw = p.a ? p.a.slice() : Array.from({ length: NH }, () => Math.random());
+    if (!p.a) {
+      const mx = Math.max(...raw, 1e-6);
+      raw = raw.map(x => Math.round(x / mx * 100) / 100);
     }
-  }
-  document.getElementById('freqList').innerHTML = html || '<span style="color:' + D('#2a3a4a','#999') + '">Ingen aktive partialtoner</span>';
+    setAmps(raw);
+  });
+  presetRow.appendChild(b);
+});
+
+/* ================= Kontroller ================= */
+const vSlider = document.getElementById('vSlider');
+const lSlider = document.getElementById('lSlider');
+const sSlider = document.getElementById('sSlider');
+const gSlider = document.getElementById('gSlider');
+const dampChk = document.getElementById('dampChk');
+const partChk = document.getElementById('partChk');
+const btnPause = document.getElementById('btnPause');
+const btnAnslag = document.getElementById('btnAnslag');
+const btnLyd = document.getElementById('btnLyd');
+const btnNulstil = document.getElementById('btnNulstil');
+
+let paused = false;
+let showParts = true;
+
+vSlider.addEventListener('input', () => {
+  phys.v = +vSlider.value;
+  document.getElementById('vVal').textContent = phys.v + ' m/s';
+  updateReadouts(); updateAudio();
+});
+lSlider.addEventListener('input', () => {
+  phys.L = +lSlider.value;
+  document.getElementById('lVal').textContent = daNum(phys.L, 2) + ' m';
+  marks.length = 0;
+  updateReadouts(); updateAudio();
+});
+sSlider.addEventListener('input', () => {
+  phys.slow = +sSlider.value;
+  document.getElementById('sVal').textContent = '×' + phys.slow;
+});
+gSlider.addEventListener('input', () => {
+  phys.gamma = +gSlider.value;
+  document.getElementById('gVal').textContent = daNum(phys.gamma, 1) + ' /s';
+});
+dampChk.addEventListener('change', () => {
+  phys.damping = dampChk.checked;
+  document.getElementById('dampRow').classList.toggle('off', !phys.damping);
+  phys.t = 0;
+});
+partChk.addEventListener('change', () => { showParts = partChk.checked; });
+
+/* Pause fryser billedet, så man kan måle i ro — og slukker lyden, for en
+   streng, der står stille, larmer ikke. */
+btnPause.addEventListener('click', () => {
+  paused = !paused;
+  btnPause.textContent = paused ? 'Afspil' : 'Pause';
+  if (paused) stopSound();
+});
+
+/* Anslå = et nyt knips: strengen vækkes, tiden nulstilles, og hvis der var
+   sat på pause, kører den igen. */
+btnAnslag.addEventListener('click', () => {
+  phys.t = 0;
+  phys.atRest = false;
+  paused = false;
+  btnPause.textContent = 'Pause';
+});
+
+/* Nulstil sætter alle indstillinger tilbage OG lægger strengen i hvile.
+   Derfra er det Anslå, der sætter den i svingning igen. */
+btnNulstil.addEventListener('click', () => {
+  vSlider.value = 120; phys.v = 120;
+  lSlider.value = 0.75; phys.L = 0.75;
+  sSlider.value = 600; phys.slow = 600;
+  gSlider.value = 5; phys.gamma = 5;
+  dampChk.checked = false; phys.damping = false;
+  document.getElementById('dampRow').classList.add('off');
+  partChk.checked = true; showParts = true;
+  document.getElementById('vVal').textContent = '120 m/s';
+  document.getElementById('lVal').textContent = '0,75 m';
+  document.getElementById('sVal').textContent = '×600';
+  document.getElementById('gVal').textContent = '5,0 /s';
+  paused = false; btnPause.textContent = 'Pause';
+  marks.length = 0;
+  showDx();
+  stopSound();
+  setAmps([1, 0, 0, 0, 0, 0]);   /* sætter atRest = false … */
+  phys.t = 0;
+  phys.atRest = true;            /* … derfor lægges strengen i hvile bagefter */
+});
+
+/* ================= Lyd (Web Audio) =================
+   Én sinus-oscillator pr. partialtone med frekvensen f_n = n*f1 og en
+   forstærkning, der følger amplitude-slideren. Hvis f1 er for dyb til at
+   høres, transponeres ALLE toner op med samme faktor 2^k, så forholdene
+   1:2:3:... bevares. Faktoren vises på knappen og i aflæsningerne.
+
+   Grænsen er sat til 200 Hz og IKKE til høregrænsen omkring 20 Hz. Årsagen
+   er hardware: indbyggede højttalere i tablets og bærbare er få centimeter
+   store og kan slet ikke gengive dybe toner. Sender man en ren 82 Hz sinus
+   til en iPad, måler man ganske vist 82 Hz i spektret, men de ULIGE
+   harmoniske (3f, 5f, 7f) fra højttalerens forvrængning er mange gange
+   kraftigere — man tror, man hører 246 Hz. Ved at transponere op i hele
+   oktaver undgår vi det: tonehøjdeforholdene mellem partialtonerne er
+   uændrede, og det, eleven hører, er faktisk det, simuleringen udsender. */
+let audioCtx = null, oscs = [], gains = [], master = null, soundOn = false;
+const F_MIN_AUDIBLE = 200;   /* Hz — sat efter små højttaleres nedre grænse */
+
+function octaveShift() {
+  let k = 1;
+  let f = f1();
+  if (f <= 0) return 1;
+  while (f * k < F_MIN_AUDIBLE) k *= 2;
+  return k;
 }
 
-var canvas = document.getElementById('c'), ctx = canvas.getContext('2d');
-var cW = 0, cH = 0;
-function resize(){
-  var dpr = window.devicePixelRatio || 1, wrap = canvas.parentElement;
-  var W = wrap.clientWidth, H = wrap.clientHeight;
-  if (W < 1 || H < 1) return;
-  cW = W; cH = H;
-  canvas.width = W*dpr;
-  canvas.height = H*dpr;
-  canvas.style.width = W + 'px';
-  canvas.style.height = H + 'px';
+function setupAudio() {
+  if (audioCtx) return;
+  audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  master = audioCtx.createGain();
+  master.gain.value = 0;
+  master.connect(audioCtx.destination);
+  for (let n = 1; n <= NH; n++) {
+    const o = audioCtx.createOscillator();
+    const g = audioCtx.createGain();
+    o.type = 'sine';
+    o.frequency.value = fn(n) * octaveShift();
+    g.gain.value = 0;
+    o.connect(g).connect(master);
+    o.start();
+    oscs.push(o); gains.push(g);
+  }
+}
+
+function updateAudio() {
+  if (!audioCtx) { refreshLydBtn(); return; }
+  const k = octaveShift();
+  const now = audioCtx.currentTime;
+  let sum = 0;
+  for (let i = 0; i < NH; i++) sum += amps[i];
+  if (sum < 1e-6) sum = 1;
+  for (let n = 1; n <= NH; n++) {
+    oscs[n - 1].frequency.setTargetAtTime(fn(n) * k, now, 0.02);
+    gains[n - 1].gain.setTargetAtTime(0.55 * amps[n - 1] / sum, now, 0.03);
+  }
+  refreshLydBtn();
+}
+
+/* Lydstyrken følger strengens udsving: den dør ud sammen med dæmpningen og
+   er nul, når strengen er i hvile eller sat på pause. */
+const MASTER_MAX = 0.16;
+let lastLevel = -1;
+function applyAudioLevel() {
+  if (!master) return;
+  const target = (soundOn && !paused && !phys.atRest) ? MASTER_MAX * envelope() : 0;
+  if (Math.abs(target - lastLevel) < 0.002) return;
+  lastLevel = target;
+  master.gain.setTargetAtTime(target, audioCtx.currentTime, 0.03);
+}
+
+function stopSound() {
+  if (!soundOn) return;
+  soundOn = false;
+  applyAudioLevel();
+  refreshLydBtn();
+}
+
+function refreshLydBtn() {
+  const k = octaveShift();
+  btnLyd.textContent = (soundOn ? 'Lyd fra' : 'Lyd til') + (k > 1 ? ' (×' + k + ')' : '');
+  const el = document.getElementById('roTone');
+  if (!el) return;
+  if (k > 1) {
+    el.textContent = daNum(f1() * k, 1) + ' Hz  (f₁ × ' + k + ')';
+    el.classList.add('yel');
+  } else {
+    el.textContent = daNum(f1(), 1) + ' Hz  (= f₁)';
+    el.classList.remove('yel');
+  }
+}
+
+btnLyd.addEventListener('click', () => {
+  setupAudio();
+  if (audioCtx.state === 'suspended') audioCtx.resume();
+  soundOn = !soundOn;
+  /* at tænde lyden på en streng, der ligger stille, giver et nyt anslag */
+  if (soundOn && (phys.atRest || paused)) {
+    phys.atRest = false; phys.t = 0;
+    paused = false; btnPause.textContent = 'Pause';
+  }
+  updateAudio();
+  applyAudioLevel();
+  refreshLydBtn();
+});
+
+/* ================= Aflæsninger ================= */
+function refreshFreqLabels() {
+  const c = cols();
+  for (let n = 1; n <= NH; n++) {
+    fLabels[n - 1].textContent = daNum(fn(n), 1) + ' Hz';
+    fLabels[n - 1].style.color = amps[n - 1] > 0.005 ? c[n - 1] : '';
+  }
+}
+
+function updateReadouts() {
+  document.getElementById('roF1').textContent = daNum(f1(), 1) + ' Hz';
+  document.getElementById('roLam').textContent = daNum(lambda(1), 2) + ' m';
+  document.getElementById('roT1').textContent = daNum(1000 / f1(), 1) + ' ms';
+  let act = 0;
+  for (let i = 0; i < NH; i++) if (amps[i] > 0.005) act++;
+  document.getElementById('roAct').textContent = act;
+  refreshFreqLabels();
+}
+
+/* ================= Måleværktøj på strengen ================= */
+/* Klik sætter et mærke i cm målt fra strengens venstre ende. To mærker viser
+   afstanden Δx. Tredje klik nulstiller. Aflæsningen er elevens egen. */
+const marks = [];
+let hoverCm = null;
+
+function showDx() {
+  const el = document.getElementById('roDx');
+  if (marks.length === 2) {
+    const d = Math.abs(marks[1] - marks[0]);
+    el.textContent = daNum(d, 1) + ' cm  =  ' + daNum(d / 100, 3) + ' m';
+  } else if (marks.length === 1) {
+    el.textContent = 'x₁ = ' + daNum(marks[0], 1) + ' cm — klik igen';
+  } else {
+    el.textContent = 'Klik to steder på strengen';
+  }
+}
+
+/* ================= Canvas ================= */
+const canvas = document.getElementById('scene');
+const ctx = canvas.getContext('2d');
+let CW = 0, CH = 0;
+
+function resize() {
+  const dpr = Math.min(window.devicePixelRatio || 1, 3);
+  const host = canvas.parentElement;
+  const w = host.clientWidth, h = host.clientHeight;
+  if (w < 2 || h < 2) return;
+  CW = w; CH = h;
+  canvas.width = Math.round(w * dpr);
+  canvas.height = Math.round(h * dpr);
   ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
 }
-resize();
 window.addEventListener('resize', resize);
+if (window.ResizeObserver) new ResizeObserver(resize).observe(canvas.parentElement);
 
-// y(frac, t_phys) — physical-time argument; w1 = 2*pi*f1 in 1/s
-function getY(frac, t){
-  var f1 = speed/(2*L);
-  var w1 = 2*Math.PI*f1;
-  var dmp = damping ? Math.exp(-gamma*t) : 1;
-  var y = 0;
-  for (var n = 1; n <= N; n++){
-    if (amps[n-1] < 0.001) continue;
-    y += amps[n-1] * Math.sin(n*Math.PI*frac) * Math.cos(n*w1*t);
-  }
-  return y*dmp;
+/* Strengens geometri på skærmen: bredden er proportional med L,
+   kalibreret så L = 1,00 m fylder hele det tilgængelige felt. */
+function geom() {
+  const pad = Math.max(46, CW * 0.06);
+  const full = CW - 2 * pad;
+  const w = full * phys.L;            /* L = 1,00 m -> full */
+  return { x0: (CW - w) / 2, w: w, cy: CH / 2 };
 }
 
-function draw(stamp){
-  if (!lastStamp) lastStamp = stamp;
-  var dtReal = Math.min((stamp - lastStamp)/1000, 0.05);
-  lastStamp = stamp;
-  if (!paused) physT += dtReal * timeScale;
+function evtToCm(e) {
+  const r = canvas.getBoundingClientRect();
+  const cx = (e.touches ? e.touches[0].clientX : e.clientX) - r.left;
+  const g = geom();
+  const frac = (cx / r.width * CW - g.x0) / g.w;
+  return Math.max(0, Math.min(1, frac)) * phys.L * 100;
+}
 
-  if (cW < 1 || cH < 1){ requestAnimationFrame(draw); return; }
-  var W = cW, H = cH, cy = H/2;
-  var pad = W*0.05;
-  var maxStrW = W - 2*pad;
-  // L = 0.5 m -> strW = 0.5 * maxStrW; L = 1.0 m -> strW = maxStrW.
-  // Visual width is proportional to L (canvas is calibrated so 1.0 m = max width).
-  var strW = maxStrW * L;
-  var x0 = (W - strW)/2;
+canvas.addEventListener('mousemove', e => { hoverCm = evtToCm(e); });
+canvas.addEventListener('mouseleave', () => { hoverCm = null; });
+canvas.addEventListener('click', e => {
+  const cm = evtToCm(e);
+  if (marks.length >= 2) marks.length = 0;
+  else marks.push(cm);
+  showDx();
+});
+canvas.addEventListener('touchstart', e => {
+  e.preventDefault();
+  const cm = evtToCm(e);
+  hoverCm = cm;
+  if (marks.length >= 2) marks.length = 0;
+  else marks.push(cm);
+  showDx();
+}, { passive: false });
 
-  // Background
-  ctx.fillStyle = D('#06080f', '#fdfaf4');
-  ctx.fillRect(0, 0, W, H);
+const NPTS = 480;
+const buf = new Float32Array(NPTS + 1);
 
-  // Grid
-  ctx.strokeStyle = D('rgba(30,42,58,0.55)', 'rgba(120,100,70,0.18)');
-  ctx.lineWidth = 0.5;
-  for (var gi = 1; gi < 8; gi++){
-    ctx.beginPath();
-    ctx.moveTo(0, H*gi/8);
-    ctx.lineTo(W, H*gi/8);
-    ctx.stroke();
-  }
-  for (var gj = 1; gj < 12; gj++){
-    ctx.beginPath();
-    ctx.moveTo(W*gj/12, 0);
-    ctx.lineTo(W*gj/12, H);
-    ctx.stroke();
-  }
+function draw() {
+  if (CW < 2 || CH < 2) return;
+  const g = geom();
+  const { x0, w, cy } = g;
 
-  // Center axis line (along string)
-  ctx.strokeStyle = D('rgba(74,98,120,0.4)', 'rgba(80,60,40,0.45)');
+  ctx.clearRect(0, 0, CW, CH);
+
+  /* gitter */
+  ctx.strokeStyle = D('rgba(26,58,82,0.55)', 'rgba(140,124,96,0.22)');
   ctx.lineWidth = 1;
-  ctx.setLineDash([4,7]);
-  ctx.beginPath();
-  ctx.moveTo(x0, cy);
-  ctx.lineTo(x0+strW, cy);
-  ctx.stroke();
+  for (let i = 1; i < 8; i++) {
+    ctx.beginPath(); ctx.moveTo(0, CH * i / 8); ctx.lineTo(CW, CH * i / 8); ctx.stroke();
+  }
+  for (let j = 1; j < 14; j++) {
+    ctx.beginPath(); ctx.moveTo(CW * j / 14, 0); ctx.lineTo(CW * j / 14, CH); ctx.stroke();
+  }
+
+  /* fastspændinger (bro og sadel) */
+  ctx.fillStyle = D('#0f1e2d', '#e0d8c6');
+  ctx.strokeStyle = colAxis();
+  ctx.lineWidth = 1.4;
+  const bw = 9, bh = Math.min(CH * 0.62, 190);
+  ctx.fillRect(x0 - bw, cy - bh / 2, bw, bh);
+  ctx.strokeRect(x0 - bw, cy - bh / 2, bw, bh);
+  ctx.fillRect(x0 + w, cy - bh / 2, bw, bh);
+  ctx.strokeRect(x0 + w, cy - bh / 2, bw, bh);
+
+  /* hvileakse */
+  ctx.strokeStyle = colAxis();
+  ctx.globalAlpha = 0.75;
+  ctx.lineWidth = 1;
+  ctx.setLineDash([4, 6]);
+  ctx.beginPath(); ctx.moveTo(x0, cy); ctx.lineTo(x0 + w, cy); ctx.stroke();
   ctx.setLineDash([]);
+  ctx.globalAlpha = 1;
 
-  // Amplitude scaling so wave never leaves canvas
-  var ampSum = 0;
-  for (var i = 0; i < N; i++) if (amps[i] > 0.001) ampSum += amps[i];
-  if (ampSum < 0.001) ampSum = 1;
-  var maxA = (H*0.44)/ampSum;
+  /* amplitudeskalering, så udsvinget aldrig forlader feltet */
+  let sum = 0;
+  for (let i = 0; i < NH; i++) if (amps[i] > 0.001) sum += amps[i];
+  if (sum < 0.001) sum = 1;
+  const A = (CH * 0.40) / sum;
 
-  var f1 = speed/(2*L);
-  var w1 = 2*Math.PI*f1;
-  var dmp = damping ? Math.exp(-gamma*physT) : 1;
-  var cols = COLORS();
+  const c = cols();
+  const t = phys.t;
 
-  // Individual partial waves (faded)
-  if (showParts){
-    for (var n = 1; n <= N; n++){
-      if (amps[n-1] < 0.005) continue;
+  /* de enkelte partialtoner, svagt optrukket */
+  if (showParts) {
+    for (let n = 1; n <= NH; n++) {
+      if (amps[n - 1] < 0.005) continue;
       ctx.beginPath();
-      ctx.strokeStyle = cols[n-1] + (isDark ? '55' : 'aa');
-      ctx.lineWidth = 1;
-      for (var j = 0; j <= NPTS; j++){
-        var f = j/NPTS;
-        var xp = x0 + f*strW;
-        var yp = cy - amps[n-1]*maxA*Math.sin(n*Math.PI*f)*Math.cos(n*w1*physT)*dmp;
+      ctx.strokeStyle = c[n - 1];
+      ctx.globalAlpha = isLight() ? 0.55 : 0.40;
+      ctx.lineWidth = 1.3;
+      for (let j = 0; j <= NPTS; j++) {
+        const f = j / NPTS;
+        const xp = x0 + f * w;
+        const yp = cy - yPartial(n, f, t) * A;
         if (j === 0) ctx.moveTo(xp, yp); else ctx.lineTo(xp, yp);
       }
       ctx.stroke();
+      ctx.globalAlpha = 1;
     }
   }
 
-  // Sum wave (the visible string)
-  var hasAny = false;
-  for (var i = 0; i < N; i++) if (amps[i] > 0.005){ hasAny = true; break; }
-  if (hasAny){
-    var pts = new Float32Array(NPTS+1);
-    for (var j = 0; j <= NPTS; j++) pts[j] = getY(j/NPTS, physT);
-    var sRGB = isDark ? '0,229,255' : '26,80,153';
-    var passes = isDark ? [[10,0.06],[4,0.18],[1.5,1.0]] : [[1.8, 1.0]];
-    for (var p = 0; p < passes.length; p++){
-      ctx.beginPath();
-      ctx.strokeStyle = 'rgba(' + sRGB + ',' + passes[p][1] + ')';
-      ctx.lineWidth = passes[p][0];
-      for (var j = 0; j <= NPTS; j++){
-        var xp = x0 + (j/NPTS)*strW;
-        var yp = cy - pts[j]*maxA;
-        if (j === 0) ctx.moveTo(xp, yp); else ctx.lineTo(xp, yp);
-      }
-      ctx.stroke();
-    }
-  } else {
-    ctx.beginPath();
-    ctx.strokeStyle = D('rgba(0,229,255,0.4)', 'rgba(26,80,153,0.8)');
-    ctx.lineWidth = 1.5;
-    ctx.moveTo(x0, cy);
-    ctx.lineTo(x0+strW, cy);
-    ctx.stroke();
-  }
+  /* strengen selv = summen */
+  let any = false;
+  for (let i = 0; i < NH; i++) if (amps[i] > 0.005) { any = true; break; }
 
-  // Endpoints + nodes per active partial
-  for (var n = 1; n <= N; n++){
-    if (amps[n-1] < 0.005) continue;
-    for (var k = 0; k <= n; k++){
-      var frac = k/n;
-      var xp = x0 + frac*strW;
-      var isEnd = (k === 0 || k === n);
+  for (let j = 0; j <= NPTS; j++) buf[j] = any ? yAt(j / NPTS, t) : 0;
+
+  if (!isLight()) { ctx.shadowColor = colStr(); ctx.shadowBlur = 9; }
+  ctx.strokeStyle = colStr();
+  ctx.lineWidth = any ? 2.4 : 1.6;
+  ctx.beginPath();
+  for (let j = 0; j <= NPTS; j++) {
+    const xp = x0 + (j / NPTS) * w;
+    const yp = cy - buf[j] * A;
+    if (j === 0) ctx.moveTo(xp, yp); else ctx.lineTo(xp, yp);
+  }
+  ctx.stroke();
+  ctx.shadowBlur = 0;
+
+  /* knuder for hver aktiv partialtone */
+  for (let n = 1; n <= NH; n++) {
+    if (amps[n - 1] < 0.005) continue;
+    for (let k = 0; k <= n; k++) {
+      const xp = x0 + (k / n) * w;
+      const end = (k === 0 || k === n);
       ctx.beginPath();
-      ctx.arc(xp, cy, isEnd ? 6 : 3.5, 0, Math.PI*2);
-      ctx.fillStyle = isEnd ? D('#1e2a3a','#f4eee3') : cols[n-1] + (isDark ? '90' : 'cc');
+      ctx.arc(xp, cy, end ? 5.5 : 3.4, 0, 2 * Math.PI);
+      ctx.fillStyle = end ? D('#0a1622', '#fdfaf4') : c[n - 1];
       ctx.fill();
-      ctx.strokeStyle = isEnd ? D('#00e5ff','#1a5099') : cols[n-1];
-      ctx.lineWidth = isEnd ? 2 : 1;
+      ctx.strokeStyle = end ? colGrn() : c[n - 1];
+      ctx.lineWidth = end ? 2 : 1;
       ctx.stroke();
     }
   }
 
-  requestAnimationFrame(draw);
+  /* længdeskala under strengen */
+  ctx.strokeStyle = colAxis();
+  ctx.fillStyle = colDim();
+  ctx.font = '700 11px "Courier New", monospace';
+  ctx.textAlign = 'center';
+  ctx.lineWidth = 1;
+  const yScale = CH - 22;
+  ctx.beginPath(); ctx.moveTo(x0, yScale); ctx.lineTo(x0 + w, yScale); ctx.stroke();
+  const totCm = phys.L * 100;
+  for (let cm = 0; cm <= totCm + 0.01; cm += 10) {
+    const xp = x0 + (cm / totCm) * w;
+    const big = (cm % 25 === 0) || cm === 0;
+    ctx.beginPath(); ctx.moveTo(xp, yScale); ctx.lineTo(xp, yScale + (big ? 6 : 3)); ctx.stroke();
+    if (big) ctx.fillText(String(cm), xp, yScale + 18);
+  }
+  ctx.textAlign = 'right';
+  ctx.fillText('x (cm)', x0 + w, yScale - 6);
+  ctx.textAlign = 'left';
+
+  /* ---- målemærker ---- */
+  function cmToPx(cm) { return x0 + (cm / (phys.L * 100)) * w; }
+  function drawMark(cm, color, solid, label) {
+    const xp = cmToPx(cm);
+    ctx.strokeStyle = color;
+    ctx.lineWidth = 1.6;
+    ctx.setLineDash(solid ? [] : [4, 4]);
+    ctx.beginPath(); ctx.moveTo(xp, 22); ctx.lineTo(xp, yScale); ctx.stroke();
+    ctx.setLineDash([]);
+    if (label) {
+      ctx.fillStyle = color;
+      ctx.font = '700 12px "Courier New", monospace';
+      ctx.textAlign = 'center';
+      ctx.fillText(daNum(cm, 1) + ' cm', Math.max(x0 + 26, Math.min(x0 + w - 26, xp)), 34);
+      ctx.textAlign = 'left';
+    }
+  }
+
+  if (marks.length === 2) {
+    drawMark(marks[0], colYel(), true, false);
+    drawMark(marks[1], colYel(), true, false);
+    const p0 = cmToPx(Math.min(marks[0], marks[1]));
+    const p1 = cmToPx(Math.max(marks[0], marks[1]));
+    const yb = 18;
+    ctx.strokeStyle = colYel();
+    ctx.lineWidth = 1.4;
+    ctx.beginPath();
+    ctx.moveTo(p0, yb); ctx.lineTo(p1, yb);
+    ctx.moveTo(p0, yb - 4); ctx.lineTo(p0, yb + 4);
+    ctx.moveTo(p1, yb - 4); ctx.lineTo(p1, yb + 4);
+    ctx.stroke();
+    ctx.fillStyle = colYel();
+    ctx.font = '700 13px "Courier New", monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText('Δx = ' + daNum(Math.abs(marks[1] - marks[0]), 1) + ' cm',
+      Math.max(x0 + 50, Math.min(x0 + w - 50, (p0 + p1) / 2)), yb + 22);
+    ctx.textAlign = 'left';
+  } else {
+    for (const cm of marks) drawMark(cm, colYel(), true, true);
+    if (hoverCm !== null) drawMark(hoverCm, colDim(), false, true);
+    if (marks.length === 0 && hoverCm === null) {
+      ctx.fillStyle = colDim();
+      ctx.font = '600 12px "Exo 2", sans-serif';
+      ctx.textAlign = 'left';
+      ctx.fillText('Klik på to knuder for at måle afstanden', x0 + 8, 20);
+    }
+  }
+
+  /* status */
+  ctx.font = '700 13px "Share Tech Mono", monospace';
+  ctx.textAlign = 'right';
+  if (phys.atRest) {
+    ctx.fillStyle = colGrn();
+    ctx.fillText('STRENGEN ER I HVILE — TRYK ANSLÅ', x0 + w - 8, 20);
+  } else if (paused) {
+    ctx.fillStyle = colText();
+    ctx.fillText('PAUSERET', x0 + w - 8, 20);
+  } else if (phys.damping) {
+    ctx.fillStyle = colDim();
+    ctx.fillText('UDSVING — ' + daNum(envelope() * 100, 0) + ' % TILBAGE', x0 + w - 8, 20);
+  }
+  ctx.textAlign = 'left';
+
+  /* etiket: L */
+  ctx.fillStyle = colDim();
+  ctx.font = '700 12px "Share Tech Mono", monospace';
+  ctx.textAlign = 'center';
+  ctx.fillText('←  L = ' + daNum(phys.L, 2) + ' m  →', x0 + w / 2, CH - 4);
+  ctx.textAlign = 'left';
 }
 
+/* ================= Hovedloop ================= */
+let lastT = performance.now();
+function loop(now) {
+  const dtReal = Math.min((now - lastT) / 1000, 0.05);
+  lastT = now;
+  if (!paused && !phys.atRest) {
+    phys.t += dtReal / phys.slow;   /* fysisk tid i sekunder */
+    /* når dæmpningen har ædt udsvinget, er strengen reelt i hvile */
+    if (phys.damping && envelope() < 0.005) {
+      phys.atRest = true;
+      stopSound();
+    }
+  }
+  applyAudioLevel();
+  draw();
+  requestAnimationFrame(loop);
+}
+
+resize();
+setTimeout(resize, 60);
 updateReadouts();
-requestAnimationFrame(draw);
+showDx();
+refreshLydBtn();
+requestAnimationFrame(loop);
 </script>
 </body>
 </html>
