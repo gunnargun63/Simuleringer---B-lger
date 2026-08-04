@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Svingende streng</title>
+<title>Knipset streng</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700&family=Share+Tech+Mono&family=Exo+2:wght@400;600;700&display=swap" rel="stylesheet">
@@ -17,13 +17,13 @@
   --green:  #00ff9f;
   --cyan:   #00cfff;
   --yellow: #ffd93d;
+  --pink:   #ff5c8a;
   --text: #d0eef5;
   --dim:  #8ec8d8;
   --mono: 'Courier New', 'Lucida Console', monospace;
   --ui: 'Share Tech Mono', monospace;
   --body: 'Exo 2', sans-serif;
   --tr: 0.15s ease;
-  --n1:#00ff9f; --n2:#00cfff; --n3:#ffd93d; --n4:#ff8a5c; --n5:#c77dff; --n6:#ff5c8a;
 }
 [data-theme="light"] {
   --bg0: #e8e0d2;
@@ -34,9 +34,9 @@
   --green:  #1D9E75;
   --cyan:   #378ADD;
   --yellow: #c07800;
+  --pink:   #c0306a;
   --text: #1a1a1a;
   --dim:  #333333;
-  --n1:#1D9E75; --n2:#378ADD; --n3:#9c5e00; --n4:#c2410c; --n5:#7a2da8; --n6:#c0306a;
 }
 
 * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -52,102 +52,61 @@ body {
 }
 
 .wrap {
-  max-width: 1600px;
-  width: 100%;
-  margin: 0 auto;
-  flex: 1 1 0;
-  display: flex;
-  flex-direction: column;
-  min-height: 0;
+  max-width: 1600px; width: 100%; margin: 0 auto;
+  flex: 1 1 0; display: flex; flex-direction: column; min-height: 0;
 }
 
-/* ---------- Kompakt topbjælke ---------- */
 header {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-  border: 1px solid var(--border);
-  background: var(--bg1);
-  padding: 6px 12px;
-  margin-bottom: 8px;
-  flex: 0 0 auto;
+  display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between;
+  gap: 8px; border: 1px solid var(--border); background: var(--bg1);
+  padding: 6px 12px; margin-bottom: 8px; flex: 0 0 auto;
 }
 [data-theme="light"] header { background: #fdfaf4; }
 .title-group { display: flex; align-items: center; gap: 10px; }
 h1 {
-  font-family: 'Orbitron', sans-serif;
-  font-weight: 700;
-  font-size: 16px;
-  letter-spacing: .16em;
-  color: var(--green);
-  text-transform: uppercase;
+  font-family: 'Orbitron', sans-serif; font-weight: 700; font-size: 16px;
+  letter-spacing: .16em; color: var(--green); text-transform: uppercase;
 }
 html:not([data-theme="light"]) h1 { text-shadow: 0 0 10px rgba(0,255,159,.4); }
 
-/* Streng-ikon med svingende bevægelse */
-.icon-str { width: 26px; height: 26px; display: block; }
-.icon-str .peg { fill: var(--green); }
-.icon-str .wv { stroke: var(--green); fill: none; transform-origin: 13px 13px; animation: strOsc 1.5s ease-in-out infinite; }
-@keyframes strOsc { 0%,100% { transform: scaleY(1); } 50% { transform: scaleY(-1); } }
-html:not([data-theme="light"]) .icon-str { filter: drop-shadow(0 0 4px rgba(0,255,159,.6)); }
+.icon-pl { width: 26px; height: 26px; display: block; }
+.icon-pl .peg { fill: var(--green); }
+.icon-pl .tri { stroke: var(--green); fill: none; transform-origin: 13px 13px; animation: plOsc 1.5s ease-in-out infinite; }
+@keyframes plOsc { 0%,100% { transform: scaleY(1); } 50% { transform: scaleY(-0.45); } }
+html:not([data-theme="light"]) .icon-pl { filter: drop-shadow(0 0 4px rgba(0,255,159,.6)); }
 
 .hdr-btns { display: flex; gap: 7px; flex-wrap: wrap; }
 .btn-hdr {
-  font-family: var(--ui);
-  font-size: 12px;
-  letter-spacing: .08em;
-  border: 1px solid var(--border);
-  background: var(--bg3);
-  color: var(--text);
-  padding: 6px 13px;
-  cursor: pointer;
-  text-transform: uppercase;
-  transition: var(--tr);
-  user-select: none;
+  font-family: var(--ui); font-size: 12px; letter-spacing: .08em;
+  border: 1px solid var(--border); background: var(--bg3); color: var(--text);
+  padding: 6px 13px; cursor: pointer; text-transform: uppercase;
+  transition: var(--tr); user-select: none;
 }
 .btn-hdr:hover { border-color: var(--green); color: var(--green); }
 html:not([data-theme="light"]) .btn-hdr:hover { box-shadow: 0 0 10px rgba(0,255,159,.35); }
 [data-theme="light"] .btn-hdr { font-weight: 700; }
 
-/* ---------- Hovedlayout ---------- */
 .main-grid {
-  display: grid;
-  grid-template-columns: 268px 1fr;
-  gap: 8px;
-  flex: 1 1 0;
-  min-height: 0;
+  display: grid; grid-template-columns: 268px 1fr; gap: 8px;
+  flex: 1 1 0; min-height: 0;
 }
-
-/* Sikkerhedsventil: bliver vinduet meget lavt, scroller kun kolonnen —
-   selve siden forbliver uden scroll. */
 .sidebar { display: flex; flex-direction: column; gap: 8px; min-height: 0; overflow-y: auto; }
 .content-col { display: flex; flex-direction: column; gap: 8px; min-height: 0; overflow-y: auto; }
 
-.panel {
-  background: var(--bg1);
-  border: 1px solid var(--border);
-  padding: 8px 11px;
-  flex: 0 0 auto;
-}
+.panel { background: var(--bg1); border: 1px solid var(--border); padding: 8px 11px; flex: 0 0 auto; }
 [data-theme="light"] .panel { background: #fdfaf4; }
 .panel.grow { flex: 1 1 0; min-height: 0; display: flex; flex-direction: column; }
 
-.canvas-holder { flex: 1 1 0; min-height: 190px; position: relative; background: var(--bg2); border: 1px solid var(--border); }
+.canvas-holder { flex: 1 1 0; min-height: 180px; position: relative; background: var(--bg2); border: 1px solid var(--border); }
 [data-theme="light"] .canvas-holder { background: #fdfaf4; }
-canvas#scene { display: block; width: 100%; height: 100%; cursor: crosshair; }
+canvas { display: block; width: 100%; height: 100%; }
+.spec-holder { height: 172px; flex: 0 0 auto; position: relative; background: var(--bg2); border: 1px solid var(--border); }
+[data-theme="light"] .spec-holder { background: #fdfaf4; }
 
 .sec-title {
-  font-family: var(--ui);
-  font-size: 11px;
-  letter-spacing: .22em;
-  color: var(--green);
-  text-transform: uppercase;
-  border-bottom: 1px solid var(--border);
-  padding-bottom: 4px;
-  margin-bottom: 8px;
-  flex: 0 0 auto;
+  font-family: var(--ui); font-size: 11px; letter-spacing: .22em; color: var(--green);
+  text-transform: uppercase; border-bottom: 1px solid var(--border);
+  padding-bottom: 4px; margin-bottom: 8px; flex: 0 0 auto;
 }
 [data-theme="light"] .sec-title { font-weight: 700; }
 .sym { text-transform: none; }
@@ -248,76 +207,42 @@ canvas#scene { display: block; width: 100%; height: 100%; cursor: crosshair; }
 }
 
 /* ---------- Slidere ---------- */
-.ctl-row { margin-bottom: 8px; }
+.ctl-row { margin-bottom: 10px; }
 .ctl-row:last-child { margin-bottom: 0; }
 .ctl-label {
-  font-family: var(--ui);
-  font-size: 12px;
-  letter-spacing: .08em;
-  color: var(--text);
-  text-transform: uppercase;
-  display: flex;
-  justify-content: space-between;
-  align-items: baseline;
-  gap: 8px;
-  margin-bottom: 4px;
+  font-family: var(--ui); font-size: 12px; letter-spacing: .08em; color: var(--text);
+  text-transform: uppercase; display: flex; justify-content: space-between;
+  align-items: baseline; gap: 8px; margin-bottom: 4px;
 }
 [data-theme="light"] .ctl-label { font-weight: 700; }
 .ctl-label .val {
-  font-family: var(--mono);
-  font-weight: 700;
-  color: var(--cyan);
-  text-transform: none;
-  white-space: nowrap;
+  font-family: var(--mono); font-weight: 700; color: var(--cyan);
+  text-transform: none; white-space: nowrap;
 }
-
 input[type="range"] {
-  width: 100%;
-  -webkit-appearance: none;
-  appearance: none;
-  height: 6px;
-  background: var(--bg3);
-  border: 1px solid var(--border);
-  outline: none;
-  cursor: pointer;
+  width: 100%; -webkit-appearance: none; appearance: none; height: 6px;
+  background: var(--bg3); border: 1px solid var(--border); outline: none; cursor: pointer;
 }
 input[type="range"]::-webkit-slider-thumb {
-  -webkit-appearance: none; appearance: none;
-  width: 18px; height: 18px;
-  background: var(--green);
-  border: 2px solid var(--bg0);
-  border-radius: 50%;
-  cursor: pointer;
+  -webkit-appearance: none; appearance: none; width: 18px; height: 18px;
+  background: var(--green); border: 2px solid var(--bg0); border-radius: 50%; cursor: pointer;
 }
 input[type="range"]::-moz-range-thumb {
-  width: 16px; height: 16px;
-  background: var(--green);
-  border: 2px solid var(--bg0);
-  border-radius: 50%;
-  cursor: pointer;
+  width: 16px; height: 16px; background: var(--green);
+  border: 2px solid var(--bg0); border-radius: 50%; cursor: pointer;
 }
 .slider-ends {
-  display: flex; justify-content: space-between;
-  font-family: var(--mono); font-size: 10px; font-weight: 700;
-  color: var(--dim); margin-top: 2px;
+  display: flex; justify-content: space-between; font-family: var(--mono);
+  font-size: 10px; font-weight: 700; color: var(--dim); margin-top: 2px;
 }
-.ctl-row.off { opacity: .35; pointer-events: none; }
 
 /* ---------- Knapper ---------- */
-.btn-row { display: flex; gap: 7px; flex-wrap: wrap; margin-top: 8px; }
-.btn-row + .btn-row { margin-top: 7px; }
+.btn-row { display: flex; gap: 7px; flex-wrap: wrap; margin-top: 10px; }
 .btn {
-  font-family: var(--ui);
-  font-size: 12px;
-  letter-spacing: .1em;
-  border: 1px solid var(--green);
-  background: var(--bg3);
-  color: var(--green);
-  padding: 6px 12px;
-  cursor: pointer;
-  text-transform: uppercase;
-  transition: var(--tr);
-  user-select: none;
+  font-family: var(--ui); font-size: 12px; letter-spacing: .1em;
+  border: 1px solid var(--green); background: var(--bg3); color: var(--green);
+  padding: 6px 12px; cursor: pointer; text-transform: uppercase;
+  transition: var(--tr); user-select: none;
 }
 [data-theme="light"] .btn { font-weight: 700; }
 .btn:hover { background: rgba(0,255,159,.09); }
@@ -327,19 +252,15 @@ html:not([data-theme="light"]) .btn:hover { box-shadow: 0 0 10px rgba(0,255,159,
 .btn.sec:hover { background: rgba(0,207,255,.09); }
 [data-theme="light"] .btn.sec:hover { background: rgba(55,138,221,.10); }
 
-/* ---------- Kontakter ---------- */
 .sw-row {
-  display: flex; align-items: center; gap: 9px;
-  font-family: var(--ui); font-size: 12px; letter-spacing: .08em;
-  text-transform: uppercase; margin-bottom: 8px; cursor: pointer; user-select: none;
+  display: flex; align-items: center; gap: 9px; font-family: var(--ui);
+  font-size: 12px; letter-spacing: .08em; text-transform: uppercase;
+  margin-bottom: 8px; cursor: pointer; user-select: none;
 }
 [data-theme="light"] .sw-row { font-weight: 700; }
 .sw { position: relative; width: 34px; height: 18px; flex-shrink: 0; }
 .sw input { opacity: 0; width: 0; height: 0; }
-.sw i {
-  position: absolute; inset: 0; background: var(--bg3);
-  border: 1px solid var(--border); transition: var(--tr);
-}
+.sw i { position: absolute; inset: 0; background: var(--bg3); border: 1px solid var(--border); transition: var(--tr); }
 .sw i:before {
   content: ''; position: absolute; width: 12px; height: 12px;
   left: 2px; top: 2px; background: var(--dim); transition: var(--tr);
@@ -352,72 +273,42 @@ html:not([data-theme="light"]) .btn:hover { box-shadow: 0 0 10px rgba(0,255,159,
 .ro { background: var(--bg2); border: 1px solid var(--border); padding: 5px 9px; }
 [data-theme="light"] .ro { background: #ffffff; }
 .ro.wide { grid-column: 1 / -1; }
-.ro .k {
-  font-family: var(--ui); font-size: 11px; letter-spacing: .06em;
-  color: var(--text); display: block; margin-bottom: 1px;
-}
+.ro .k { font-family: var(--ui); font-size: 11px; letter-spacing: .06em; color: var(--text); display: block; margin-bottom: 1px; }
 [data-theme="light"] .ro .k { font-weight: 700; }
 .ro .v { font-family: var(--mono); font-size: 15px; font-weight: 700; color: var(--cyan); display: block; }
 .ro .v.grn { color: var(--green); }
 .ro .v.yel { color: var(--yellow); }
+.ro .v.sm { font-size: 13px; }
 
-/* ---------- Partialtone-mixer ---------- */
-.mixer { display: grid; grid-template-columns: repeat(6, 1fr); gap: 8px; }
-.mx-col { display: flex; flex-direction: column; align-items: center; gap: 3px; }
-.mx-n { font-family: var(--ui); font-size: 13px; font-weight: 700; letter-spacing: .04em; }
-.mx-f { font-family: var(--mono); font-size: 10.5px; font-weight: 700; color: var(--dim); }
-input.mx-a {
+/* ---------- Koefficient-felter ---------- */
+.coef-grid { display: grid; grid-template-columns: repeat(16, minmax(0, 1fr)); gap: 5px; }
+@media (max-width: 1320px) { .coef-grid { grid-template-columns: repeat(8, minmax(0, 1fr)); } }
+.cf { display: flex; flex-direction: column; align-items: center; gap: 2px; }
+.cf-n { font-family: var(--ui); font-size: 11px; font-weight: 700; letter-spacing: .04em; color: var(--dim); }
+.cf.on .cf-n { color: var(--green); }
+.cf.dim { opacity: .32; }
+input.cf-v {
   font-family: var(--mono); font-size: 12px; font-weight: 700;
   color: var(--cyan); background: var(--bg2); border: 1px solid var(--border);
-  width: 56px; height: 22px; text-align: center; padding: 0 2px;
+  width: 100%; height: 23px; text-align: center; padding: 0 1px;
   -moz-appearance: textfield; appearance: textfield;
 }
-input.mx-a::-webkit-outer-spin-button,
-input.mx-a::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
-input.mx-a:focus { outline: none; border-color: var(--green); color: var(--green); }
-[data-theme="light"] input.mx-a { background: #ffffff; }
-.vwrap { height: 62px; display: flex; align-items: center; justify-content: center; }
-input[type="range"].vert {
-  writing-mode: vertical-lr; direction: rtl;
-  -webkit-appearance: slider-vertical; appearance: slider-vertical;
-  width: 22px; height: 62px; background: transparent; border: none;
-}
-input[type="range"].vert::-webkit-slider-runnable-track {
-  width: 5px; background: var(--bg3); border: 1px solid var(--border);
-}
-input[type="range"].vert::-moz-range-track {
-  width: 5px; background: var(--bg3); border: 1px solid var(--border);
-}
-.c1 input.vert::-webkit-slider-thumb { background: var(--n1); } .c1 input.vert::-moz-range-thumb { background: var(--n1); } .c1 .mx-n { color: var(--n1); }
-.c2 input.vert::-webkit-slider-thumb { background: var(--n2); } .c2 input.vert::-moz-range-thumb { background: var(--n2); } .c2 .mx-n { color: var(--n2); }
-.c3 input.vert::-webkit-slider-thumb { background: var(--n3); } .c3 input.vert::-moz-range-thumb { background: var(--n3); } .c3 .mx-n { color: var(--n3); }
-.c4 input.vert::-webkit-slider-thumb { background: var(--n4); } .c4 input.vert::-moz-range-thumb { background: var(--n4); } .c4 .mx-n { color: var(--n4); }
-.c5 input.vert::-webkit-slider-thumb { background: var(--n5); } .c5 input.vert::-moz-range-thumb { background: var(--n5); } .c5 .mx-n { color: var(--n5); }
-.c6 input.vert::-webkit-slider-thumb { background: var(--n6); } .c6 input.vert::-moz-range-thumb { background: var(--n6); } .c6 .mx-n { color: var(--n6); }
-
-.preset-row { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
-.btn-sm {
-  font-family: var(--ui); font-size: 11.5px; letter-spacing: .06em;
-  border: 1px solid var(--border); background: var(--bg3); color: var(--text);
-  padding: 5px 10px; cursor: pointer; text-transform: uppercase;
-  transition: var(--tr); user-select: none;
-}
-.btn-sm:hover { border-color: var(--green); color: var(--green); }
-.btn-sm.reset { margin-left: 14px; border-color: var(--cyan); color: var(--cyan); }
-.btn-sm.reset:hover { background: rgba(0,207,255,.09); }
-[data-theme="light"] .btn-sm { font-weight: 700; }
+input.cf-v::-webkit-outer-spin-button,
+input.cf-v::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+input.cf-v:focus { outline: none; border-color: var(--green); color: var(--green); }
+[data-theme="light"] input.cf-v { background: #ffffff; }
+.cf-hint { font-family: var(--ui); font-size: 11px; letter-spacing: .06em; color: var(--dim); margin-top: 6px; }
+[data-theme="light"] .cf-hint { font-weight: 700; }
 
 /* ---------- Modaler ---------- */
 .modal-bg {
-  display: none; position: fixed; inset: 0;
-  background: rgba(0,0,0,.65); z-index: 50;
-  align-items: center; justify-content: center; padding: 20px;
+  display: none; position: fixed; inset: 0; background: rgba(0,0,0,.65);
+  z-index: 50; align-items: center; justify-content: center; padding: 20px;
 }
 .modal-bg.open { display: flex; }
 .modal {
   background: var(--bg1); border: 1px solid var(--green);
-  max-width: 720px; width: 100%; max-height: 84vh;
-  overflow-y: auto; padding: 20px 24px;
+  max-width: 720px; width: 100%; max-height: 84vh; overflow-y: auto; padding: 20px 24px;
 }
 [data-theme="light"] .modal { background: #fdfaf4; border-color: #1D9E75; }
 .modal h2 {
@@ -431,20 +322,25 @@ input[type="range"].vert::-moz-range-track {
 .modal .acc-y { color: var(--yellow); font-weight: 600; }
 [data-theme="light"] .modal .acc-y { color: #c07800; }
 .modal-close-row { text-align: right; margin-top: 12px; }
+table.tbl { border-collapse: collapse; margin: 4px 0 12px; font-size: 14px; }
+table.tbl th, table.tbl td {
+  border: 1px solid var(--border); padding: 4px 12px; text-align: center;
+  font-family: var(--mono); font-weight: 700;
+}
+table.tbl th { color: var(--green); }
 
 .toast {
   position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
   background: var(--bg3); border: 1px solid var(--green); color: var(--green);
   font-family: var(--ui); font-size: 13px; letter-spacing: .08em;
-  padding: 10px 22px; opacity: 0; pointer-events: none;
-  transition: opacity .3s; z-index: 99;
+  padding: 10px 22px; opacity: 0; pointer-events: none; transition: opacity .3s; z-index: 99;
 }
 .toast.show { opacity: 1; }
 
 @media (max-width: 980px) {
   html, body { overflow: auto; height: auto; }
   .main-grid { grid-template-columns: 1fr; }
-  .canvas-holder { height: 46vw; min-height: 220px; }
+  .canvas-holder { height: 44vw; min-height: 200px; }
   .panel.grow { flex: 0 0 auto; }
 }
 </style>
@@ -454,12 +350,12 @@ input[type="range"].vert::-moz-range-track {
 
   <header>
     <div class="title-group">
-      <svg class="icon-str" viewBox="0 0 26 26" aria-hidden="true">
+      <svg class="icon-pl" viewBox="0 0 26 26" aria-hidden="true">
         <rect class="peg" x="2" y="5" width="3" height="16"/>
         <rect class="peg" x="21" y="5" width="3" height="16"/>
-        <path class="wv" d="M5 13 Q 13 2 21 13" stroke-width="2" stroke-linecap="round"/>
+        <path class="tri" d="M5 13 L 15 4 L 21 13" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
       </svg>
-      <h1>Svingende streng</h1>
+      <h1>Knipset streng</h1>
     </div>
     <div class="hdr-btns">
       <button class="btn-hdr" id="btnForklaring">Forklaring</button>
@@ -473,24 +369,24 @@ input[type="range"].vert::-moz-range-track {
 
     <div class="sidebar">
       <div class="panel">
-        <div class="sec-title">Kontrol</div>
+        <div class="sec-title">Knipset</div>
 
         <div class="ctl-row">
           <div class="ctl-label">
-            <span>B&oslash;lgefart <span class="sym">v</span></span>
-            <span class="val" id="vVal">240 m/s</span>
+            <span>Knipsepunkt <span class="sym">p</span></span>
+            <span class="val" id="pVal">50 cm</span>
           </div>
-          <input type="range" id="vSlider" min="20" max="400" step="2" value="240">
-          <div class="slider-ends"><span>20 m/s</span><span>400 m/s</span></div>
+          <input type="range" id="pSlider" min="0.02" max="0.98" step="0.001" value="0.5">
+          <div class="slider-ends"><span>ved broen</span><span>ved sadlen</span></div>
         </div>
 
         <div class="ctl-row">
           <div class="ctl-label">
-            <span>Strengl&aelig;ngde <span class="sym">L</span></span>
-            <span class="val" id="lVal">1,00 m</span>
+            <span>Antal led <span class="sym">N</span></span>
+            <span class="val" id="nVal">16</span>
           </div>
-          <input type="range" id="lSlider" min="0.50" max="1.00" step="0.01" value="1.00">
-          <div class="slider-ends"><span>0,50 m</span><span>1,00 m</span></div>
+          <input type="range" id="nSlider" min="1" max="16" step="1" value="16">
+          <div class="slider-ends"><span>1</span><span>16</span></div>
         </div>
 
         <div class="ctl-row">
@@ -502,57 +398,47 @@ input[type="range"].vert::-moz-range-track {
           <div class="slider-ends"><span>&times;50</span><span>&times;1000</span></div>
         </div>
 
-        <div class="sw-row" style="margin-top:10px;">
-          <label class="sw"><input type="checkbox" id="dampChk"><i></i></label>
-          <span>D&aelig;mpning</span>
+        <div class="sw-row" style="margin-top:12px;">
+          <label class="sw"><input type="checkbox" id="exactChk" checked><i></i></label>
+          <span>Vis eksakt form</span>
         </div>
-        <div class="ctl-row off" id="dampRow">
-          <div class="ctl-label">
-            <span>D&aelig;mpning <span class="sym">&gamma;</span></span>
-            <span class="val" id="gVal">5,0 /s</span>
-          </div>
-          <input type="range" id="gSlider" min="0.5" max="50" step="0.5" value="5">
-          <div class="slider-ends"><span>0,5 /s</span><span>50 /s</span></div>
-        </div>
-
-        <div class="sw-row" style="margin-top:10px; margin-bottom:0;">
-          <label class="sw"><input type="checkbox" id="partChk" checked><i></i></label>
-          <span>Vis partialtoner</span>
+        <div class="sw-row" style="margin-bottom:0;">
+          <label class="sw"><input type="checkbox" id="partChk"><i></i></label>
+          <span>Vis de enkelte led</span>
         </div>
 
         <div class="btn-row">
+          <button class="btn" id="btnKnips">Knips</button>
           <button class="btn" id="btnPause">Pause</button>
-          <button class="btn sec" id="btnLyd">Lyd til</button>
+          <button class="btn sec" id="btnNulstil">Nulstil</button>
         </div>
       </div>
 
       <div class="panel">
         <div class="sec-title">Afl&aelig;sninger</div>
         <div class="readouts">
-          <div class="ro"><span class="k">Grundfrekvens <span class="sym">f&#8321;</span></span><span class="v grn" id="roF1">&ndash;</span></div>
-          <div class="ro"><span class="k">B&oslash;lgel&aelig;ngde <span class="sym">&lambda;&#8321;</span></span><span class="v" id="roLam">&ndash;</span></div>
-          <div class="ro"><span class="k">Periode <span class="sym">T&#8321;</span></span><span class="v" id="roT1">&ndash;</span></div>
-          <div class="ro"><span class="k">Aktive toner</span><span class="v" id="roAct">&ndash;</span></div>
-          <div class="ro wide"><span class="k">Dybeste aktive tone</span><span class="v" id="roTone">&ndash;</span></div>
-          <div class="ro wide"><span class="k">M&aring;ling p&aring; strengen <span class="sym">&Delta;x</span></span><span class="v yel" id="roDx">Klik to steder p&aring; strengen</span></div>
+          <div class="ro"><span class="k">Knipsepunkt <span class="sym">p/L</span></span><span class="v grn" id="roPL">&ndash;</span></div>
+          <div class="ro"><span class="k">Grundfrekvens <span class="sym">f&#8321;</span></span><span class="v" id="roF1">&ndash;</span></div>
+          <div class="ro wide"><span class="k">Partialtoner der mangler</span><span class="v yel" id="roMiss">&ndash;</span></div>
+          <div class="ro wide"><span class="k">Fast streng</span><span class="v sm" id="roStr">&ndash;</span></div>
         </div>
       </div>
     </div>
 
     <div class="content-col">
       <div class="panel grow">
-        <div class="canvas-holder">
-          <canvas id="scene"></canvas>
-        </div>
+        <div class="canvas-holder"><canvas id="scene"></canvas></div>
       </div>
 
       <div class="panel">
-        <div class="sec-title">Partialtoner &mdash; amplitude <span class="sym">A<sub>n</sub></span></div>
-        <div class="mixer" id="mixer"></div>
+        <div class="sec-title">Frekvensspektrum &mdash; Fourierkoefficienter <span class="sym">A<sub>n</sub></span></div>
+        <div class="spec-holder"><canvas id="spec"></canvas></div>
       </div>
 
       <div class="panel">
-        <div class="preset-row" id="presetRow"></div>
+        <div class="sec-title">Koefficienter <span class="sym">A<sub>n</sub></span> &mdash; kan skrives direkte ind</div>
+        <div class="coef-grid" id="coefGrid"></div>
+        <div class="cf-hint" id="cfHint">Beregnet ud fra knipsepunktet. Skriv i et felt for at g&aring; over til manuel tilstand.</div>
       </div>
     </div>
 
@@ -564,25 +450,37 @@ input[type="range"].vert::-moz-range-track {
 <div class="modal-bg" id="modalForklaring">
   <div class="modal">
     <h2>Forklaring</h2>
-    <p>Strengen er <span class="acc">fastgjort i begge ender</span> som på en guitar. Sender man en bølge af sted langs den, rammer den den faste ende, kan ikke komme videre og bliver kastet tilbage — vendt på hovedet. Den udsendte og den reflekterede bølge løber nu mod hinanden og lægges sammen. Ved de fleste frekvenser bliver det bare rod, men rammer man præcis den rigtige, forstærker de hinanden de samme steder hver gang. Så holder mønstret op med at flytte sig sidelæns og står bare og svinger op og ned. Det er en <span class="acc">stående bølge</span>.</p>
+    <p>Når man knipser en streng, trækker man den til side i ét punkt og slipper. Lige i det øjeblik, man slipper, har strengen form som en <span class="acc">trekant</span>: to rette linjer, der mødes i en spids netop dér, hvor fingeren var. Det er strengens <em>begyndelsesform</em>, og den ser jo ikke ud som en pæn bølge overhovedet.</p>
 
-    <p>Punkterne med det største udsving kaldes <span class="acc">buge</span>, og dem, hvor strengen står helt stille, kaldes <span class="acc">knuder</span>. Enderne kan ikke bevæge sig, så der er altid en knude i hver ende. Mellem to nabo­knuder er der en halv bølgelængde:</p>
-    <span class="eqd" data-tex="|KK| = \frac{\lambda}{2}"></span>
+    <p>Alligevel kan man beskrive den med de stående bølger, vi kender. Strengen har nemlig kun ét sæt svingninger, den overhovedet kan udføre — partialtonerne med <span class="eq" data-tex="\lambda_n = 2L/n"></span>. Det viser sig, at man kan ramme <em>enhver</em> begyndelsesform ved at lægge disse partialtoner sammen med passende styrker. Styrkerne kaldes <span class="acc">Fourierkoefficienter</span> og skrives <span class="eq" data-tex="A_n"></span>. Det er dem, søjlediagrammet viser.</p>
 
-    <p>Vælg en partialtone og tæl <span class="acc">bugene</span>. Tallet kaldes <span class="eq" data-tex="n"></span> og er samtidig tonenummeret. Da hver bug fylder en halv bølgelængde, er der <span class="eq" data-tex="n"></span> halve bølgelængder på strengen — og med bølgeformlen <span class="eq" data-tex="v = \lambda\cdot f"></span> giver det frekvenserne:</p>
-    <span class="eqd" data-tex="L = n\cdot\frac{\lambda_n}{2} \quad\Leftrightarrow\quad \lambda_n = \frac{2\cdot L}{n} \quad\quad f_n = \frac{v}{2\cdot L}\cdot n"></span>
+    <p>Nogle af koefficienterne er <span class="acc-y">negative</span>. Det betyder ikke et mindre udsving, men at den pågældende partialtone vender omvendt: dens bug peger nedad, mens de andres peger opad. Uden fortegn kunne man aldrig få de bløde sinuskurver til at danne en spids trekant.</p>
 
-    <p>Disse frekvenser kaldes <span class="acc">resonansfrekvenser</span>. De er 1, 2, 3, 4 … gange grundtonens — aflæs selv rækken over skyderne. Det er forklaringen på, at en streng lyder som en <em>tone</em>: alle de frekvenser, den kan lave, passer sammen i simple talforhold. I musiklære kaldes alt over grundtonen for <span class="acc">overtoner</span>, så 1. overtone er det samme som 2. partialtone.</p>
+    <p>Knipser man i punktet <span class="eq" data-tex="p"></span> med udsvinget <span class="eq" data-tex="h"></span>, kan koefficienterne beregnes:</p>
+    <span class="eqd" data-tex="A_n = \frac{2hL^2}{\pi^2 p(L-p)}\cdot\frac{1}{n^2}\cdot\sin\left(\frac{n\pi p}{L}\right)"></span>
+    <p>Formlen skal man ikke kunne udlede, men to ting i den er værd at lægge mærke til.</p>
 
-    <p>Strengen kan svinge i flere partialtoner på én gang. De svage farvede kurver er de enkelte partialtoner, og den kraftige kurve er strengen selv: i hvert punkt er udsvinget de farvede kurvers udsving <span class="acc">lagt sammen</span>. Styrkeforholdet mellem dem er det, vi hører som <span class="acc">klangfarve</span> — grundtonen afgør, hvilken tone det er, overtonerne om den lyder blød eller skarp.</p>
+    <p><strong>1. Faktoren <span class="eq" data-tex="1/n^2"></span>.</strong> De høje partialtoner er meget svagere end de lave. 3. partialtone har kun <span class="eq" data-tex="1/9"></span> af grundtonens styrke, 5. partialtone <span class="eq" data-tex="1/25"></span>. Det er derfor, søjlerne i spektret falder så hurtigt, og derfor at nogle få led allerede giver en form, der ligner trekanten ganske godt.</p>
 
-    <p>En <span class="acc-y">negativ amplitude</span> betyder ikke et mindre udsving, men at partialtonen vender omvendt: bugen peger nedad. Det er nødvendigt for at kunne sammensætte former, der ikke er pæne bølger — prøv forvalget <span class="acc">Knips i midten</span>, som er de amplituder, en streng har lige efter et knips midt på.</p>
+    <p><strong>2. Faktoren <span class="eq" data-tex="\sin(n\pi p/L)"></span>.</strong> Den er nul, netop når knipsepunktet ligger i en <span class="acc">knude</span> for den <span class="eq" data-tex="n"></span>'te partialtone. Og det er der en meget håndgribelig grund til: <em>man kan ikke sætte gang i en svingning ved at trække i et punkt, hvor den svingning står stille.</em> Knipser man midt på strengen, ligger man i knuden for alle de lige partialtoner, og de udebliver fuldstændig — se selv søjlerne forsvinde. Knipser man ved <span class="eq" data-tex="L/5"></span>, forsvinder 5., 10. og 15. partialtone.</p>
 
-    <p><span class="acc-y">Bølgefarten</span> <span class="eq" data-tex="v"></span> afhænger ikke af tonen, men af strengen: hvor stramt den er spændt, og dens masse pr. længde. Derfor kan en guitars seks strenge have samme længde og alligevel klinge vidt forskelligt — de er forskelligt tykke. <span class="eq" data-tex="L"></span>-skyderen svarer til at trykke en finger ned på gribebrættet. Ingen af delene ændrer forholdet 1 : 2 : 3 : 4 mellem partialtonerne.</p>
+    <p>Ved et knips præcis på midten bliver forholdet mellem de tilbageværende styrker særlig pænt:</p>
+    <table class="tbl">
+      <tr><th>n</th><td>1</td><td>2</td><td>3</td><td>4</td><td>5</td><td>6</td><td>7</td></tr>
+      <tr><th>A<sub>n</sub></th><td>1</td><td>0</td><td>&minus;1/9</td><td>0</td><td>1/25</td><td>0</td><td>&minus;1/49</td></tr>
+    </table>
 
-    <p><em>Sådan bruges den:</em> Vælg en partialtone under strengen — det slår an. <span class="acc">Dæmpning</span> lader tonen dø ud som efter et rigtigt anslag; vælg partialtonen igen for at slå an på ny. <span class="acc">Nulstil</span> stiller alt tilbage og lægger strengen i hvile.</p>
+    <p>Læg mærke til, at hverken <span class="eq" data-tex="L"></span> eller bølgefarten optræder i det, koefficienterne ender med at blive: forkorter man brøken, står der kun <span class="eq" data-tex="p/L"></span> tilbage. <span class="acc">Hvor stor en brøkdel af strengen man knipser henne ad, er det eneste, der bestemmer styrkeforholdet</span> — ikke hvor lang strengen er, og ikke hvor stramt den er spændt. Derfor er strengen her fastholdt til 1,00 m og 160 m/s, så grundtonen er 80 Hz og partialtonerne ligger på 80, 160, 240 Hz og så videre. Da strengen er præcis 1,00 m, kan knipsepunktet aflæses direkte: 20 cm <em>er</em> <span class="eq" data-tex="L/5"></span>.</p>
 
-    <p><em>Om modellen:</em> Bevægelsen vises i kraftig slowmotion — en streng med grundtonen 300 Hz svinger 300 gange i sekundet. Udsvinget er stærkt overdrevet; en rigtig guitarstreng bevæger sig brøkdele af en millimeter. I modellen dæmpes alle partialtoner lige hurtigt, hvor de høje overtoner på en rigtig streng dør først. Lyden er ægte: én ren tone pr. partialtone med præcis den frekvens, der står over skyderen — der transponeres ikke. Vær opmærksom på, at indbyggede højttalere begynder at forvrænge under omkring 120 Hz: i stedet for den dybe tone hører man en af dens overtoner. Aflæsningen <span class="acc">Dybeste aktive tone</span> advarer, når man er nede i det område.</p>
+    <p><span class="acc">Antal led</span>-skyderen bestemmer, hvor mange partialtoner der tages med i summen. Med ét led er der kun en enkelt sinuskurve; jo flere led, jo skarpere bliver spidsen. Slå <span class="acc">Vis eksakt form</span> til for at sammenligne med den rigtige løsning: forskellen mellem de to kurver er præcis det, de manglende led ville have bidraget med. Læg mærke til, at det er ved <em>knækket</em>, summen har sværest ved at følge med — den bølger lidt omkring hjørnet i stedet for at ramme det skarpt.</p>
+
+    <p>Sætter man strengen fri, svinger hver partialtone videre med sin egen frekvens <span class="eq" data-tex="f_n = n\cdot f_1"></span>. Fordi frekvenserne er heltalsmultipla, falder hele mønstret tilbage i trekantformen én gang pr. periode <span class="eq" data-tex="T_1"></span> — bevægelsen gentager sig. Det, man ser, er et knæk, der løber frem og tilbage langs strengen og vender på hovedet, hver gang det rammer en ende.</p>
+
+    <p>Det hele har en meget hørbar konsekvens: <span class="acc">hvor man knipser, bestemmer klangen</span>. Knipser man midt på, mangler alle de lige partialtoner, og tonen bliver blød og hul. Knipser man tæt ved broen, er ingen af de lave partialtoner i nærheden af en knude, og alle kommer med i fuld styrke — tonen bliver skarp og nasal. Det er præcis den forskel, en guitarist bruger, når hen flytter hånden hen over strengene.</p>
+
+    <p><em>Knapperne:</em> <span class="acc">Nulstil</span> stiller alt tilbage og lægger strengen stille. <span class="acc">Knips</span> trækker den ud i trekanten og slipper. <span class="acc">Pause</span> fryser billedet, så formen kan studeres i ro.</p>
+
+    <p><em>Om modellen:</em> Beregningen er den eksakte løsning for en ideel streng uden dæmpning: strengen svinger videre for evigt, og alle partialtoner dør lige langsomt. På en rigtig streng dæmpes de høje overtoner hurtigst, så klangen bliver blødere, mens tonen klinger ud. Bevægelsen vises i kraftig slowmotion, og udsvinget er stærkt overdrevet — en rigtig streng knipses brøkdele af en millimeter ud.</p>
     <div class="modal-close-row"><button class="btn" data-close="modalForklaring">Luk</button></div>
   </div>
 </div>
@@ -591,46 +489,21 @@ input[type="range"].vert::-moz-range-track {
   <div class="modal">
     <h2>Opgaver</h2>
     <ol>
-      <li>Vælg <span class="acc">Grundtone</span>. Der er nu kun 1. partialtone. Tæl buge og knuder.
-        <ul>
-          <li>Mål afstanden mellem de to knuder, og brug <span class="eq" data-tex="|KK| = \lambda/2"></span> til at finde <span class="eq" data-tex="\lambda_1"></span>. Passer det med <span class="eq" data-tex="\lambda_1 = 2\cdot L"></span>?</li>
-          <li>Kontrollér med bølgeformlen, at <span class="eq" data-tex="v = \lambda_1\cdot f_1"></span> giver den indstillede bølgefart.</li>
-        </ul>
-      </li>
+      <li>Sæt <span class="acc">Antal led</span> til 1. Hvilken form har strengen nu? Skru langsomt op til 16, og beskriv, hvordan kurven nærmer sig trekanten. Hvor på strengen er den sidst til at passe — og hvorfor netop dér?</li>
 
-      <li>Skift til 2. og derefter 3. partialtone.
-        <ul>
-          <li>Hvor mange buge og knuder er der hver gang? Mål <span class="eq" data-tex="|KK|"></span> mellem to naboknuder, og find <span class="eq" data-tex="\lambda_2"></span> og <span class="eq" data-tex="\lambda_3"></span>.</li>
-          <li>Aflæs <span class="eq" data-tex="f_2"></span> og <span class="eq" data-tex="f_3"></span>. Passer bølgeformlen <span class="eq" data-tex="v = \lambda_n\cdot f_n"></span> også her?</li>
-          <li>Opstil ud fra dine målinger en formel for <span class="eq" data-tex="\lambda_n"></span> og en for <span class="eq" data-tex="f_n"></span>, udtrykt ved <span class="eq" data-tex="L"></span>, <span class="eq" data-tex="v"></span> og <span class="eq" data-tex="n"></span>.</li>
-        </ul>
-      </li>
+      <li>Sæt knipsepunktet på midten. Aflæs i søjlediagrammet, hvilke partialtoner der forsvinder helt. Tegn 2. partialtone på papir, marker dens knuder, og forklar ud fra tegningen, hvorfor den ikke kan sættes i gang med et knips netop dér.</li>
 
-      <li>Tryk <span class="acc">Nulstil</span>, og vælg igen grundtonen.
-        <ul>
-          <li>Halvér bølgefarten fra 240 m/s til 120 m/s. Hvad sker der med <span class="eq" data-tex="f_1"></span>, og hvad sker der med <span class="eq" data-tex="\lambda_1"></span>?</li>
-          <li>Sæt farten tilbage til 240 m/s, og halvér i stedet <span class="eq" data-tex="L"></span> fra 1,00 m til 0,50 m. Denne gang ændrer begge sig — sammenlign de to forsøg, og forklar forskellen.</li>
-          <li>En guitars seks strenge har alle samme længde og dermed samme <span class="eq" data-tex="\lambda_1"></span>. Forklar ud fra <span class="eq" data-tex="f_1 = \frac{v}{2\cdot L}"></span>, hvordan de så kan klinge forskelligt.</li>
-        </ul>
-      </li>
+      <li>Aflæs <span class="eq" data-tex="A_1"></span>, <span class="eq" data-tex="A_3"></span> og <span class="eq" data-tex="A_5"></span> ved knips på midten. Beregn forholdene <span class="eq" data-tex="A_3/A_1"></span> og <span class="eq" data-tex="A_5/A_1"></span>. Passer de med <span class="eq" data-tex="-1/9"></span> og <span class="eq" data-tex="1/25"></span>? Hvad betyder minusset fysisk?</li>
 
-      <li>Vælg 3. partialtone alene, og bemærk, hvor de to knuder inde på strengen ligger. Slå nu grundtonen til ved siden af, så både <span class="eq" data-tex="A_1"></span> og <span class="eq" data-tex="A_3"></span> står på 1,00. Slå også <span class="acc">Vis partialtoner</span> til.
-        <ul>
-          <li>Står strengen stadig stille i de to punkter, hvor 3. partialtone havde knuder?</li>
-          <li>For at et punkt kan stå helt stille, skal begge partialtoner være nul dér hele tiden. Brug det til at forklare, hvor på strengen der overhovedet kan være knuder, når to partialtoner kører samtidig.</li>
-          <li>Sæt <span class="eq" data-tex="A_3"></span> ned til 0,30, og følg kurven. Med én partialtone alene beholder strengen sin facon og skifter kun størrelse. Gør sumkurven også det? Forklar det ud fra, at de to partialtoner svinger med hver sin frekvens.</li>
-          <li>Aflæs til sidst <span class="eq" data-tex="f_1"></span> og <span class="eq" data-tex="T_1"></span>. Ændrer de sig, når du skruer op og ned for <span class="eq" data-tex="A_3"></span>? Hvad betyder det for tonens højde — og hvad er det så, <span class="eq" data-tex="A_3"></span> ændrer?</li>
-        </ul>
-      </li>
+      <li>Strengen er 1,00 m lang, så aflæsningen i cm er samtidig brøkdelen af <span class="eq" data-tex="L"></span>. Flyt knipsepunktet til 20 cm, altså <span class="eq" data-tex="L/5"></span>: hvilke partialtoner mangler nu? Prøv derefter 25 cm og 33 cm. Formuler en regel for, hvilke partialtoner der falder ud, når man knipser i punktet <span class="eq" data-tex="L/m"></span>.</li>
 
-      <li>Tryk <span class="acc">Nulstil</span>, og sæt amplituderne til ca. <span class="eq" data-tex="A_1 = 0,5"></span>, <span class="eq" data-tex="A_2 = 0,6"></span>, <span class="eq" data-tex="A_3 = -0,25"></span>, <span class="eq" data-tex="A_4 = 0,15"></span> og <span class="eq" data-tex="A_5 = 0,15"></span>. Slå <span class="acc">Vis partialtoner</span> til.
-        <ul>
-          <li>Observer bølgen. Med hvilken frekvens gentager hele mønstret sig? Hvad bestemmer det?</li>
-          <li>Hvor mange punkter på strengen står helt stille? Sammenlign med dit svar i opgave 4.</li>
-          <li>Sæt <span class="eq" data-tex="A_1"></span> til 0, så grundtonen slet ikke er med. Gentager mønstret sig nu hurtigere? Aflæs også <span class="eq" data-tex="f_1"></span> — hvorfor ændrer den sig ikke, selvom grundtonen er slået fra?</li>
-          <li>Sæt nu også <span class="eq" data-tex="A_3"></span> og <span class="eq" data-tex="A_5"></span> til 0, så kun <span class="eq" data-tex="A_2"></span> og <span class="eq" data-tex="A_4"></span> er tilbage. Hvad sker der med gentagelsesfrekvensen? Og hvad sker der midt på strengen? Forklar, hvorfor strengen nu opfører sig som to halve strenge.</li>
-        </ul>
-      </li>
+      <li>Sammenlign spektret ved et knips på midten med et knips 3 cm fra broen. Hvilket af de to har flest kraftige overtoner? En guitarist, der spiller tæt ved broen, får en skarp, nasal klang — forklar det ud fra søjlerne.</li>
+
+      <li>Slå <span class="acc">Vis eksakt form</span> til og sæt antallet af led ned til 3. Hvor ligger den største afvigelse mellem summen og den eksakte form? Hvad fortæller det om, hvor mange led man skal bruge for at gengive et skarpt knæk?</li>
+
+      <li>Skriv selv koefficienter ind i felterne: sæt alle til 0 undtagen <span class="eq" data-tex="A_1 = 1,00"></span> og <span class="eq" data-tex="A_2 = 0,50"></span>. Tegn formen af. Skift så <span class="eq" data-tex="A_2"></span> til <span class="eq" data-tex="-0,50"></span>. Hvad ændrer sig ved kurven? Findes der et knipsepunkt, der ville give netop de to koefficienter?</li>
+
+      <li>Slå <span class="acc">Vis de enkelte led</span> til, sæt antal led til 3 og tryk Pause et par gange undervejs. Overbevis dig om, at den kraftige kurve i hvert punkt er de tre svage kurvers udsving lagt sammen.</li>
     </ol>
     </ol>
     <div class="modal-close-row"><button class="btn" data-close="modalOpgave">Luk</button></div>
@@ -844,11 +717,9 @@ const htmlEl = document.documentElement;
 const btnTema = document.getElementById('btnTema');
 function isLight() { return htmlEl.getAttribute('data-theme') === 'light'; }
 function D(dark, light) { return isLight() ? light : dark; }
-
 btnTema.addEventListener('click', () => {
   if (isLight()) { htmlEl.removeAttribute('data-theme'); btnTema.textContent = 'Lyst tema'; }
   else { htmlEl.setAttribute('data-theme', 'light'); btnTema.textContent = 'Mørkt tema'; }
-  refreshFreqLabels();
 });
 
 /* ================= Modaler ================= */
@@ -877,7 +748,6 @@ document.getElementById('btnKopier').addEventListener('click', () => {
 });
 
 /* ================= Dansk talformatering ================= */
-/* Fysik-konvention: decimalkomma, men ALDRIG tusindtalsseparator */
 function daNum(x, digits) {
   return x.toLocaleString('da-DK', {
     minimumFractionDigits: digits, maximumFractionDigits: digits, useGrouping: false });
@@ -890,471 +760,327 @@ function daParse(s) {
 }
 
 /* === FYSIK-KERNE START ===
-   Stående bølger på en streng, der er fastspændt i begge ender.
-   Randbetingelsen y(0)=y(L)=0 tillader kun bølgelængder lambda_n = 2L/n,
-   svarende til frekvenserne f_n = n*v/(2L) = n*f1.
-   Udsvinget er superpositionen
-       y(x,t) = sum_n A_n * sin(n*pi*x/L) * cos(w_n*t) * exp(-gamma*t)
-   hvor w_n = 2*pi*f_n. Bemærk at rumlig form og tidsafhængighed er
-   FAKTORISERET — det er præcis, hvad der kendetegner en stående bølge:
-   knuderne ligger fast, kun amplituden ånder op og ned.
+   Knipset streng: strengen trækkes til side i punktet p med udsvinget h og
+   slippes fra hvile. Begyndelsesformen er en trekant
+
+       y(x,0) = h*x/p            for 0 <= x <= p
+       y(x,0) = h*(L-x)/(L-p)    for p <= x <= L
+
+   Den udvikles i strengens egne stående bølger (Fouriersinusrække). Med
+   randbetingelsen y(0)=y(L)=0 er basisfunktionerne sin(n*pi*x/L), og
+
+       A_n = 2*h*L^2 / (pi^2 * p * (L-p)) * 1/n^2 * sin(n*pi*p/L)
+
+   Skrives p som en broekdel q = p/L, forkorter L og h ud af FORHOLDET mellem
+   koefficienterne: A_n er proportional med sin(n*pi*q)/n^2. Styrkeforholdet
+   afhaenger altsaa KUN af, hvor stor en broekdel af strengen man knipser
+   henne ad - hverken af strengens laengde eller af boelgefarten. Derfor er
+   L og v fastholdt i denne simulering.
+
+   Faktoren sin(n*pi*q) er nul, netop naar knipsepunktet er en KNUDE for den
+   n'te partialtone - man kan ikke excitere en svingning ved at traekke i et
+   punkt, hvor den staar stille.
+
+   Da strengen slippes fra hvile, er tidsafhaengigheden ren cosinus:
+
+       y(x,t) = sum_n A_n * sin(n*pi*x/L) * cos(w_n*t),   w_n = 2*pi*n*f_1
+
+   Til sammenligning beregnes ogsaa den EKSAKTE loesning med d'Alembert:
+   y(x,t) = 1/2 * [F(x - v*t) + F(x + v*t)], hvor F er den ulige, 2L-periodiske
+   fortsaettelse af begyndelsesformen. Den er lukket og eksakt og bruges som
+   facitliste for partialsummen.
    Sektionen er DOM-fri. */
 
-const NH = 6;                                   /* antal partialtoner */
-const amps = [1, 0, 0, 0, 0, 0];
+const NMAX = 16;                 /* antal koefficienter */
+const L_FIX = 1.00;              /* strenglængde, m — fastholdt */
+const V_FIX = 160;               /* bølgefart, m/s — fastholdt (f1 = 80 Hz) */
+const coef = new Float64Array(NMAX);
+
 const phys = {
-  v: 240,          /* bølgefart, m/s — giver f1 = 120 Hz ved L = 1,00 m, lige
-                      over den grænse, hvor små højttalere begynder at forvrænge */
-  L: 1.00,         /* strenglængde, m */
-  slow: 600,       /* slowmotion-faktor: 1 fysisk s vises som "slow" sekunder */
-  damping: false,
-  gamma: 5.0,      /* 1/s */
-  t: 0,            /* fysisk tid i sekunder siden anslag */
-  atRest: false    /* strengen ligger stille — venter på et anslag */
+  q: 0.50,         /* knipsepunkt som brøkdel af L */
+  N: NMAX,         /* antal led, der tages med i summen */
+  slow: 600,
+  t: 0,
+  atRest: true,    /* strengen ligger stille — venter på et knips */
+  /* Koefficienterne normeres til |A|max = 1, så søjlediagrammet altid fylder
+     pænt. norm er den faktor, trekantens EGEN normering skal ganges med for
+     at ligge på samme skala som den normerede række. */
+  norm: 1,
+  peak: 1          /* største udsving — bruges til at skalere tegningen */
 };
 
-function f1()      { return phys.v / (2 * phys.L); }        /* Hz */
-function fn(n)     { return n * f1(); }                     /* Hz */
-function lambda(n) { return 2 * phys.L / n; }               /* m */
-/* Fælles amplitudefaktor. En streng i hvile har udsvinget 0 overalt; med
-   dæmpning aftager udsvinget efter e^(-gamma*t) regnet fra anslaget. */
-function envelope() {
-  if (phys.atRest) return 0;
-  return phys.damping ? Math.exp(-phys.gamma * phys.t) : 1;
+function f1()  { return V_FIX / (2 * L_FIX); }
+function fn(n) { return n * f1(); }
+function lambda(n) { return 2 * L_FIX / n; }
+
+/* En streng i hvile har udsvinget 0 overalt */
+function amp() { return phys.atRest ? 0 : 1; }
+
+/* Fourierkoefficient nr. n for et knips i q (brøkdel af L) med højde h */
+function coefOf(n, q, h) {
+  const s = Math.sin(n * Math.PI * q);
+  if (Math.abs(s) < 1e-12) return 0;
+  return (2 * h) / (Math.PI * Math.PI * q * (1 - q)) * s / (n * n);
 }
 
-/* Udsving i punktet frac = x/L til tiden t (fysiske sekunder) */
-function yAt(frac, t) {
+/* Fyld koefficient-tabellen ud fra knipsepunktet, normeret så |A|max = 1.
+   Returnerer normeringsfaktoren 1/mx, som trekanten skal ganges med for at
+   ligge på samme skala som den normerede række. */
+function coefsFromPluck(q, out) {
+  const a = out || new Float64Array(NMAX);
+  let mx = 0;
+  for (let n = 1; n <= NMAX; n++) {
+    a[n - 1] = coefOf(n, q, 1);
+    mx = Math.max(mx, Math.abs(a[n - 1]));
+  }
+  if (mx > 0) for (let n = 0; n < NMAX; n++) a[n] /= mx;
+  return mx > 0 ? 1 / mx : 1;
+}
+
+/* Partialsum med N led, uden hensyn til hviletilstanden. frac = x/L */
+function ySumRaw(frac, t, N) {
   const w1 = 2 * Math.PI * f1();
   let y = 0;
-  for (let n = 1; n <= NH; n++) {
-    const a = amps[n - 1];
-    if (Math.abs(a) < 0.001) continue;
+  for (let n = 1; n <= N; n++) {
+    const a = coef[n - 1];
+    if (Math.abs(a) < 1e-9) continue;
     y += a * Math.sin(n * Math.PI * frac) * Math.cos(n * w1 * t);
   }
-  return y * envelope();
+  return y;
+}
+function ySum(frac, t, N) { return ySumRaw(frac, t, N) * amp(); }
+
+/* Ét enkelt led */
+function yTerm(n, frac, t) {
+  const w1 = 2 * Math.PI * f1();
+  return coef[n - 1] * Math.sin(n * Math.PI * frac) * Math.cos(n * w1 * t) * amp();
 }
 
-/* Udsving fra ÉN partialtone alene */
-function yPartial(n, frac, t) {
-  const w1 = 2 * Math.PI * f1();
-  return amps[n - 1] * Math.sin(n * Math.PI * frac) * Math.cos(n * w1 * t) * envelope();
+/* Begyndelsesformen (trekanten) med toppunktværdi 1 */
+function triangle(frac, q) {
+  return frac <= q ? frac / q : (1 - frac) / (1 - q);
+}
+
+/* Ulige, 2L-periodisk fortsættelse af trekanten. u måles i brøkdele af L. */
+function Fext(u, q) {
+  let x = u % 2;
+  if (x < 0) x += 2;
+  return x <= 1 ? triangle(x, q) : -triangle(2 - x, q);
+}
+
+/* EKSAKT løsning (d'Alembert), skaleret til samme normering som rækken. */
+function yExact(frac, t, q) {
+  const s = V_FIX * t / L_FIX;        /* tilbagelagt strækning i brøkdele af L */
+  return 0.5 * (Fext(frac - s, q) + Fext(frac + s, q)) * phys.norm * amp();
+}
+
+/* Største udsving. For denne bevægelse er maksimum altid til stede ved t = 0,
+   så det er nok at scanne begyndelsesformen. */
+function computePeak() {
+  let mx = 0;
+  for (let j = 0; j <= 240; j++) {
+    mx = Math.max(mx, Math.abs(ySumRaw(j / 240, 0, phys.N)));
+  }
+  phys.peak = mx > 1e-6 ? mx : 1;
 }
 /* === FYSIK-KERNE SLUT === */
 
 /* ================= Farver ================= */
-const COL_DARK  = ['#00ff9f', '#00cfff', '#ffd93d', '#ff8a5c', '#c77dff', '#ff5c8a'];
-const COL_LIGHT = ['#1D9E75', '#378ADD', '#9c5e00', '#c2410c', '#7a2da8', '#c0306a'];
-function cols() { return isLight() ? COL_LIGHT : COL_DARK; }
 function colAxis() { return D('#3a5a72', '#8a8070'); }
 function colText() { return D('#d0eef5', '#1a1a1a'); }
 function colDim()  { return D('#8ec8d8', '#333333'); }
 function colGrn()  { return D('#00ff9f', '#1D9E75'); }
 function colStr()  { return D('#00cfff', '#1a5099'); }
 function colYel()  { return D('#ffd93d', '#c07800'); }
+function colPnk()  { return D('#ff5c8a', '#c0306a'); }
 
-/* ================= Partialtone-mixer ================= */
-const mixer = document.getElementById('mixer');
-const fLabels = [], aLabels = [], vSliders = [];
-for (let i = 0; i < NH; i++) {
-  const col = document.createElement('div');
-  col.className = 'mx-col c' + (i + 1);
+/* ================= Tilstand ================= */
+let manual = false;         /* true = brugeren har skrevet koefficienter ind */
+let paused = false;
+let showExact = true;
+let showTerms = false;
 
-  const n = document.createElement('div');
-  n.className = 'mx-n';
-  n.textContent = 'n=' + (i + 1);
-
-  const f = document.createElement('div');
-  f.className = 'mx-f';
-  f.textContent = '--';
-  fLabels.push(f);
-
-  /* Skyderen går fra -1 til +1: en NEGATIV amplitude betyder, at partialtonen
-     starter med bugen nedad — altså modfase. Det er nødvendigt, hvis man vil
-     sammensætte fx den trekantede form, en knipset streng har. */
-  const wrap = document.createElement('div');
-  wrap.className = 'vwrap';
-  const inp = document.createElement('input');
-  inp.type = 'range';
-  inp.className = 'vert';
-  inp.min = -1; inp.max = 1; inp.step = 0.01;
-  inp.value = amps[i];
-  vSliders.push(inp);
-
-  /* … og tallet kan skrives direkte ind, så man kan indtaste beregnede
-     koefficienter i stedet for at ramme dem med musen. */
+/* ================= Koefficient-felter ================= */
+const coefGrid = document.getElementById('coefGrid');
+const cfBoxes = [], cfCells = [];
+for (let n = 1; n <= NMAX; n++) {
+  const cell = document.createElement('div');
+  cell.className = 'cf';
+  const lbl = document.createElement('div');
+  lbl.className = 'cf-n';
+  lbl.textContent = 'A' + n;
   /* Tekstfelt frem for type="number": et talfelt afviser dansk decimalkomma
-     og returnerer tom streng for halvfærdigt input som "-", så man aldrig når
-     at taste et negativt tal færdigt. */
-  const a = document.createElement('input');
-  a.type = 'text';
-  a.inputMode = 'decimal';
-  a.autocomplete = 'off';
-  a.spellcheck = false;
-  a.maxLength = 6;
-  a.className = 'mx-a';
-  a.value = daNum(amps[i], 2);
-  aLabels.push(a);
-
-  function commit(val, fromBox) {
-    let x = Math.max(-1, Math.min(1, isFinite(val) ? val : 0));
-    amps[i] = x;
-    inp.value = x;
-    if (!fromBox) a.value = daNum(x, 2);
-    phys.atRest = false;      /* at ændre en amplitude vækker strengen */
+     og returnerer tom streng for halvfærdigt input som "-", hvilket gør det
+     umuligt at taste et negativt tal færdigt. */
+  const box = document.createElement('input');
+  box.type = 'text';
+  box.inputMode = 'decimal';
+  box.autocomplete = 'off';
+  box.spellcheck = false;
+  box.maxLength = 6;
+  box.className = 'cf-v';
+  box.addEventListener('input', () => {
+    const x = daParse(box.value);
+    coef[n - 1] = isFinite(x) ? Math.max(-1, Math.min(1, x)) : 0;
+    manual = true;
+    document.getElementById('cfHint').textContent =
+      'Manuel tilstand — tryk Nulstil eller flyt knipsepunktet for at regne ud fra et knips igen.';
+    phys.t = 0;
+    phys.atRest = false;          /* at skrive et tal ind er i sig selv et knips */
+    computePeak();
     updateReadouts();
-    updateAudio();
-  }
-
-  inp.addEventListener('input', () => commit(+inp.value, false));
-  a.addEventListener('input', () => commit(daParse(a.value), true));
-  a.addEventListener('blur', () => { a.value = daNum(amps[i], 2); });
-
-  wrap.appendChild(inp);
-  col.appendChild(n); col.appendChild(f); col.appendChild(wrap); col.appendChild(a);
-  mixer.appendChild(col);
-}
-
-function setAmps(arr) {
-  for (let i = 0; i < NH; i++) {
-    amps[i] = arr[i];
-    vSliders[i].value = arr[i];
-    if (document.activeElement !== aLabels[i]) aLabels[i].value = daNum(arr[i], 2);
-  }
-  /* at ændre amplituderne er i sig selv et nyt anslag */
-  phys.t = 0;
-  phys.atRest = false;
-  updateReadouts();
-  updateAudio();
-}
-
-/* ================= Forvalg ================= */
-const PRESETS = [
-  { label: 'Grundtone',  a: [1, 0, 0, 0, 0, 0] },
-  { label: '2. partial', a: [0, 1, 0, 0, 0, 0] },
-  { label: '3. partial', a: [0, 0, 1, 0, 0, 0] },
-  { label: '4. partial', a: [0, 0, 0, 1, 0, 0] },
-  { label: '5. partial', a: [0, 0, 0, 0, 1, 0] },
-  { label: '6. partial', a: [0, 0, 0, 0, 0, 1] },
-  /* Trekantformen fra et knips midt på strengen. Koefficienterne er
-     A_n = 8h/(n^2*pi^2) * sin(n*pi/2), normeret så A_1 = 1: de lige
-     partialtoner falder helt ud, og de ulige skifter fortegn: 1, -1/9, 1/25. */
-  { label: 'Knips i midten', a: [1, 0, -0.11, 0, 0.04, 0] },
-  { label: 'Tilfældig', a: null }
-];
-const presetRow = document.getElementById('presetRow');
-PRESETS.forEach(p => {
-  const b = document.createElement('button');
-  b.className = 'btn-sm';
-  b.textContent = p.label;
-  b.addEventListener('click', () => {
-    let raw = p.a ? p.a.slice() : Array.from({ length: NH }, () => Math.random() * 2 - 1);
-    if (!p.a) {
-      const mx = Math.max(...raw.map(Math.abs), 1e-6);
-      raw = raw.map(x => Math.round(x / mx * 100) / 100);
-    }
-    setAmps(raw);
   });
-  presetRow.appendChild(b);
-});
+  box.addEventListener('blur', () => { box.value = daNum(coef[n - 1], 2); });
+  cell.appendChild(lbl); cell.appendChild(box);
+  coefGrid.appendChild(cell);
+  cfBoxes.push(box); cfCells.push(cell);
+}
 
-/* Nulstil hører hjemme sammen med de øvrige knapper, der sætter amplituderne:
-   den stiller ALT tilbage — også skyderne i kontrolpanelet — og lægger
-   strengen i hvile. Derfra vælger man en partialtone for at slå an igen. */
-const btnNulstil = document.createElement('button');
-btnNulstil.className = 'btn-sm reset';
-btnNulstil.textContent = 'Nulstil';
-presetRow.appendChild(btnNulstil);
+/* Feltet, brugeren står og skriver i, må IKKE overskrives undervejs. Ellers
+   bliver "-" og "0." omskrevet til 0,00 på hvert tastetryk, og man kan aldrig
+   nå at taste et negativt tal færdigt. Det felt normaliseres i stedet ved blur. */
+function refreshCoefBoxes() {
+  for (let n = 1; n <= NMAX; n++) {
+    const box = cfBoxes[n - 1];
+    if (document.activeElement !== box) box.value = daNum(coef[n - 1], 2);
+    cfCells[n - 1].classList.toggle('dim', n > phys.N);
+    cfCells[n - 1].classList.toggle('on', n <= phys.N && Math.abs(coef[n - 1]) > 0.005);
+  }
+}
+
+/* Regn koefficienterne ud fra knipsepunktet. wake = false bruges af Nulstil,
+   som skal efterlade strengen i hvile. */
+function recomputeFromPluck(wake) {
+  phys.norm = coefsFromPluck(phys.q, coef);
+  manual = false;
+  document.getElementById('cfHint').textContent =
+    'Beregnet ud fra knipsepunktet. Skriv i et felt for at gå over til manuel tilstand.';
+  phys.t = 0;
+  if (wake) phys.atRest = false;
+  computePeak();
+  updateReadouts();
+}
 
 /* ================= Kontroller ================= */
-const vSlider = document.getElementById('vSlider');
-const lSlider = document.getElementById('lSlider');
+const pSlider = document.getElementById('pSlider');
+const nSlider = document.getElementById('nSlider');
 const sSlider = document.getElementById('sSlider');
-const gSlider = document.getElementById('gSlider');
-const dampChk = document.getElementById('dampChk');
+const exactChk = document.getElementById('exactChk');
 const partChk = document.getElementById('partChk');
+const btnKnips = document.getElementById('btnKnips');
 const btnPause = document.getElementById('btnPause');
-const btnLyd = document.getElementById('btnLyd');
+const btnNulstil = document.getElementById('btnNulstil');
 
-let paused = false;
-let showParts = true;
+function showP() {
+  document.getElementById('pVal').textContent = daNum(phys.q * L_FIX * 100, 0) + ' cm';
+}
 
-vSlider.addEventListener('input', () => {
-  phys.v = +vSlider.value;
-  document.getElementById('vVal').textContent = phys.v + ' m/s';
-  updateReadouts(); updateAudio();
+pSlider.addEventListener('input', () => {
+  phys.q = +pSlider.value;
+  showP();
+  recomputeFromPluck(true);
 });
-lSlider.addEventListener('input', () => {
-  phys.L = +lSlider.value;
-  document.getElementById('lVal').textContent = daNum(phys.L, 2) + ' m';
-  marks.length = 0;
-  updateReadouts(); updateAudio();
+nSlider.addEventListener('input', () => {
+  phys.N = +nSlider.value;
+  document.getElementById('nVal').textContent = phys.N;
+  computePeak();
+  updateReadouts();
 });
 sSlider.addEventListener('input', () => {
   phys.slow = +sSlider.value;
   document.getElementById('sVal').textContent = '×' + phys.slow;
 });
-gSlider.addEventListener('input', () => {
-  phys.gamma = +gSlider.value;
-  document.getElementById('gVal').textContent = daNum(phys.gamma, 1) + ' /s';
-});
-dampChk.addEventListener('change', () => {
-  phys.damping = dampChk.checked;
-  document.getElementById('dampRow').classList.toggle('off', !phys.damping);
-  phys.t = 0;
-});
-partChk.addEventListener('change', () => { showParts = partChk.checked; });
+exactChk.addEventListener('change', () => { showExact = exactChk.checked; });
+partChk.addEventListener('change', () => { showTerms = partChk.checked; });
 
-/* Pause fryser billedet, så man kan måle i ro — og slukker lyden, for en
-   streng, der står stille, larmer ikke. */
+/* Knips = træk strengen ud i trekanten og slip */
+btnKnips.addEventListener('click', () => {
+  phys.t = 0;
+  phys.atRest = false;
+  paused = false;
+  btnPause.textContent = 'Pause';
+});
 btnPause.addEventListener('click', () => {
   paused = !paused;
   btnPause.textContent = paused ? 'Afspil' : 'Pause';
-  if (paused) stopSound();
 });
-
-/* Nulstil sætter alle indstillinger tilbage OG lægger strengen i hvile.
-   Derfra er det forvalgene under strengen, der slår an igen. */
+/* Nulstil stiller alt tilbage OG lægger strengen stille */
 btnNulstil.addEventListener('click', () => {
-  vSlider.value = 240; phys.v = 240;
-  lSlider.value = 1.00; phys.L = 1.00;
-  sSlider.value = 600; phys.slow = 600;
-  gSlider.value = 5; phys.gamma = 5;
-  dampChk.checked = false; phys.damping = false;
-  document.getElementById('dampRow').classList.add('off');
-  partChk.checked = true; showParts = true;
-  document.getElementById('vVal').textContent = '240 m/s';
-  document.getElementById('lVal').textContent = '1,00 m';
+  pSlider.value = 0.5;  phys.q = 0.5;
+  nSlider.value = NMAX; phys.N = NMAX;
+  sSlider.value = 600;  phys.slow = 600;
+  exactChk.checked = true;  showExact = true;
+  partChk.checked = false;  showTerms = false;
+  document.getElementById('nVal').textContent = NMAX;
   document.getElementById('sVal').textContent = '×600';
-  document.getElementById('gVal').textContent = '5,0 /s';
+  showP();
   paused = false; btnPause.textContent = 'Pause';
-  marks.length = 0;
-  showDx();
-  stopSound();
-  setAmps([1, 0, 0, 0, 0, 0]);   /* sætter atRest = false … */
-  phys.t = 0;
-  phys.atRest = true;            /* … derfor lægges strengen i hvile bagefter */
-});
-
-/* ================= Lyd (Web Audio) =================
-   Én sinus-oscillator pr. partialtone med PRÆCIS frekvensen f_n = n*f1 og en
-   forstærkning, der følger amplitude-skyderen.
-
-   Der transponeres IKKE. En tidligere udgave løftede alle toner op i oktaver,
-   når f1 var dyb, for at komme fri af små højttaleres forvrængning. Det var en
-   fejl: faktoren blev regnet ud fra f1, uanset hvilke partialtoner der rent
-   faktisk lød. Valgte man 4. partialtone alene, stod der 320 Hz i panelet,
-   mens højttaleren spillede 1280 Hz. Netop sammenhængen mellem det aflæste og
-   det hørte er hele pointen, så det, der sendes ud, er nu altid det, der står
-   på skærmen.
-
-   Til gengæld gælder hardwarens begrænsning stadig: under ca. 120 Hz begynder
-   indbyggede højttalere at forvrænge, så man hører en overtone i stedet for
-   grundtonen. Aflæsningen advarer om det i stedet for at skjule det. */
-let audioCtx = null, oscs = [], gains = [], master = null, soundOn = false;
-const F_REN = 120;   /* Hz — under dette kan små højttalere ikke gengive rent */
-
-/* Dybeste partialtone, der faktisk lyder — det er den, man skal lytte efter */
-function laveste() {
-  for (let n = 1; n <= NH; n++) if (Math.abs(amps[n - 1]) > 0.005) return fn(n);
-  return 0;
-}
-
-function setupAudio() {
-  if (audioCtx) return;
-  audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-  master = audioCtx.createGain();
-  master.gain.value = 0;
-  master.connect(audioCtx.destination);
-  for (let n = 1; n <= NH; n++) {
-    const o = audioCtx.createOscillator();
-    const g = audioCtx.createGain();
-    o.type = 'sine';
-    o.frequency.value = fn(n);
-    g.gain.value = 0;
-    o.connect(g).connect(master);
-    o.start();
-    oscs.push(o); gains.push(g);
-  }
-}
-
-function updateAudio() {
-  if (!audioCtx) { refreshLydBtn(); return; }
-  const now = audioCtx.currentTime;
-  let sum = 0;
-  for (let i = 0; i < NH; i++) sum += Math.abs(amps[i]);
-  if (sum < 1e-6) sum = 1;
-  for (let n = 1; n <= NH; n++) {
-    oscs[n - 1].frequency.setTargetAtTime(fn(n), now, 0.02);
-    gains[n - 1].gain.setTargetAtTime(0.55 * Math.abs(amps[n - 1]) / sum, now, 0.03);
-  }
-  refreshLydBtn();
-}
-
-/* Lydstyrken følger strengens udsving: den dør ud sammen med dæmpningen og
-   er nul, når strengen er i hvile eller sat på pause. */
-const MASTER_MAX = 0.16;
-let lastLevel = -1;
-function applyAudioLevel() {
-  if (!master) return;
-  const target = (soundOn && !paused && !phys.atRest) ? MASTER_MAX * envelope() : 0;
-  if (Math.abs(target - lastLevel) < 0.002) return;
-  lastLevel = target;
-  master.gain.setTargetAtTime(target, audioCtx.currentTime, 0.03);
-}
-
-function stopSound() {
-  if (!soundOn) return;
-  soundOn = false;
-  applyAudioLevel();
-  refreshLydBtn();
-}
-
-function refreshLydBtn() {
-  btnLyd.textContent = soundOn ? 'Lyd fra' : 'Lyd til';
-  const el = document.getElementById('roTone');
-  if (!el) return;
-  const f = laveste();
-  if (f <= 0) {
-    el.textContent = '–';
-    el.classList.remove('yel');
-  } else if (f < F_REN) {
-    el.textContent = daNum(f, 1) + ' Hz · kan forvrænge';
-    el.classList.add('yel');
-  } else {
-    el.textContent = daNum(f, 1) + ' Hz';
-    el.classList.remove('yel');
-  }
-}
-
-btnLyd.addEventListener('click', () => {
-  setupAudio();
-  if (audioCtx.state === 'suspended') audioCtx.resume();
-  soundOn = !soundOn;
-  /* at tænde lyden på en streng, der ligger stille, giver et nyt anslag */
-  if (soundOn && (phys.atRest || paused)) {
-    phys.atRest = false; phys.t = 0;
-    paused = false; btnPause.textContent = 'Pause';
-  }
-  updateAudio();
-  applyAudioLevel();
-  refreshLydBtn();
+  recomputeFromPluck(false);
+  phys.atRest = true;
 });
 
 /* ================= Aflæsninger ================= */
-function refreshFreqLabels() {
-  const c = cols();
-  for (let n = 1; n <= NH; n++) {
-    fLabels[n - 1].textContent = daNum(fn(n), 1) + ' Hz';
-    fLabels[n - 1].style.color = Math.abs(amps[n - 1]) > 0.005 ? c[n - 1] : '';
-  }
-}
-
 function updateReadouts() {
-  document.getElementById('roF1').textContent = daNum(f1(), 1) + ' Hz';
-  document.getElementById('roLam').textContent = daNum(lambda(1), 2) + ' m';
-  document.getElementById('roT1').textContent = daNum(1000 / f1(), 1) + ' ms';
-  let act = 0;
-  for (let i = 0; i < NH; i++) if (Math.abs(amps[i]) > 0.005) act++;
-  document.getElementById('roAct').textContent = act;
-  refreshFreqLabels();
+  document.getElementById('roPL').textContent = daNum(phys.q, 3);
+  document.getElementById('roF1').textContent = daNum(f1(), 0) + ' Hz';
+  const miss = [];
+  for (let n = 1; n <= phys.N; n++) if (Math.abs(coef[n - 1]) < 0.005) miss.push(n);
+  document.getElementById('roMiss').textContent =
+    miss.length ? 'n = ' + miss.join(', ') : 'ingen';
+  document.getElementById('roStr').textContent =
+    'L = ' + daNum(L_FIX, 2) + ' m · v = ' + V_FIX + ' m/s';
+  refreshCoefBoxes();
 }
 
-/* ================= Måleværktøj på strengen ================= */
-/* Klik sætter et mærke i cm målt fra strengens venstre ende. To mærker viser
-   afstanden Δx. Tredje klik nulstiller. Aflæsningen er elevens egen. */
-const marks = [];
-let hoverCm = null;
-
-function showDx() {
-  const el = document.getElementById('roDx');
-  if (marks.length === 2) {
-    const d = Math.abs(marks[1] - marks[0]);
-    el.textContent = daNum(d, 1) + ' cm  =  ' + daNum(d / 100, 3) + ' m';
-  } else if (marks.length === 1) {
-    el.textContent = 'x₁ = ' + daNum(marks[0], 1) + ' cm — klik igen';
-  } else {
-    el.textContent = 'Klik to steder på strengen';
-  }
+/* ================= Canvas-opsætning ================= */
+function mkCanvas(id) {
+  const cv = document.getElementById(id);
+  const ctx = cv.getContext('2d');
+  const st = { cv: cv, ctx: ctx, W: 0, H: 0 };
+  st.resize = function () {
+    const dpr = Math.min(window.devicePixelRatio || 1, 3);
+    const host = cv.parentElement;
+    const w = host.clientWidth, h = host.clientHeight;
+    if (w < 2 || h < 2) return;
+    st.W = w; st.H = h;
+    cv.width = Math.round(w * dpr);
+    cv.height = Math.round(h * dpr);
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  };
+  st.resize();
+  if (window.ResizeObserver) new ResizeObserver(st.resize).observe(cv.parentElement);
+  return st;
 }
+const S = mkCanvas('scene');
+const G = mkCanvas('spec');
+window.addEventListener('resize', () => { S.resize(); G.resize(); });
 
-/* ================= Canvas ================= */
-const canvas = document.getElementById('scene');
-const ctx = canvas.getContext('2d');
-let CW = 0, CH = 0;
-
-function resize() {
-  const dpr = Math.min(window.devicePixelRatio || 1, 3);
-  const host = canvas.parentElement;
-  const w = host.clientWidth, h = host.clientHeight;
-  if (w < 2 || h < 2) return;
-  CW = w; CH = h;
-  canvas.width = Math.round(w * dpr);
-  canvas.height = Math.round(h * dpr);
-  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-}
-window.addEventListener('resize', resize);
-if (window.ResizeObserver) new ResizeObserver(resize).observe(canvas.parentElement);
-
-/* Strengens geometri på skærmen: bredden er proportional med L,
-   kalibreret så L = 1,00 m fylder hele det tilgængelige felt. */
 function geom() {
-  const pad = Math.max(46, CW * 0.06);
-  const full = CW - 2 * pad;
-  const w = full * phys.L;            /* L = 1,00 m -> full */
-  return { x0: (CW - w) / 2, w: w, cy: CH / 2 };
+  const pad = Math.max(46, S.W * 0.06);
+  const w = S.W - 2 * pad;
+  return { x0: pad, w: w, cy: S.H / 2 };
 }
 
-function evtToCm(e) {
-  const r = canvas.getBoundingClientRect();
-  const cx = (e.touches ? e.touches[0].clientX : e.clientX) - r.left;
-  const g = geom();
-  const frac = (cx / r.width * CW - g.x0) / g.w;
-  return Math.max(0, Math.min(1, frac)) * phys.L * 100;
-}
+/* ================= Tegning: strengen ================= */
+const NPTS = 600;
 
-canvas.addEventListener('mousemove', e => { hoverCm = evtToCm(e); });
-canvas.addEventListener('mouseleave', () => { hoverCm = null; });
-canvas.addEventListener('click', e => {
-  const cm = evtToCm(e);
-  if (marks.length >= 2) marks.length = 0;
-  else marks.push(cm);
-  showDx();
-});
-canvas.addEventListener('touchstart', e => {
-  e.preventDefault();
-  const cm = evtToCm(e);
-  hoverCm = cm;
-  if (marks.length >= 2) marks.length = 0;
-  else marks.push(cm);
-  showDx();
-}, { passive: false });
-
-const NPTS = 480;
-const buf = new Float32Array(NPTS + 1);
-
-function draw() {
-  if (CW < 2 || CH < 2) return;
-  const g = geom();
-  const { x0, w, cy } = g;
-
-  ctx.clearRect(0, 0, CW, CH);
+function drawScene() {
+  const ctx = S.ctx, W = S.W, H = S.H;
+  if (W < 2 || H < 2) return;
+  const g = geom(), x0 = g.x0, w = g.w, cy = g.cy;
+  ctx.clearRect(0, 0, W, H);
 
   /* gitter */
   ctx.strokeStyle = D('rgba(26,58,82,0.55)', 'rgba(140,124,96,0.22)');
   ctx.lineWidth = 1;
-  for (let i = 1; i < 8; i++) {
-    ctx.beginPath(); ctx.moveTo(0, CH * i / 8); ctx.lineTo(CW, CH * i / 8); ctx.stroke();
-  }
-  for (let j = 1; j < 14; j++) {
-    ctx.beginPath(); ctx.moveTo(CW * j / 14, 0); ctx.lineTo(CW * j / 14, CH); ctx.stroke();
-  }
+  for (let i = 1; i < 8; i++) { ctx.beginPath(); ctx.moveTo(0, H * i / 8); ctx.lineTo(W, H * i / 8); ctx.stroke(); }
+  for (let j = 1; j < 14; j++) { ctx.beginPath(); ctx.moveTo(W * j / 14, 0); ctx.lineTo(W * j / 14, H); ctx.stroke(); }
 
-  /* fastspændinger (bro og sadel) */
+  /* fastspændinger */
   ctx.fillStyle = D('#0f1e2d', '#e0d8c6');
   ctx.strokeStyle = colAxis();
   ctx.lineWidth = 1.4;
-  const bw = 9, bh = Math.min(CH * 0.62, 190);
+  const bw = 9, bh = Math.min(H * 0.62, 200);
   ctx.fillRect(x0 - bw, cy - bh / 2, bw, bh);
   ctx.strokeRect(x0 - bw, cy - bh / 2, bw, bh);
   ctx.fillRect(x0 + w, cy - bh / 2, bw, bh);
@@ -1362,188 +1088,205 @@ function draw() {
 
   /* hvileakse */
   ctx.strokeStyle = colAxis();
-  ctx.globalAlpha = 0.75;
-  ctx.lineWidth = 1;
+  ctx.globalAlpha = 0.75; ctx.lineWidth = 1;
   ctx.setLineDash([4, 6]);
   ctx.beginPath(); ctx.moveTo(x0, cy); ctx.lineTo(x0 + w, cy); ctx.stroke();
-  ctx.setLineDash([]);
-  ctx.globalAlpha = 1;
+  ctx.setLineDash([]); ctx.globalAlpha = 1;
 
-  /* amplitudeskalering, så udsvinget aldrig forlader feltet */
-  let sum = 0;
-  for (let i = 0; i < NH; i++) if (Math.abs(amps[i]) > 0.001) sum += Math.abs(amps[i]);
-  if (sum < 0.001) sum = 1;
-  const A = (CH * 0.36) / sum;   /* lidt luft til etiketten under kurven */
-
-  const c = cols();
+  const A = (H * 0.40) / phys.peak;
   const t = phys.t;
 
-  /* de enkelte partialtoner, svagt optrukket */
-  if (showParts) {
-    for (let n = 1; n <= NH; n++) {
-      if (Math.abs(amps[n - 1]) < 0.005) continue;
+  /* de enkelte led, svagt optrukket */
+  if (showTerms) {
+    for (let n = 1; n <= phys.N; n++) {
+      if (Math.abs(coef[n - 1]) < 0.005) continue;
       ctx.beginPath();
-      ctx.strokeStyle = c[n - 1];
-      ctx.globalAlpha = isLight() ? 0.55 : 0.40;
-      ctx.lineWidth = 1.3;
+      ctx.strokeStyle = coef[n - 1] >= 0 ? colGrn() : colPnk();
+      ctx.globalAlpha = isLight() ? 0.5 : 0.36;
+      ctx.lineWidth = 1.2;
       for (let j = 0; j <= NPTS; j++) {
         const f = j / NPTS;
-        const xp = x0 + f * w;
-        const yp = cy - yPartial(n, f, t) * A;
-        if (j === 0) ctx.moveTo(xp, yp); else ctx.lineTo(xp, yp);
+        const yp = cy - yTerm(n, f, t) * A;
+        if (j === 0) ctx.moveTo(x0 + f * w, yp); else ctx.lineTo(x0 + f * w, yp);
       }
       ctx.stroke();
       ctx.globalAlpha = 1;
     }
   }
 
-  /* strengen selv = summen */
-  let any = false;
-  for (let i = 0; i < NH; i++) if (Math.abs(amps[i]) > 0.005) { any = true; break; }
+  /* eksakt løsning — kun meningsfuld, når koefficienterne stammer fra et knips */
+  const exactShown = showExact && !manual;
+  if (exactShown) {
+    ctx.beginPath();
+    ctx.strokeStyle = colYel();
+    ctx.globalAlpha = isLight() ? 0.95 : 0.8;
+    ctx.lineWidth = 1.6;
+    ctx.setLineDash([6, 5]);
+    for (let j = 0; j <= NPTS; j++) {
+      const f = j / NPTS;
+      const yp = cy - yExact(f, t, phys.q) * A;
+      if (j === 0) ctx.moveTo(x0 + f * w, yp); else ctx.lineTo(x0 + f * w, yp);
+    }
+    ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.globalAlpha = 1;
+  }
 
-  for (let j = 0; j <= NPTS; j++) buf[j] = any ? yAt(j / NPTS, t) : 0;
-
+  /* partialsummen — den streng, eleven skal se på */
   if (!isLight()) { ctx.shadowColor = colStr(); ctx.shadowBlur = 9; }
   ctx.strokeStyle = colStr();
-  ctx.lineWidth = any ? 2.4 : 1.6;
+  ctx.lineWidth = 2.4;
   ctx.beginPath();
   for (let j = 0; j <= NPTS; j++) {
-    const xp = x0 + (j / NPTS) * w;
-    const yp = cy - buf[j] * A;
-    if (j === 0) ctx.moveTo(xp, yp); else ctx.lineTo(xp, yp);
+    const f = j / NPTS;
+    const yp = cy - ySum(f, t, phys.N) * A;
+    if (j === 0) ctx.moveTo(x0 + f * w, yp); else ctx.lineTo(x0 + f * w, yp);
   }
   ctx.stroke();
   ctx.shadowBlur = 0;
 
-  /* knuder for hver aktiv partialtone */
-  for (let n = 1; n <= NH; n++) {
-    if (Math.abs(amps[n - 1]) < 0.005) continue;
-    for (let k = 0; k <= n; k++) {
-      const xp = x0 + (k / n) * w;
-      const end = (k === 0 || k === n);
-      ctx.beginPath();
-      ctx.arc(xp, cy, end ? 5.5 : 3.4, 0, 2 * Math.PI);
-      ctx.fillStyle = end ? D('#0a1622', '#fdfaf4') : c[n - 1];
-      ctx.fill();
-      ctx.strokeStyle = end ? colGrn() : c[n - 1];
-      ctx.lineWidth = end ? 2 : 1;
-      ctx.stroke();
-    }
-  }
+  /* knipsepunktet markeret */
+  const px = x0 + phys.q * w;
+  ctx.strokeStyle = colGrn();
+  ctx.globalAlpha = 0.5; ctx.lineWidth = 1;
+  ctx.setLineDash([2, 4]);
+  ctx.beginPath(); ctx.moveTo(px, cy - bh / 2); ctx.lineTo(px, cy + bh / 2); ctx.stroke();
+  ctx.setLineDash([]); ctx.globalAlpha = 1;
+  ctx.beginPath(); ctx.arc(px, cy, 3.5, 0, 2 * Math.PI);
+  ctx.fillStyle = colGrn(); ctx.fill();
 
-  /* længdeskala under strengen */
+  /* længdeskala */
   ctx.strokeStyle = colAxis();
   ctx.fillStyle = colDim();
   ctx.font = '700 11px "Courier New", monospace';
   ctx.textAlign = 'center';
   ctx.lineWidth = 1;
-  const yScale = CH - 22;
+  const yScale = H - 22;
   ctx.beginPath(); ctx.moveTo(x0, yScale); ctx.lineTo(x0 + w, yScale); ctx.stroke();
-  const totCm = phys.L * 100;
-  for (let cm = 0; cm <= totCm + 0.01; cm += 5) {
-    const xp = x0 + (cm / totCm) * w;
+  for (let cm = 0; cm <= 100; cm += 5) {
+    const xp = x0 + (cm / 100) * w;
     const big = (cm % 25 === 0);
     ctx.beginPath(); ctx.moveTo(xp, yScale); ctx.lineTo(xp, yScale + (big ? 6 : 3)); ctx.stroke();
     if (big) ctx.fillText(String(cm), xp, yScale + 18);
   }
   ctx.textAlign = 'right';
   ctx.fillText('x (cm)', x0 + w, yScale - 6);
-  /* L-etiketten står OVER aksen. Lå den under, ramte den cm-tallet på midten. */
-  ctx.textAlign = 'center';
-  ctx.font = '700 12px "Share Tech Mono", monospace';
-  ctx.fillText('←  L = ' + daNum(phys.L, 2) + ' m  →', x0 + w / 2, yScale - 6);
   ctx.textAlign = 'left';
 
-  /* ---- målemærker ---- */
-  function cmToPx(cm) { return x0 + (cm / (phys.L * 100)) * w; }
-  function drawMark(cm, color, solid, label) {
-    const xp = cmToPx(cm);
-    ctx.strokeStyle = color;
-    ctx.lineWidth = 1.6;
-    ctx.setLineDash(solid ? [] : [4, 4]);
-    ctx.beginPath(); ctx.moveTo(xp, 22); ctx.lineTo(xp, yScale); ctx.stroke();
-    ctx.setLineDash([]);
-    if (label) {
-      ctx.fillStyle = color;
-      ctx.font = '700 12px "Courier New", monospace';
-      ctx.textAlign = 'center';
-      ctx.fillText(daNum(cm, 1) + ' cm', Math.max(x0 + 26, Math.min(x0 + w - 26, xp)), 34);
-      ctx.textAlign = 'left';
-    }
-  }
-
-  if (marks.length === 2) {
-    drawMark(marks[0], colYel(), true, false);
-    drawMark(marks[1], colYel(), true, false);
-    const p0 = cmToPx(Math.min(marks[0], marks[1]));
-    const p1 = cmToPx(Math.max(marks[0], marks[1]));
-    const yb = 18;
-    ctx.strokeStyle = colYel();
-    ctx.lineWidth = 1.4;
-    ctx.beginPath();
-    ctx.moveTo(p0, yb); ctx.lineTo(p1, yb);
-    ctx.moveTo(p0, yb - 4); ctx.lineTo(p0, yb + 4);
-    ctx.moveTo(p1, yb - 4); ctx.lineTo(p1, yb + 4);
-    ctx.stroke();
+  /* signaturforklaring og status */
+  ctx.font = '700 12px "Share Tech Mono", monospace';
+  ctx.textAlign = 'left';
+  ctx.fillStyle = colStr();
+  ctx.fillText('— SUM MED ' + phys.N + (phys.N === 1 ? ' LED' : ' LED'), x0 + 8, 20);
+  if (exactShown) {
     ctx.fillStyle = colYel();
-    ctx.font = '700 13px "Courier New", monospace';
-    ctx.textAlign = 'center';
-    ctx.fillText('Δx = ' + daNum(Math.abs(marks[1] - marks[0]), 1) + ' cm',
-      Math.max(x0 + 50, Math.min(x0 + w - 50, (p0 + p1) / 2)), yb + 22);
-    ctx.textAlign = 'left';
-  } else {
-    for (const cm of marks) drawMark(cm, colYel(), true, true);
-    if (hoverCm !== null) drawMark(hoverCm, colDim(), false, true);
-    if (marks.length === 0 && hoverCm === null) {
-      ctx.fillStyle = colDim();
-      ctx.font = '600 12px "Exo 2", sans-serif';
-      ctx.textAlign = 'left';
-      ctx.fillText('Klik på to knuder for at måle afstanden', x0 + 8, 20);
-    }
+    ctx.fillText('-- EKSAKT FORM', x0 + 8, 37);
   }
-
-  /* status */
-  ctx.font = '700 13px "Share Tech Mono", monospace';
   ctx.textAlign = 'right';
   if (phys.atRest) {
     ctx.fillStyle = colGrn();
-    ctx.fillText('STRENGEN ER I HVILE — VÆLG EN PARTIALTONE NEDENFOR', x0 + w - 8, 20);
+    ctx.fillText('STRENGEN ER I HVILE — TRYK KNIPS', x0 + w - 8, 20);
   } else if (paused) {
     ctx.fillStyle = colText();
     ctx.fillText('PAUSERET', x0 + w - 8, 20);
-  } else if (phys.damping) {
-    ctx.fillStyle = colDim();
-    ctx.fillText('UDSVING — ' + daNum(envelope() * 100, 0) + ' % TILBAGE', x0 + w - 8, 20);
   }
   ctx.textAlign = 'left';
-
-
 }
 
-/* ================= Hovedloop ================= */
+/* ================= Tegning: frekvensspektrum ================= */
+function drawSpec() {
+  const ctx = G.ctx, W = G.W, H = G.H;
+  if (W < 2 || H < 2) return;
+  ctx.clearRect(0, 0, W, H);
+
+  const padL = 44, padR = 12, padT = 14, padB = 34;
+  const pw = W - padL - padR;
+  const cy = padT + (H - padT - padB) / 2;
+  const half = (H - padT - padB) / 2;
+
+  ctx.strokeStyle = colAxis();
+  ctx.lineWidth = 1;
+  ctx.globalAlpha = 0.4;
+  for (const v of [-1, -0.5, 0.5, 1]) {
+    const y = cy - v * half;
+    ctx.beginPath(); ctx.moveTo(padL, y); ctx.lineTo(W - padR, y); ctx.stroke();
+  }
+  ctx.globalAlpha = 1;
+
+  ctx.strokeStyle = colAxis();
+  ctx.lineWidth = 1.4;
+  ctx.beginPath();
+  ctx.moveTo(padL, padT); ctx.lineTo(padL, H - padB);
+  ctx.moveTo(padL, cy); ctx.lineTo(W - padR, cy);
+  ctx.stroke();
+
+  ctx.fillStyle = colText();
+  ctx.font = '700 11px "Courier New", monospace';
+  ctx.textAlign = 'right';
+  for (const v of [-1, -0.5, 0, 0.5, 1]) {
+    const y = cy - v * half;
+    ctx.strokeStyle = colAxis();
+    ctx.beginPath(); ctx.moveTo(padL - 4, y); ctx.lineTo(padL, y); ctx.stroke();
+    ctx.fillText(daNum(v, 1), padL - 7, y + 4);
+  }
+
+  const slot = pw / NMAX;
+  const bw = Math.min(slot * 0.62, 28);
+  for (let n = 1; n <= NMAX; n++) {
+    const xc = padL + (n - 0.5) * slot;
+    const a = coef[n - 1];
+    const inRange = n <= phys.N;
+    const y = cy - a * half;
+
+    ctx.globalAlpha = inRange ? 1 : 0.22;
+    if (Math.abs(a) > 0.002) {
+      ctx.fillStyle = a >= 0 ? colGrn() : colPnk();
+      ctx.fillRect(xc - bw / 2, Math.min(cy, y), bw, Math.abs(a) * half);
+    } else {
+      /* markér tydeligt, at leddet er nul */
+      ctx.strokeStyle = colDim();
+      ctx.lineWidth = 1.6;
+      ctx.beginPath();
+      ctx.moveTo(xc - bw / 2, cy); ctx.lineTo(xc + bw / 2, cy);
+      ctx.stroke();
+    }
+
+    ctx.fillStyle = inRange ? colText() : colDim();
+    ctx.font = '700 11px "Share Tech Mono", monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText(String(n), xc, H - padB + 15);
+
+    if (n % 2 === 1) {
+      ctx.fillStyle = colDim();
+      ctx.font = '700 9.5px "Courier New", monospace';
+      ctx.fillText(daNum(fn(n), 0), xc, H - padB + 27);
+    }
+    ctx.globalAlpha = 1;
+  }
+
+  ctx.fillStyle = colText();
+  ctx.font = '700 11px "Exo 2", sans-serif';
+  ctx.textAlign = 'left';
+  ctx.fillText('Aₙ', 6, padT + 8);
+  ctx.textAlign = 'right';
+  ctx.fillText('n / f (Hz)', W - padR, H - 5);
+  ctx.textAlign = 'left';
+}
+
+/* ================= Hovedløkke ================= */
 let lastT = performance.now();
 function loop(now) {
-  const dtReal = Math.min((now - lastT) / 1000, 0.05);
+  const dt = Math.min((now - lastT) / 1000, 0.05);
   lastT = now;
-  if (!paused && !phys.atRest) {
-    phys.t += dtReal / phys.slow;   /* fysisk tid i sekunder */
-    /* når dæmpningen har ædt udsvinget, er strengen reelt i hvile */
-    if (phys.damping && envelope() < 0.005) {
-      phys.atRest = true;
-      stopSound();
-    }
-  }
-  applyAudioLevel();
-  draw();
+  if (!paused && !phys.atRest) phys.t += dt / phys.slow;
+  drawScene();
+  drawSpec();
   requestAnimationFrame(loop);
 }
 
-resize();
-setTimeout(resize, 60);
-updateReadouts();
-showDx();
-refreshLydBtn();
-phys.atRest = true;      /* strengen ligger stille, til man vælger en partialtone */
+showP();
+recomputeFromPluck(false);
+phys.atRest = true;
 requestAnimationFrame(loop);
 </script>
 </body>
